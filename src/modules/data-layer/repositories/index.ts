@@ -16,13 +16,14 @@ const now = () => new Date().toISOString()
 /* ---------- loops ---------- */
 
 export const loopsRepo = {
+  /** ADR-0003: nowy wątek trafia NA GÓRĘ listy (quick capture — świeży temat widoczny od razu). */
   async add(title: string, goalText = ''): Promise<Loop> {
-    const maxOrder = await db.loops.orderBy('sortOrder').last()
+    const minOrder = await db.loops.orderBy('sortOrder').first()
     const loop: Loop = {
       id: generateId(),
       title,
       status: 'open',
-      sortOrder: (maxOrder?.sortOrder ?? -1) + 1,
+      sortOrder: (minOrder?.sortOrder ?? 1) - 1,
       goalText,
       tagIds: [],
       createdAt: now(),
@@ -47,6 +48,28 @@ export const loopsRepo = {
   },
   listOpen(): Promise<Loop[]> {
     return db.loops.where('status').equals('open').sortBy('sortOrder')
+  },
+  /** Sekcja „Domknięte i porzucone” (ADR-0002) — sortowanie wg daty zdarzenia malejąco robi UI. */
+  async listByStatuses(statuses: Loop['status'][]): Promise<Loop[]> {
+    const found = await db.loops.where('status').anyOf(statuses).toArray()
+    return found.sort((a, b) =>
+      (b.closedAt ?? b.abandonedAt ?? b.updatedAt).localeCompare(a.closedAt ?? a.abandonedAt ?? a.updatedAt),
+    )
+  },
+  /** Porzucenie celowo nie tworzy wpisu dziennika — nie jest zwycięstwem. */
+  abandon(id: string): Promise<void> {
+    return db.loops.update(id, { status: 'abandoned', abandonedAt: now(), updatedAt: now() }).then(() => undefined)
+  },
+  /** Reopen wraca na koniec listy otwartej (ADR-0003: przechwycenie ≠ przywrócenie); wpisów dziennika nie rusza. */
+  async reopen(id: string): Promise<void> {
+    const maxOrder = await db.loops.orderBy('sortOrder').last()
+    await db.loops.update(id, {
+      status: 'open',
+      sortOrder: (maxOrder?.sortOrder ?? -1) + 1,
+      closedAt: undefined,
+      abandonedAt: undefined,
+      updatedAt: now(),
+    })
   },
   async remove(id: string): Promise<void> {
     // Twarde usunięcie wątku z akcjami; wpisy dziennika zostają ze snapshotem tekstu.
@@ -162,7 +185,8 @@ export const tagsRepo = {
   async remove(id: string): Promise<void> {
     await db.transaction('rw', db.tags, db.loops, async () => {
       await db.tags.delete(id)
-      const tagged = await db.loops.where('tagIds').notEqual('').filter((l) => l.tagIds.includes(id)).toArray()
+      // tagIds nie jest indeksowane w schemacie — filtrujemy w JS po pełnym skanie tabeli.
+      const tagged = (await db.loops.toArray()).filter((l) => l.tagIds.includes(id))
       for (const loop of tagged) {
         await db.loops.update(loop.id, { tagIds: loop.tagIds.filter((t) => t !== id), updatedAt: now() })
       }

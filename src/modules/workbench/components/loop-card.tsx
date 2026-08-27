@@ -1,0 +1,179 @@
+import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react'
+import { Clock3, GripVertical } from 'lucide-react'
+import type { Loop, LoopAction, Tag } from '@/modules/data-layer'
+import { cn } from '@/lib/utils'
+import { EditableText } from '@/shared/components/editable-text'
+import { getProgressView, hasWaitingOn, overdueCount } from '../lib/workbench-ui'
+import { TagEditor } from './tag-editor'
+
+/** Propsy uchwytu podłączone przez useSortable (typy luźne, bo API listenerów jest generyczne). */
+export interface DragHandleProps {
+  handleRef?: (element: HTMLButtonElement | null) => void
+  attributes?: Record<string, unknown>
+  listeners?: Record<string, unknown>
+  dragging?: boolean
+}
+
+interface LoopCardProps extends DragHandleProps {
+  loop: Loop
+  tagsPool: Tag[]
+  actions: LoopAction[]
+  selected: boolean
+  todayKey: string
+  onSelect: () => void
+  onRename: (title: string) => void
+  onAttachTag: (tag: Tag) => void
+  onDetachTag: (tag: Tag) => void
+  onCreateTagAndAttach: (name: string) => void
+}
+
+/** Karta wątku na liście po lewej: tytuł, tagi, progres/pochodne, uchwyt DnD (ADR: grip). */
+export function LoopCard({
+  loop,
+  tagsPool,
+  actions,
+  selected,
+  todayKey,
+  onSelect,
+  onRename,
+  onAttachTag,
+  onDetachTag,
+  onCreateTagAndAttach,
+  handleRef,
+  attributes,
+  listeners,
+}: LoopCardProps) {
+  const selectUnlessInteractive = (event: MouseEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest('[data-no-select]')) return
+    onSelect()
+  }
+  const onKeyDownSelect = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault()
+      onSelect()
+    }
+  }
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected}
+      onClick={selectUnlessInteractive}
+      onKeyDown={onKeyDownSelect}
+      className={cn(
+        'rounded-lg border bg-card p-2 shadow-sm transition-colors',
+        selected ? 'border-ring ring-2 ring-ring/30' : 'border-border hover:border-ring/50',
+      )}
+    >
+      <div className="flex items-start gap-1">
+        <LoopGripHandle
+          handleRef={handleRef}
+          attributes={attributes}
+          listeners={listeners}
+          className="mt-1 shrink-0 text-muted-foreground"
+        />
+        <div className="min-w-0 flex-1" data-no-select>
+          <EditableText value={loop.title} onChange={onRename} ariaLabel="Tytuł wątku" className="text-sm font-medium" />
+        </div>
+      </div>
+
+      <ProgressArea actions={actions} todayKey={todayKey} />
+
+      <div className="pl-6 pt-1">
+        <TagEditor
+          tagsPool={tagsPool}
+          attachedTagIds={loop.tagIds}
+          onAttach={onAttachTag}
+          onDetach={onDetachTag}
+          onCreateAndAttach={onCreateTagAndAttach}
+        />
+      </div>
+    </div>
+  )
+}
+
+/** Pochodne karty: pasek progresu / etykieta zastępcza + wskaźniki „czeka” i „po terminie”. */
+function ProgressArea({ actions, todayKey }: { actions: LoopAction[]; todayKey: string }) {
+  const view = getProgressView(actions)
+  const waiting = hasWaitingOn(actions)
+  const overdue = overdueCount(actions, todayKey)
+
+  return (
+    <div className="flex items-center gap-2 pl-6 pr-1 pt-1.5">
+      {view.kind === 'bar' && (
+        <>
+          <div
+            className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-muted"
+            role="progressbar"
+            aria-valuenow={view.done}
+            aria-valuemin={0}
+            aria-valuemax={view.total}
+            aria-label={`Progres mój ruch: ${view.done} z ${view.total}`}
+          >
+            <div
+              data-testid="progress-fill"
+              className="h-full rounded-full bg-primary transition-[width]"
+              style={{ width: `${Math.round((view.done / view.total) * 100)}%` }}
+            />
+          </div>
+          <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
+            {view.done}/{view.total}
+          </span>
+        </>
+      )}
+      {view.kind === 'waiting-only' && (
+        <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <Clock3 className="size-3" />
+          cały czeka na innych · {view.waiting}
+        </span>
+      )}
+      {view.kind === 'empty' && (
+        <span className="text-[11px] italic text-muted-foreground">rozpisz kroki…</span>
+      )}
+
+      {view.kind !== 'waiting-only' && waiting && (
+        <span className="ml-auto flex shrink-0 items-center gap-1 text-[11px] text-muted-foreground" title="Wątek czeka częściowo na innych">
+          <Clock3 className="size-3" />
+          czeka
+        </span>
+      )}
+      {overdue > 0 && (
+        <span className="ml-auto shrink-0 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[11px] font-medium text-destructive">
+          {overdue} po terminie
+        </span>
+      )}
+    </div>
+  )
+}
+
+/** Uchwyt rezerwowany dla useSortable — bez listenerów działa jak statyczna ikona. */
+export function LoopGripHandle({
+  handleRef,
+  attributes,
+  listeners,
+  className,
+}: DragHandleProps & { className?: string }) {
+  return (
+    <button
+      ref={handleRef}
+      type="button"
+      data-no-select
+      aria-label="Przeciągnij, aby zmienić kolejność"
+      className={cn(
+        'cursor-grab touch-none rounded p-0.5 focus-visible:ring-2 focus-visible:ring-ring',
+        (!listeners || !attributes) && 'cursor-default opacity-40',
+        className,
+      )}
+      {...(attributes as React.HTMLAttributes<HTMLButtonElement>)}
+      {...(listeners as React.HTMLAttributes<HTMLButtonElement>)}
+    >
+      <GripVertical className="size-4" />
+    </button>
+  )
+}
+
+/** Przeniesienie karty podczas dragowania ponad resztę stosu. */
+export function draggingStyle(transformStyle: string | undefined): CSSProperties | undefined {
+  return transformStyle ? { transform: transformStyle, zIndex: 20 } : undefined
+}

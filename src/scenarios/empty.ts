@@ -1,5 +1,7 @@
-import type { AppData } from './types';
+import type { ScenarioData } from './types'
+import { EMPTY_DATA } from './types'
 
-export function emptyScenario(): AppData {
-  return {};
+/** Czysty stan zerowy — pierwsze uruchomienie / produkcja. */
+export function emptyScenario(): ScenarioData {
+  return EMPTY_DATA
 }
