@@ -49,9 +49,3 @@ export function useTags(): Tag[] {
 export function useTagMap(): Map<string, Tag> {
   return new Map(useTags().map((t) => [t.id, t]))
 }
-
-/** Licznik dzisiejszych zwycięstw — używany przez placeholder Dziennika. */
-export function useTodayEntryCount(todayKey: string): number {
-  const entries = useLiveQuery(() => db.dayEntries.where('dayKey').equals(todayKey).count(), [todayKey])
-  return entries ?? 0
-}

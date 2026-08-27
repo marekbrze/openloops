@@ -9,6 +9,12 @@ const dkey = (offsetDays = 0) => {
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
+/** Godzina wpisu dziennika o konkretnym czasie — dzień demo wygląda jak przepracowany, nie jak „teraz”. */
+const winAt = (offsetDays: number, hour: number, minute: number) => {
+  const d = new Date(Date.now() + offsetDays * DAY_MS)
+  d.setHours(hour, minute, 0, 0)
+  return d.toISOString()
+}
 
 const tags: Tag[] = [
   { id: 'tag-ux', name: 'UX', createdAt: iso(-30), updatedAt: iso(-30) },
@@ -166,8 +172,8 @@ const dayEntries: DayEntry[] = [
     actionId: 'act-loop-onboarding-0-insighty',
     snapshotText: 'Zebrać insighty z 5 wywiadów onboardingowych',
     dayKey: dkey(0),
-    createdAt: iso(0),
-    updatedAt: iso(0),
+    createdAt: winAt(0, 9, 40),
+    updatedAt: winAt(0, 9, 40),
   },
   {
     id: 'act-loop-retro-0-oceny:' + dkey(-1),
@@ -176,8 +182,8 @@ const dayEntries: DayEntry[] = [
     actionId: 'act-loop-retro-0-oceny',
     snapshotText: 'Zebrać oceny od zespołu',
     dayKey: dkey(-1),
-    createdAt: iso(-1),
-    updatedAt: iso(-1),
+    createdAt: winAt(-1, 16, 20),
+    updatedAt: winAt(-1, 16, 20),
   },
   {
     id: 'close:loop-audit-ds:' + dkey(-3),
@@ -185,8 +191,8 @@ const dayEntries: DayEntry[] = [
     loopId: 'loop-audit-ds',
     snapshotText: 'Audyt komponentów pod design system',
     dayKey: dkey(-3),
-    createdAt: iso(-3),
-    updatedAt: iso(-3),
+    createdAt: winAt(-3, 11, 5),
+    updatedAt: winAt(-3, 11, 5),
   },
 ]
 

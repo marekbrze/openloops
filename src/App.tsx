@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { DevToolbar } from './shared/components/DevToolbar'
 import { WorkbenchScreen } from './modules/workbench/components/workbench-screen'
-import { JournalPlaceholder } from './modules/journal/components/journal-placeholder'
+import { JournalScreen } from './modules/journal/components/journal-screen'
 import { AppNotices } from './shared/components/app-notices'
 import type { ViewId } from './lib/navigation'
 import { ensureScenarioBootstrapped } from './scenarios/loader'
@@ -87,7 +87,7 @@ function App() {
         ) : view === 'workbench' ? (
           <WorkbenchScreen />
         ) : (
-          <JournalPlaceholder />
+          <JournalScreen />
         )}
       </main>
 
