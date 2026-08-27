@@ -15,4 +15,8 @@ Terms and concepts specific to this project. Used across all project skills to m
 | tag | `Tag` | Swobodna etykieta grupująca wątki (np. projekt, obszar); dołączana do wątku. | „kategoria" (brzmi jak zamknięta taksonomia) |
 | progres | `Progress` | Udział wykonanych akcji typu „mój ruch" względem wszystkich akcji tego typu w wątku; wizualizowany barem. | „postęp projektu" |
 | dziennik | `DayLog` | Osobny widok: log per dzień — wykonane akcje i domknięte wątki; źródło poczucia zwycięstw. | „historia", „log systemowy" |
-| wpis dziennika | `DayEntry` | Pojedynczy rekord zdarzenia (skończona akcja / domknięty wątek) przypisany do dnia i czasu. | „event" |
+| wpis dziennika | `DayEntry` | Pojedynczy rekord zdarzenia (skończona akcja / domknięty wątek) przypisany do dnia i czasu. Odhaczenie akcji usuwa jej wpis. | „event" |
+| zwycięstwo | `Win` | Jednostka bilansu motywacyjnego: skończona akcja = małe zwycięstwo, domknięty wątek = większe zwycięstwo. Porzucenie nie jest zwycięstwem. | „punkt", „score" |
+| porzucony | `Abandoned` | Status wątku świadomie odpuszczonego (open → abandoned). Nie liczy się jako zwycięstwo; można przywrócić do otwartego. | „usunięty", „zakończony" |
+| data dopytania | `FollowUpDate` | Opcjonalna data na akcji typu czekam na kogoś; po terminie widoczny znacznik przeterminowania. Bez powiadomień. | „deadline", „przypomnienie" |
+| tygodniowy bilans | `WeekSummary` | Agregacja wpisów dziennika na tydzień z nawigacją ← / → i podglądem dzień po dniu. | „statystyki", „raporty" |

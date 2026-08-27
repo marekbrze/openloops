@@ -1,0 +1,59 @@
+# Action Inventory
+
+Complete list of actions users can perform, organized by entity.
+
+## Roles
+
+- **Owner** (użytkownik): jedyna rola. Aplikacja single-user, local-first — bez kont, bez współdzielenia.
+
+## Actions
+
+### Loop
+
+| Action | Description | Role | Notes |
+|--------|------------|------|-------|
+| Add Loop | Przechwycenie nowego otwartego tematu: tytuł + (opcjonalnie od razu) cel i tagi | Owner | szybki zapis ważniejszy niż pełny formularz |
+| Edit Loop | Zmiana tytułu; zmiana treści celu przez edycję Goal | Owner | |
+| Reorder Loops | Ręczne ustawienie priorytetów drag & drop na liście po lewej | Owner | `sort_order`; kolejność nie resetuje się sama |
+| Tag Loop / Untag Loop | Dobranie/odjęcie tagów do wątku | Owner | wolne wpisywanie tworzy nowe tagi w puli |
+| Select Loop | Zaznaczenie wątku otwiera jego akcje w prawym panelu | Owner | akcja nawigacyjna — nie zmienia danych |
+| Close Loop | Ręczne domknięcie: „cel osiągnięty". open → closed | Owner | nie wymaga odhaczonych wszystkich akcji; **większe zwycięstwo** → wpis dziennika |
+| Abandon Loop | Świadome porzucenie tematu. open → abandoned | Owner | nie jest zwycięstwem; odróżnia „odpuściłem" od „domknąłem" |
+| Reopen Loop | Przywrócenie domkniętego lub porzuconego wątku → open | Owner | cofa datę domknięcia/porzucenia; historycznych wpisów dziennika nie kasuje |
+| Delete Loop | Trwałe usunięcie wątku razem z akcjami i celem | Owner | destrukcyjne, wymaga potwierdzenia; wpisy dziennika zostają ze snapshotem tekstu |
+
+### Action
+
+| Action | Description | Role | Notes |
+|--------|------------|------|-------|
+| Add Action | Dopisanie kroku do zaznaczonego wątku | Owner | nowa trafia na koniec listy (nad przypiętym celem) |
+| Edit Action | Zmiana etykiety; przełączenie typu mój ruch ⇄ czekam na kogoś; ustawienie/usunięcie daty dopytania | Owner | data dopytania tylko dla WaitingOn |
+| Toggle Done | Odhaczenie skończonej akcji / odhaczenie z powrotem | Owner | check = małe zwycięstwo → wpis dziennika; uncheck = wpis znika, bilans dnia wraca do stanu realnego |
+| Reorder Actions | Ręczna kolejność działań drag & drop — plan wykonania | Owner | cel (`Goal`) przypięty jako ostatni element; nie da się go przeciągnąć powyżej końca listy |
+| Delete Action | Usunięcie pojedynczego kroku z wątku | Owner | destrukcyjne, wymaga potwierdzenia gdy done; bilans dnia traci jej bieżące zwycięstwo (akcji nie ma ⇒ nie była wykonana); snapy z poprzednich dni zostają |
+
+### Goal
+
+| Action | Description | Role | Notes |
+|--------|------------|------|-------|
+| Edit Goal | Dopisanie/zmiana opisu „po czym wiem, że gotowe" | Owner | edytowalny zawsze, także po domknięciu |
+| Pin at End (system) | Cel zawsze renderowany jako ostatni element listy działań | System | wyłącza go z drag & drop poza pozycję końcową |
+
+### Tag
+
+| Action | Description | Role | Notes |
+|--------|------------|------|-------|
+| Create Tag | Powstaje przy pierwszym wpisaniu nowej etykiety przy wątku | Owner | pula wspólna dla wszystkich wątków |
+| Rename Tag | Globalna zmiana nazwy tagu we wszystkich wątkach | Owner | |
+| Delete Tag | Usunięcie tagu z puli; odczepia go od wątków | Owner | wątki zostają, tracą tylko etykietę |
+
+### DayLog / WeekSummary (widok Dziennik)
+
+Dziennik jest agregacją `DayEntry` — użytkownik nie tworzy wpisów wprost; log zasilają zdarzenia (`Toggle Done`, `Close Loop`).
+
+| Action | Description | Role | Notes |
+|--------|------------|------|-------|
+| Open Journal | Przejście do osobnego widoku Dziennik z głównego ekranu | Owner | nawigacja zakładką/przełącznikiem widoku |
+| Navigate Weeks | Strzałki ← / → między tygodniami; skrót „dziś" | Owner | |
+| Read Weekly Balance | Bilans całego tygodnia: ile małych zwycięstw (akcje) i większych (domknięte wątki) | Owner | cele motywacyjne systemu — widoczne od razu |
+| Browse Day Entries | Rozwinięcie dnia: lista wykonanych akcji i domkniętych wątków z godzinami | Owner | wpisy mają snapshoty tekstu, czytelne także po usunięciu źródła |

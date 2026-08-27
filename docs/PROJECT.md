@@ -34,12 +34,16 @@ Otwierasz aplikację → widzisz posortowaną priorytetowo listę otwartych wąt
 - **Kolejność akcji jest ręczna** (drag & drop) — odzwierciedla plan wykonania; cel zawsze pozostaje ostatnim elementem listy.
 - **Domknięcie jest ręczne** — Ty oceniasz osiągnięcie celu; odhaczenie wszystkich akcji nie jest warunkiem.
 - **Progres bar liczy tylko akcje „mój ruch"** — bar nie staje w miejscu, gdy czekasz na innych.
-- **Dziennik to osobny widok** przełączany z głównego ekranu, z pełną historią po datach.
+- **Dziennik to osobny widok** przełączany z głównego ekranu, z nawigacją po tygodniach i bilansem całego tygodnia (dzień po dniu w środku).
 - **Storage**: localStorage + Dexie (IndexedDB), wzorzec zgodny z dopadone/dopawrite; single-user, bez autoryzacji i backendu.
+
+## Decyzje z deepen (2026-08-27)
+
+- **Stany wątku**: open / closed / abandoned. Porzucenie ≠ zwycięstwo — dziennik odróżnia „domknąłem" od „odpuściłem". Reopen i twarde usunięcie dostępne.
+- **Zwycięstwa**: skończona akcja = małe zwycięstwo, domknięty wątek = większe zwycięstwo. Odhaczenie akcji usuwa jej wpis — bilans dnia zawsze pokazuje stan realny.
+- **Data dopytania**: opcjonalna data na akcjach „czekam na kogoś"; po terminie znacznik przeterminowania, bez powiadomień.
 
 ## Open Questions
 
-- Czy oprócz domknięcia potrzebny jest status **porzucony/wstrzymany** (wątek zdjęty z listy bez zwycięstwa)?
-- **Terminy/daty** na wątkach i akcjach — na start brak; czy dodać później (np. follow-up date dla „czekam na kogoś")?
-- **Tagi**: swobodne wpisywane czy zarządzana lista z edycją globalną (rename/remove)?
-- Dziennik: czy potrzebna **statystyka dłuższego horyzontu** (np. trend tygodnia), czy wystarczy dzień po dniu?
+- **Tagi**: swobodne wpisywane czy zarządzana lista z edycją globalną (rename/remove)? *(deepen przyjęło: swobodne + globalny rename/remove; do potwierdzenia na etapie detail/lofi)*
+- Jak dokładnie wygląda moment domknięcia w UI — klik przy celu? osobna akcja w nagłówku wątku? *(rozdane do proto-detail)*
