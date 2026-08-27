@@ -5,6 +5,7 @@ import { actionsRepo, dayKey } from '@/modules/data-layer'
 import type { LoopAction } from '@/modules/data-layer'
 import { cn } from '@/lib/utils'
 import { EditableText } from '@/shared/components/editable-text'
+import { guard } from '@/shared/lib/mutations'
 import { draggingStyle, LoopGripHandle } from './loop-card'
 
 interface ActionRowProps {
@@ -33,7 +34,7 @@ export function SortableActionRow({ action, onRequestDelete }: ActionRowProps) {
       <input
         type="checkbox"
         checked={action.done}
-        onChange={() => void actionsRepo.toggleDone(action)}
+        onChange={() => void guard(() => actionsRepo.toggleDone(action))}
         aria-label={`${action.label} — wykonane`}
         data-no-select
         className="size-4 shrink-0 accent-[var(--primary)] focus-visible:ring-2 focus-visible:ring-ring"
@@ -41,7 +42,7 @@ export function SortableActionRow({ action, onRequestDelete }: ActionRowProps) {
       <div className="min-w-0 flex-1" data-no-select>
         <EditableText
           value={action.label}
-          onChange={(label) => void actionsRepo.update(action.id, { label })}
+          onChange={(label) => void guard(() => actionsRepo.update(action.id, { label }))}
           ariaLabel="Etykieta akcji"
           className={cn('text-sm', action.done && 'text-muted-foreground line-through')}
         />
@@ -56,7 +57,7 @@ export function SortableActionRow({ action, onRequestDelete }: ActionRowProps) {
           done={action.done}
           overdue={overdue}
           onChange={(date) =>
-            void actionsRepo.update(action.id, { followUpDate: date === '' ? undefined : date })
+            void guard(() => actionsRepo.update(action.id, { followUpDate: date === '' ? undefined : date }))
           }
         />
       )}
@@ -89,18 +90,18 @@ function OwnerTypeToggle({ action }: { action: LoopAction }) {
       ownerType === 'MyMove'
         ? { ownerType: 'MyMove', followUpDate: undefined }
         : { ownerType: 'WaitingOn' }
-    void actionsRepo.update(action.id, patch)
+    void guard(() => actionsRepo.update(action.id, patch))
   }
 
   return (
-    <div role="group" aria-label={`Typ akcji: ${action.ownerType === 'MyMove' ? 'mój ruch' : 'czekam na kogoś'}`} data-no-select>
+    <div role="group" aria-label={`Typ akcji: ${waitingLabel(action)}`} data-no-select>
       <ToggleOption label="Mój ruch" active={action.ownerType === 'MyMove'} onSelect={() => setOwner('MyMove')} />
-      <ToggleOption label="Czekam" active={waitingStatic(action)} onSelect={() => setOwner('WaitingOn')} />
+      <ToggleOption label="Czekam" active={action.ownerType === 'WaitingOn'} onSelect={() => setOwner('WaitingOn')} />
     </div>
   )
 }
 
-const waitingStatic = (action: LoopAction) => action.ownerType === 'WaitingOn'
+const waitingLabel = (action: LoopAction) => (action.ownerType === 'MyMove' ? 'mój ruch' : 'czekam na kogoś')
 
 function ToggleOption({ label, active, onSelect }: { label: string; active: boolean; onSelect: () => void }) {
   return (

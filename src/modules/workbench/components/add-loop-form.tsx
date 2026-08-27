@@ -20,25 +20,36 @@ export function AddLoopForm({ onAdded, focusOnMount }: AddLoopFormProps) {
   const [goalOpen, setGoalOpen] = useState(false)
   const [goalText, setGoalText] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
   const titleInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (focusOnMount) titleInputRef.current?.focus()
   }, [focusOnMount])
 
+  /** Luka #4 audytu: flaga busy blokuje podwójny Enter podczas trwającego zapisu. */
   const submit = async (event: FormEvent) => {
     event.preventDefault()
+    if (busy) return
     const trimmed = title.trim()
     if (!trimmed) {
       setError('Nazwij wątek — bez tytułu nie ma o czym notować.')
       return
     }
-    const loop = await loopsRepo.add(trimmed, goalText.trim())
-    setTitle('')
-    setGoalText('')
-    setGoalOpen(false)
-    setError(null)
-    onAdded(loop.id)
+    setBusy(true)
+    try {
+      const loop = await loopsRepo.add(trimmed, goalText.trim())
+      setTitle('')
+      setGoalText('')
+      setGoalOpen(false)
+      setError(null)
+      onAdded(loop.id)
+    } catch (error) {
+      console.error('[openloops] dodanie wątku nie powiodło się', error)
+      setError('Nie udało się zapisać — pamięć przeglądarki odmówiła. Spróbuj ponownie.')
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -67,8 +78,8 @@ export function AddLoopForm({ onAdded, focusOnMount }: AddLoopFormProps) {
         >
           <ChevronDown className={cn('transition-transform', goalOpen && 'rotate-180')} />
         </Button>
-        <Button type="submit" size="sm" disabled={title.trim() === ''}>
-          Dodaj wątek
+        <Button type="submit" size="sm" disabled={busy || title.trim() === ''}>
+          {busy ? 'Zapisuję…' : 'Dodaj wątek'}
         </Button>
       </div>
       {goalOpen && (

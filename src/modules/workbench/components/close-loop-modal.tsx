@@ -1,19 +1,32 @@
 import { Trophy } from 'lucide-react'
 import { closeLoopWithWin } from '@/modules/data-layer'
 import type { Loop } from '@/modules/data-layer'
+import { guard } from '@/shared/lib/mutations'
 import { Dialog } from '@/shared/components/dialog'
 import { Button } from '@/components/ui/button'
 
 interface CloseLoopModalProps {
   loop: Loop | null
   onClose: () => void
+  /** Panel podaje własny przebieg potwierdzenia (zapis + toast); domyślnie sam zapis do repo. */
+  onConfirm?: () => Promise<void> | void
 }
 
 /**
  * Moment domknięcia (ADR-0001): celebracja + nazwany przepływ informacji do dziennika.
  * Domknięcie nie wymaga odhaczonych wszystkich akcji — decyzja należy do celu.
+ * Nieudany zapis zostawia modal otwarty; baner błędu tłumaczy powód.
  */
-export function CloseLoopModal({ loop, onClose }: CloseLoopModalProps) {
+export function CloseLoopModal({ loop, onClose, onConfirm }: CloseLoopModalProps) {
+  const confirm = async (): Promise<void> => {
+    if (!loop) return onClose()
+    if (onConfirm) {
+      await onConfirm()
+      return
+    }
+    if (await guard(() => closeLoopWithWin(loop))) onClose()
+  }
+
   return (
     <Dialog open={Boolean(loop)} onClose={onClose} labelId="close-loop-title" describeId="close-loop-desc">
       <div className="flex items-center gap-2">
@@ -34,13 +47,7 @@ export function CloseLoopModal({ loop, onClose }: CloseLoopModalProps) {
         <Button variant="outline" onClick={onClose}>
           Jeszcze nie teraz
         </Button>
-        <Button
-          data-autofocus
-          onClick={() => {
-            if (loop) void closeLoopWithWin(loop)
-            onClose()
-          }}
-        >
+        <Button data-autofocus onClick={() => void confirm()}>
           Domknij wątek
         </Button>
       </div>

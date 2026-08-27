@@ -2,22 +2,30 @@ import { useRef, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 
 interface ActionAddFormProps {
-  onAdd: (label: string) => void
+  /** Zwraca sukces zapisu — pole czyści się wyłącznie po potwierdzonej operacji. */
+  onAdd: (label: string) => Promise<boolean>
 }
 
 /** Dopisywanie kroku do zaznaczonego wątku — szybkie pole nad przypiętym celem. */
 export function ActionAddForm({ onAdd }: ActionAddFormProps) {
   const [value, setValue] = useState('')
+  const [busy, setBusy] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const submit = (event: FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault()
+    if (busy) return
     const trimmed = value.trim()
     if (!trimmed) return
-    onAdd(trimmed)
-    setValue('')
-    // Zachowaj focus — rozpisywanie serii kroków idzie bez przełączania kontekstu.
-    inputRef.current?.focus()
+    setBusy(true)
+    try {
+      // Czyszczenie dopiero po sukcesie (luka #4): przy porażce tekst zostaje w polu.
+      if (await onAdd(trimmed)) setValue('')
+    } finally {
+      setBusy(false)
+      // Zachowaj focus — rozpisywanie serii kroków idzie bez przełączania kontekstu.
+      inputRef.current?.focus()
+    }
   }
 
   return (
@@ -30,8 +38,8 @@ export function ActionAddForm({ onAdd }: ActionAddFormProps) {
         placeholder="Dopisz krok do wątku…"
         className="h-7 min-w-0 flex-1 rounded-md bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:bg-muted/50"
       />
-      <Button type="submit" size="sm" variant="outline" disabled={!value.trim()}>
-        Dodaj
+      <Button type="submit" size="sm" variant="outline" disabled={busy || !value.trim()}>
+        {busy ? 'Dodaję…' : 'Dodaj'}
       </Button>
     </form>
   )

@@ -168,14 +168,28 @@ export const tagsRepo = {
   list(): Promise<Tag[]> {
     return db.tags.orderBy('name').toArray()
   },
-  /** Wolne wpisywanie tworzy tag przy pierwszym użyciu. */
+  /**
+   * Wolne wpisywanie tworzy tag przy pierwszym użyciu.
+   * Unikalny indeks `&name` w razie wyścigu równoległych zapisów rzuca ConstraintError —
+   * wtedy po prostu dogrywamy istniejący rekord (luka #7 audytu).
+   */
   async findOrCreate(name: string): Promise<Tag> {
     const trimmed = name.trim()
     const found = await db.tags.where('name').equals(trimmed).first()
     if (found) return found
     const tag: Tag = { id: generateId(), name: trimmed, createdAt: now(), updatedAt: now() }
-    await db.tags.add(tag)
-    return tag
+    try {
+      await db.tags.add(tag)
+      return tag
+    } catch (error) {
+      const raced = await db.tags
+        .where('name')
+        .equals(trimmed)
+        .first()
+        .catch(() => undefined)
+      if (raced) return raced
+      throw error
+    }
   },
   /** Globalny rename — nazwa zmienia się we wszystkich wątkach (referencja po id). */
   async rename(id: string, name: string): Promise<void> {

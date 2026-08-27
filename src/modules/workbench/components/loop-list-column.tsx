@@ -19,6 +19,9 @@ import { CSS } from '@dnd-kit/utilities'
 import { dayKey, loopsRepo, tagsRepo } from '@/modules/data-layer'
 import type { Loop, LoopAction, Tag } from '@/modules/data-layer'
 import { ConfirmDialog } from '@/shared/components/confirm-dialog'
+import { SkeletonCards } from '@/shared/components/skeleton-cards'
+import { guard } from '@/shared/lib/mutations'
+import { plDndAccessibility } from '@/shared/lib/pl-dnd'
 import { useAllActions, useClosedLoops, useOpenLoops, useTags } from '../hooks/use-workbench'
 import { AddLoopForm } from './add-loop-form'
 import { ClosedLoopsSection } from './closed-loops-section'
@@ -57,7 +60,7 @@ export function LoopListColumn({ selectedId, onSelectLoop }: LoopListColumnProps
     if (!over || active.id === over.id || !openLoops) return
     const oldIndex = openLoops.findIndex((l) => l.id === active.id)
     const newIndex = openLoops.findIndex((l) => l.id === over.id)
-    void loopsRepo.reorder(arrayMove(openLoops, oldIndex, newIndex).map((l) => l.id))
+    void guard(() => loopsRepo.reorder(arrayMove(openLoops, oldIndex, newIndex).map((l) => l.id)))
   }
 
   return (
@@ -72,7 +75,7 @@ export function LoopListColumn({ selectedId, onSelectLoop }: LoopListColumnProps
 
       <div className="mt-2 min-h-0 flex-1 overflow-y-auto pb-12">
         {!openLoops ? (
-          <p className="px-1 pt-2 text-sm text-muted-foreground">Ładowanie…</p>
+          <SkeletonCards />
         ) : openLoops.length === 0 && (closedLoops ?? []).length === 0 ? (
           <EmptyListHint />
         ) : openLoops.length === 0 ? (
@@ -80,7 +83,7 @@ export function LoopListColumn({ selectedId, onSelectLoop }: LoopListColumnProps
             Brak otwartych wątków. Dobry moment na przechwycenie nowego.
           </p>
         ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} accessibility={plDndAccessibility}>
             <SortableContext items={openLoops.map((l) => l.id)} strategy={verticalListSortingStrategy}>
               <ul className="space-y-2" aria-label="Otwarte wątki — ręczny priorytet">
                 {openLoops.map((loop) => (
@@ -101,7 +104,7 @@ export function LoopListColumn({ selectedId, onSelectLoop }: LoopListColumnProps
         <ClosedLoopsSection
           loops={closedLoops ?? []}
           onRequestDelete={(loop) => setPendingDelete(loop)}
-          onReopen={(loop) => void loopsRepo.reopen(loop.id)}
+          onReopen={(loop) => void guard(() => loopsRepo.reopen(loop.id))}
         />
       </div>
 
@@ -114,7 +117,7 @@ export function LoopListColumn({ selectedId, onSelectLoop }: LoopListColumnProps
         onCancel={() => setPendingDelete(undefined)}
         onConfirm={() => {
           if (!pendingDelete) return
-          void loopsRepo.remove(pendingDelete.id)
+          void guard(() => loopsRepo.remove(pendingDelete.id))
           if (selectedId === pendingDelete.id) onSelectLoop(undefined)
           setPendingDelete(undefined)
         }}
@@ -136,7 +139,7 @@ function SortableLoopItem({
   selected: boolean
   onSelect: () => void
 }) {
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition } = useSortable({
     id: loop.id,
   })
 
@@ -149,22 +152,26 @@ function SortableLoopItem({
         selected={selected}
         todayKey={dayKey()}
         onSelect={onSelect}
-        onRename={(title) => void loopsRepo.update(loop.id, { title })}
+        onRename={(title) => void guard(() => loopsRepo.update(loop.id, { title }))}
         onAttachTag={(tag) =>
-          void (loop.tagIds.includes(tag.id)
-            ? Promise.resolve()
-            : loopsRepo.update(loop.id, { tagIds: [...loop.tagIds, tag.id] }))
+          void guard(() =>
+            loop.tagIds.includes(tag.id)
+              ? Promise.resolve()
+              : loopsRepo.update(loop.id, { tagIds: [...loop.tagIds, tag.id] }),
+          )
         }
-        onDetachTag={(tag) => void loopsRepo.update(loop.id, { tagIds: loop.tagIds.filter((t) => t !== tag.id) })}
+        onDetachTag={(tag) =>
+          void guard(() => loopsRepo.update(loop.id, { tagIds: loop.tagIds.filter((t) => t !== tag.id) }))
+        }
         onCreateTagAndAttach={(name) =>
-          void tagsRepo.findOrCreate(name).then(async (tag) => {
+          void guard(async () => {
+            const tag = await tagsRepo.findOrCreate(name)
             if (!loop.tagIds.includes(tag.id)) await loopsRepo.update(loop.id, { tagIds: [...loop.tagIds, tag.id] })
           })
         }
         handleRef={setActivatorNodeRef}
         attributes={attributes as unknown as Record<string, unknown>}
         listeners={listeners as unknown as Record<string, unknown> | undefined}
-        dragging={isDragging}
       />
     </li>
   )

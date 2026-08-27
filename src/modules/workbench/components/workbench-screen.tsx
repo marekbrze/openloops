@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useOpenLoops } from '../hooks/use-workbench'
+import { useClosedLoops, useOpenLoops } from '../hooks/use-workbench'
 import { LoopListColumn } from './loop-list-column'
 import { ActionPanel } from './action-panel'
 
@@ -9,6 +9,7 @@ import { ActionPanel } from './action-panel'
  */
 export function WorkbenchScreen() {
   const openLoops = useOpenLoops()
+  const closedLoops = useClosedLoops()
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined)
   const autoSelectDoneRef = useRef(false)
 
@@ -21,13 +22,15 @@ export function WorkbenchScreen() {
     }
   }, [openLoops, selectedId])
 
+  const firstRun = Boolean(openLoops && closedLoops && openLoops.length === 0 && closedLoops.length === 0)
+
   return (
     <div className="grid h-full min-h-0 grid-cols-1 gap-4 lg:grid-cols-2">
       <div className="min-h-0 overflow-hidden lg:h-full">
         <LoopListColumn selectedId={selectedId} onSelectLoop={setSelectedId} />
       </div>
       <div className="min-h-0 overflow-hidden lg:h-full">
-        <ActionPanel loopId={selectedId} />
+        <ActionPanel loopId={selectedId} firstRun={firstRun} />
       </div>
     </div>
   )

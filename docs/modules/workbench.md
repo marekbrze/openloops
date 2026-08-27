@@ -58,8 +58,10 @@ Zasady kierujące (z wywiadu 2026-08-27):
 - **Karta wątku**: tytuł, chipy tagów (+ dobieranie), pasek progresu **lub** etykieta zastępcza (brak akcji „mój ruch"), wskaźnik „czeka na innych N", plakietka „X po terminie" gdy dotyczy.
 - **Prawa kolumna — panel akcji**: nagłówek (tytuł klik-to-edit, tagi, przycisk „Domknij", menu ⋯: Porzuć / Usuń…), lista akcji (checkbox, etykieta klik-to-edit, przełącznik typu, data dopytania, handle DnD), **przypięty cel** jako ostatni element (wyróżniony wizualnie, klik-to-edit, nieruchomy w DnD).
 - **Panel bez zaznaczenia**: placeholder — ikona/krótka zachęta „Wybierz wątek…" + wskazówka o dodaniu pierwszego, gdy lista też pusta.
-- **Modal domknięcia**: nagłówek „Cel osiągnięty", nazwa wątku, notka o wpisie do dziennika, Confirm/Anuluj.
+- **Modal domknięcia**: nagłówek „Cel osiągnięty”, nazwa wątku, notka o wpisie do dziennika, Confirm/Anuluj; po potwierdzeniu toast z przejściem do Dziennika.
 - **Dialog usuwania** (wątek/akcja): ostrzeżenie o destrukcyjności + co zostaje (wpisy dziennika ze snapshotem).
+- **Pasek komunikatów systemowych**: toasty informacji/akcji oraz trwały baner błędu zapisu (`AppNotices`) — jedyny kanał awarii storage.
+- **Stany ładowania**: szkielety kart przy inicialnym query; pełnoekranowy alert, gdy IndexedDB nie chce się otworzyć.
 
 ## Actions
 
@@ -83,14 +85,22 @@ Zasady kierujące (z wywiadu 2026-08-27):
 
 ## Edge Cases
 
-- **Pierwsze uruchomienie (scenariusz `empty`)**: pusta lista + skupione pole dodawania z przykładem-wzorcem w placeholderze; prawy panel pokazuje wersję zachęty pierwszego uruchomienia („nazwij pierwszy wątek…").
-- **Wątek bez akcji albo tylko „czekam na kogoś"**: brak pasa progresu — etykieta stanu („rozpisz kroki…" / „cały czeka na innych · N"); zero sztucznego wypełnienia bara.
-- **Progres pełny, wątek nadal otwarty**: legalne i częste (celem zamyka się ręcznie) — karta pokazuje 100% „mój ruch" bez sugerowania, że wątek skończony.
-- **Domknięcie z niezakończonymi akcjami**: dozwolone przez design; modal pozostaje prosty (cel ≠ suma checkboxów).
-- **Usunięcie zaznaczonego wątku / domknięcie go**: zaznaczenie czyści się do placeholda; null-safety selekcji obowiązkowa.
-- **Cel przy DnD**: niepodniesiony jako źródło i niemieszczący się jako cel upuszczenia — ostatnia pozycja zastrzeżona.
-- **Data dopytania w przeszłości przy akcji done**: znacznik po terminie treściwy tylko dla undone; done nie straszy.
-- **Tag nieistniejący / pusty tytuł**: pusty tytuł blokuje Enter (inline walidacja, bez modala błędu).
+*Zachowania rozstrzygnięte i zaimplementowane (harden 2026-08-27 — pełna ewidencja: `workbench-edgecases.md`).*
+
+- **Pierwsze uruchomienie (scenariusz `empty`)**: skupione pole dodawania + podpowiedź lewej kolumny; prawy panel ma wariant first-run „nazwij pierwszy wątek…".
+- **Wątek bez akcji albo tylko „czekam na kogoś"**: brak pasa progresu — etykieta stanu; zero sztucznego wypełnienia bara.
+- **Progres pełny, wątek nadal otwarty**: legalne — karta pokazuje 100% „mój ruch" bez sugerowania końca wątku.
+- **Domknięcie/porzucenie zaznaczonego wątku**: panel natychmiast schodzi do placeholda — nigdy nie edytuje się zamkniętego wątku.
+- **Domknięcie z niezakończonymi akcjami**: dozwolone; po sukcesie toast z linkiem do Dziennika.
+- **Nieudany zapis** (IndexedDB odmowa/quota): baner błędu zamiast ciszy; formularze zachowują treść, modal domknięcia zostaje otwarty.
+- **Aplikacja nie może otworzyć bazy**: pełnoekranowy alert z „Spróbuj ponownie".
+- **Podwójny submit**: flaga busy w obu formularzach — duplikaty niemożliwe.
+- **Wyścig tworzenia tagu**: unique-indeks dogrywa istniejący rekord.
+- **Długie tokeny tekstowe**: chipy tagów łamią wyraz (`overflow-wrap:anywhere`).
+- **Cel przy DnD**: ostatnia pozycja zastrzeżona — cel poza sortowalnym kontekstem.
+- **Data dopytania w przeszłości przy done**: znacznik tylko dla undone.
+- **Pusty tytuł**: inline walidacja blokuje Enter; klik-to-edit nie wypala treści do pustki.
+- **Screen reader**: drag & drop ogłaszany po polsku (dnd-kit accessibility override).
 
 ## Integration Points
 

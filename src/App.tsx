@@ -2,28 +2,44 @@ import { useEffect, useState } from 'react'
 import { DevToolbar } from './shared/components/DevToolbar'
 import { WorkbenchScreen } from './modules/workbench/components/workbench-screen'
 import { JournalPlaceholder } from './modules/journal/components/journal-placeholder'
+import { AppNotices } from './shared/components/app-notices'
+import type { ViewId } from './lib/navigation'
 import { ensureScenarioBootstrapped } from './scenarios/loader'
-
-type ViewId = 'workbench' | 'journal'
 
 const MODULE_TABS: { id: ViewId; label: string }[] = [
   { id: 'workbench', label: 'Workbench' },
   { id: 'journal', label: 'Dziennik' },
 ]
 
+const BOOT_ERROR_MESSAGE =
+  'Nie udało się otworzyć lokalnej bazy danych (IndexedDB). openloops pracuje wyłącznie na pamięci przeglądarki — najczęstsze powody: tryb prywatny, zablokowana pamięć stron albo brak miejsca.'
+
 function App() {
   const [ready, setReady] = useState(false)
+  const [bootError, setBootError] = useState<string | null>(null)
   const [view, setView] = useState<ViewId>('workbench')
 
-  // Seed scenariusza przed pierwszym renderem — produkcja startuje zawsze z czystego stanu.
+  // Seed scenariusza przed pierwszym renderem; porażka otwarcia IndexedDB = widoczny ekran błędu (luka #2).
   useEffect(() => {
     let cancelled = false
-    ensureScenarioBootstrapped().finally(() => {
-      if (!cancelled) setReady(true)
-    })
+    ensureScenarioBootstrapped()
+      .then(() => {
+        if (!cancelled) setReady(true)
+      })
+      .catch((error) => {
+        console.error('[openloops] bootstrap bazy nie powiódł się', error)
+        if (!cancelled) setBootError(BOOT_ERROR_MESSAGE)
+      })
     return () => {
       cancelled = true
     }
+  }, [])
+
+  // Toasty mogą przełączać widok (np. „Otwórz dziennik” po domknięciu wątku).
+  useEffect(() => {
+    const onNavigate = (event: Event) => setView((event as CustomEvent<ViewId>).detail)
+    window.addEventListener('openloops:navigate', onNavigate)
+    return () => window.removeEventListener('openloops:navigate', onNavigate)
   }, [])
 
   return (
@@ -54,7 +70,19 @@ function App() {
       </header>
 
       <main className="min-h-0 flex-1 p-4">
-        {!ready ? (
+        {bootError ? (
+          <div role="alert" className="mx-auto mt-10 max-w-lg rounded-xl border border-destructive/40 bg-destructive/5 p-6 text-center">
+            <h1 className="text-base font-semibold">Aplikacja nie może wystartować</h1>
+            <p className="pt-2 text-sm text-muted-foreground">{bootError}</p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="mt-4 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Spróbuj ponownie
+            </button>
+          </div>
+        ) : !ready ? (
           <p className="p-4 text-sm text-muted-foreground">Ładowanie danych lokalnych…</p>
         ) : view === 'workbench' ? (
           <WorkbenchScreen />
@@ -63,6 +91,7 @@ function App() {
         )}
       </main>
 
+      <AppNotices />
       <DevToolbar />
     </div>
   )

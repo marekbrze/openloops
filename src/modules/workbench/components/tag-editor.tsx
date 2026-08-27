@@ -57,7 +57,8 @@ export function TagEditor({ tagsPool, attachedTagIds, onAttach, onDetach, onCrea
         return (
           <span
             key={id}
-            className="inline-flex items-center gap-0.5 rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground"
+            title={tag.name}
+            className="inline-flex max-w-full items-center gap-0.5 overflow-hidden rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground [overflow-wrap:anywhere]"
           >
             {tag.name}
             <button
