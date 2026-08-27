@@ -2,7 +2,7 @@
 
 ## Overview
 
-openloops to aplikacja o jednym ekranie roboczym (startowym), dwóch powierzchniach zarządzania i jednej refleksyjnej plus warstwa infrastruktury. Podział na 5 modułów projektowych odzwierciedla podział na powierzchnie UI plus infrastrukturę: **now / Teraz** (widok startowy i główny ekran pracy: dziś + ręczna kolejka wybranych akcji — dodany 2026-08-27, ADR-0020/0021), **tasks / Zadania** (katalog wszystkich zadań pogrupowanych po wątku, tylko wybór — 2026-08-27, ADR-0022), **workbench** (ekran autorski wątków: lista wątków po lewej + panel akcji z celem po prawej), **journal** (widok bilansu zwycięstw) i **data-layer** (Dexie/persistence pod wszystkim). Moduł **tags** wycofany decyzją użytkownika z 2026-08-27 — kod, encja `Tag` i tabela `tags` usunięte.
+openloops to aplikacja o jednym ekranie roboczym (startowym), dwóch powierzchniach zarządzania i jednej refleksyjnej plus warstwa infrastruktury. Podział na 5 modułów projektowych odzwierciedla podział na powierzchnie UI plus infrastrukturę: **now / Teraz** (widok startowy i główny ekran pracy: dziś + ręczna kolejka wybranych akcji — dodany 2026-08-27, ADR-0020/0021), **tasks / Zadania** (katalog wszystkich zadań pogrupowanych po wątku, tylko wybór — modal na Teraz od ADR-0024, pierwotnie zakładka), **workbench** (ekran autorski wątków: lista wątków po lewej + panel akcji z celem po prawej), **journal** (widok bilansu zwycięstw) i **data-layer** (Dexie/persistence pod wszystkim). Moduł **tags** wycofany decyzją użytkownika z 2026-08-27 — kod, encja `Tag` i tabela `tags` usunięte.
 
 Zasada przepływu danych: workbench i Teraz *piszą* wpisy zwycięstw (`Toggle Done`, `Close Loop` → DayEntry); journal jest wyłącznie czytelnikiem; tasks niczego nie zmienia poza kolejką Teraz przez `nowRepo`. Wszystko stoi na data-layer.
 
@@ -17,11 +17,11 @@ Zasada przepływu danych: workbench i Teraz *piszą* wpisy zwycięstw (`Toggle D
 **Design priority**: High — lądowanie aplikacji; kolejność i meta dnia muszą być natychmiast czytelne.
 
 ### tasks (Zadania)
-**Type**: Core
-**Description**: Katalog wszystkich zadań — akcje otwartych wątków pogrupowane per wątek (kolejność grup = priorytet wątków). Łatwy wybór „co robię dalej": przełącznik „Teraz" przy każdym wierszu dokłada/zdejmuje z kolejki. Powierzchnia celowo tylko-do-czytania-i-wyboru (ADR-0022): edycja treści/typów/usuwanie zostaje w workbench.
+**Type**: Core (modal-osadzenie, bez własnej zakładki — ADR-0024)
+**Description**: Katalog wszystkich zadań — akcje otwartych wątków pogrupowane per wątek (kolejność grup = priorytet wątków). Łatwy wybór „co robię dalej": przełącznik „Teraz" przy każdym wierszu dokłada/zdejmuje z kolejki. Renderowany jako **modal „Wybierz zadania" na ekranie Teraz** (przycisk w nagłówku + CTA stanu pustego); dobieranie pracy bez opuszczania głównego ekranu. Powierzchnia celowo tylko-do-czytania-i-wyboru (ADR-0022): edycja treści/typów/usuwanie zostaje w workbench.
 **Entities**: brak własnych (czyta Loop × Action, pisze NowItem przez nowRepo)
-**Key Actions**: Browse Catalog, Pick For Now/Unpick, Open Workbench (stany puste)
-**Connects to**: data-layer (odczyt), now (dzielą hook członkostwa i semantykę przełącznika)
+**Key Actions**: Browse Catalog, Pick For Now/Unpick, Open Task Picker (po stronie Teraz), Open Workbench (stany puste)
+**Connects to**: now (modal żyje na tym ekranie; dzielą hook członkostwa i semantykę przełącznika), data-layer (odczyt)
 **Design priority**: Medium — powierzchnia rozpoznawcza; spójność przełącznika z workbench ważniejsza niż bogactwo.
 
 ### workbench
@@ -79,4 +79,5 @@ graph LR
 - **Moment domknięcia (workbench)**: przejście open → closed to chwila nagrody („cel osiągnięty") — przepływ informacji do dziennika musi być widoczny/nazwany, żeby zwycięstwo było poczute.
 - **Czytelność bilansu (journal)**: jedna spojrzenie na tydzień ma odpowiadać na pytanie „ile zrobiłem" — hierarchia liczb vs. dni krytyczna.
 - **Kolejka dnia (now)**: góra listy = następne w kolejce; doklejanie na koniec i kaskadowe czyszczenie muszą działać bezwyjątkowo, bo inaczej główny ekran pracy kłamie (ADR-0021/0023).
+- **Modal „Wybierz zadania" (now × tasks)**: wybór w modalu i kolejka pod spodem muszą odświeżać się jako jedno (liveQuery); zamknięcie modalu nie może gubić ani dopisywać wyborów (ADR-0024).
 - **Rozdzielenie ról wybór vs. autoryzacja (tasks ↔ workbench)**: przełącznik „Teraz" wygląda i znaczy to samo w obu miejscach; katalog nigdy nie przeradza się w drugi panel edycji (ADR-0022).

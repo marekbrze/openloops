@@ -96,7 +96,7 @@ Uwaga modelowa: „wątek zablokowany na innych" nie jest polem — jest **pocho
 ### NowItem
 **Description**: Pozycja kolejki ekranu Teraz — wskaźnik „ta akcja pracuje dziś". Tylko referencja (`actionId`) i ręczny porządek; treść/status zawsze żyją w Action/Loop.
 **Instances per user**: Niezduplikowane — dokładnie najwyżej jeden rekord na akcję (deterministyczny klucz czyni toggle idempotentnym).
-**Ownership**: User (ręką przełącznika „Teraz" na liście Zadania lub w panelu workbench).
+**Ownership**: User (ręką przełącznika „Teraz" w modalu Zadania lub w panelu workbench).
 **Lifecycle**: Powstaje przy doklejeniu na koniec kolejki (ADR-0023); znika świadomie (X / masowe „zdejmij zrobione") albo kaskadowo razem ze źródłem — usunięcie akcji, twarde usunięcie wątku, jego domknięcie czy porzucenie czyszczą pozycje (ADR-0021). Reopen wątku nie odtwarza zdjętych pozycji.
 **States**: brak własnych stanów — skreślenie (done) czytane z akcji, kolejność to dane samego rekordu.
 **Contains**: —
