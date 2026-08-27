@@ -21,5 +21,7 @@ export function loadScenario(name: string): void {
 }
 
 export function getCurrentScenarioName(): string {
+  // Produkcja zawsze startuje w pustym scenariuszu — deweloperski localStorage nie przecieka.
+  if (import.meta.env.PROD) return 'empty';
   return localStorage.getItem(STORAGE_KEY) || 'empty';
 }
