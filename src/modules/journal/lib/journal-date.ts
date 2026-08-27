@@ -34,18 +34,23 @@ export function weekDates(anchor: Date): Date[] {
   })
 }
 
-const weekdayLong = new Intl.DateTimeFormat('pl-PL', { weekday: 'long' })
-const monthLong = new Intl.DateTimeFormat('pl-PL', { month: 'long' })
+const weekdayDayMonth = new Intl.DateTimeFormat('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })
+const dayAndMonth = new Intl.DateTimeFormat('pl-PL', { day: 'numeric', month: 'long' })
 const timeHM = new Intl.DateTimeFormat('pl-PL', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
 
-/** „Poniedziałek, 24 sierpnia”. */
+/** „Poniedziałek, 24 sierpnia” — jeden formatter, bo pl-PL odmienia miesiąc tylko przy koniunkcji. */
 export function formatDayTitle(date: Date): string {
-  return `${capitalize(weekdayLong.format(date))}, ${date.getDate()} ${monthLong.format(date)}`
+  return capitalize(weekdayDayMonth.format(date))
+}
+
+/** Miesiąc w dopełniaczu („sierpnia”) — samotny `{ month: 'long' }` dawałby mianownik („sierpień”). */
+function monthGenitive(date: Date): string {
+  return dayAndMonth.format(date).replace(/^\d+\s*/, '')
 }
 
 /**
  * Nagłówek zakresu tygodnia:
- * „24–30 sierpnia 2026” · „31 sierpnia – 6 września 2026” · „29 grudnia 2025 – 4 stycznia 2026”.
+ * „24–30 sierpnia 2026" · „31 sierpnia – 6 września 2026" · „29 grudnia 2025 – 4 stycznia 2026".
  */
 export function formatWeekTitle(anchor: Date): string {
   const dates = weekDates(anchor)
@@ -53,11 +58,11 @@ export function formatWeekTitle(anchor: Date): string {
   const last = dates[6]
   const sameMonth = first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()
   const sameYear = first.getFullYear() === last.getFullYear()
-  if (sameMonth) return `${first.getDate()}–${last.getDate()} ${monthLong.format(last)} ${last.getFullYear()}`
+  if (sameMonth) return `${first.getDate()}–${last.getDate()} ${monthGenitive(last)} ${last.getFullYear()}`
   if (sameYear) {
-    return `${first.getDate()} ${monthLong.format(first)} – ${last.getDate()} ${monthLong.format(last)} ${last.getFullYear()}`
+    return `${first.getDate()} ${monthGenitive(first)} – ${last.getDate()} ${monthGenitive(last)} ${last.getFullYear()}`
   }
-  return `${first.getDate()} ${monthLong.format(first)} ${first.getFullYear()} – ${last.getDate()} ${monthLong.format(last)} ${last.getFullYear()}`
+  return `${first.getDate()} ${monthGenitive(first)} ${first.getFullYear()} – ${last.getDate()} ${monthGenitive(last)} ${last.getFullYear()}`
 }
 
 /** Godzina wpisu „14:05”. */
