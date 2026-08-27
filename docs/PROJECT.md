@@ -26,7 +26,7 @@ Pojedynczy użytkownik — Ty: osoba pracująca kreatywno/projektowo (UX), prowa
 
 ## Happy Path
 
-Otwierasz aplikację → widzisz posortowaną priorytetowo listę otwartych wątków → zaznaczasz topowy wątek → po prawej widzisz jego akcje → robisz pierwszy „mój ruch" i odhaczasz go (progres bar rośnie) → na punktach „czekam na kogoś" zostawiasz bufor/follow-up → w kolejnych dniach wracasz, aż realizacja celu staje się faktem → klikasz „domknij wątek" → zaglądasz do dziennika: wpis tego dnia mówi Ci jasno, ile udało Ci się zrobić i domknąć.
+Otwierasz aplikację → lądujesz na ekranie **Teraz** (widok startowy od 2026-08-27, ADR-0020): dzisiejsza data z dniem tygodnia i żywym zegarem nad kolejką wybranych zadań → jeśli kolejka jest pusta, przechodzisz na zakładkę **Zadania** i przełącznikiem „Teraz" wybierasz akcje do zrobienia (albo robisz to prosto z panelu wątku w workbench) → wracasz na Teraz, układasz kolejność dnia drag & drop → robisz pierwszą pozycję i odhaczasz ją (małe zwycięstwo do dziennika) → zdejmujesz zrobione, a resztę planu dowozisz przy okazji → w tle priorytetyzujesz wątki i dopisujesz kroki w workbench, aż realizacja celu staje się faktem → klikasz „domknij wątek” → zaglądasz do dziennika: wpis tego dnia mówi Ci jasno, ile udało Ci się zrobić i domknąć.
 
 ## Decyzje obrane (potwierdzone)
 
@@ -34,7 +34,8 @@ Otwierasz aplikację → widzisz posortowaną priorytetowo listę otwartych wąt
 - **Kolejność akcji jest ręczna** (drag & drop) — odzwierciedla plan wykonania; cel zawsze pozostaje ostatnim elementem listy.
 - **Domknięcie jest ręczne** — Ty oceniasz osiągnięcie celu; odhaczenie wszystkich akcji nie jest warunkiem.
 - **Progres bar liczy tylko akcje „mój ruch"** — bar nie staje w miejscu, gdy czekasz na innych.
-- **Dziennik to osobny widok** przełączany z głównego ekranu, z nawigacją po tygodniach i bilansem całego tygodnia (dzień po dniu w środku).
+- **Dziennik to osobny widok** przełączany z paska modułów, z nawigacją po tygodniach i bilansem całego tygodnia (dzień po dniu w środku).
+- **Ekran Teraz jest widokiem startowym** (2026-08-27, ADR-0020): data/dzień/godzina + ręczna kolejka (ADR-0021); dobór zadań przełącznikiem „Teraz" z listy Zadania lub workbench (ADR-0022), doklejanie na koniec kolejki (ADR-0023).
 - **Storage**: localStorage + Dexie (IndexedDB), wzorzec zgodny z dopadone/dopawrite; single-user, bez autoryzacji i backendu.
 
 ## Decyzje z deepen (2026-08-27)

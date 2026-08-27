@@ -8,6 +8,7 @@ erDiagram
     LOOP ||--o{ ACTION : "contains"
     LOOP ||--o{ DAY_ENTRY : "wins-of"
     ACTION ||--o{ DAY_ENTRY : "wins-of"
+    ACTION ||--o| NOW_ITEM : "queued-for-today"
 
     LOOP {
         string id PK
@@ -43,9 +44,16 @@ erDiagram
         date day_key "lokalna data zdarzenia"
         datetime created_at
     }
+    NOW_ITEM {
+        string id PK "deterministyczny: now:actionId - toggle idempotentny"
+        string action_id FK "wskaźnik; zero kopii tresci"
+        int sort_order "reczna kolejka ekranu Teraz"
+        datetime added_at
+        datetime created_at
+    }
 ```
 
-Uwaga modelowa: „wątek zablokowany na innych" nie jest polem — jest **pochodną** (`derived`): Loop jest blocked, gdy ma co najmniej jedną akcję `WaitingOn` niezakończoną. Dziennik (`DayLog`) też nie jest tabelą — to **agregacja** `DAY_ENTRY` po `day_key` do widoku dnia i tygodnia.
+Uwaga modelowa: „wątek zablokowany na innych" nie jest polem — jest **pochodną** (`derived`): Loop jest blocked, gdy ma co najmniej jedną akcję `WaitingOn` niezakończoną. Dziennik (`DayLog`) też nie jest tabelą — to **agregacja** `DAY_ENTRY` po `day_key` do widoku dnia i tygodnia. Kolejka „Teraz" (`NowItem`, ADR-0021) to wskaźnik, nie kopia: treść czyta się na żywo z `ACTION`; rekord nie przeżywa usunięcia/domknięcia/porzucenia źródła (kaskady w repozytoriach).
 
 ## Entities
 
@@ -84,3 +92,12 @@ Uwaga modelowa: „wątek zablokowany na innych" nie jest polem — jest **pocho
 **States**: brak — rekord zdarzenia.
 **Contains**: —
 **Belongs to**: Loop i/lub Action (referencja + snapshot). Agregowany do **WeekSummary** (widok dziennika: nawigacja po tygodniu, bilans tygodnia, dzień po dniu).
+
+### NowItem
+**Description**: Pozycja kolejki ekranu Teraz — wskaźnik „ta akcja pracuje dziś". Tylko referencja (`actionId`) i ręczny porządek; treść/status zawsze żyją w Action/Loop.
+**Instances per user**: Niezduplikowane — dokładnie najwyżej jeden rekord na akcję (deterministyczny klucz czyni toggle idempotentnym).
+**Ownership**: User (ręką przełącznika „Teraz" na liście Zadania lub w panelu workbench).
+**Lifecycle**: Powstaje przy doklejeniu na koniec kolejki (ADR-0023); znika świadomie (X / masowe „zdejmij zrobione") albo kaskadowo razem ze źródłem — usunięcie akcji, twarde usunięcie wątku, jego domknięcie czy porzucenie czyszczą pozycje (ADR-0021). Reopen wątku nie odtwarza zdjętych pozycji.
+**States**: brak własnych stanów — skreślenie (done) czytane z akcji, kolejność to dane samego rekordu.
+**Contains**: —
+**Belongs to**: Action (N:1 przez `actionId`). Widoczność ograniczona żywą kwerendą modułu now (join + filtr obronny).

@@ -19,4 +19,9 @@ Terms and concepts specific to this project. Used across all project skills to m
 | porzucony | `Abandoned` | Status wątku świadomie odpuszczonego (open → abandoned). Nie liczy się jako zwycięstwo; można przywrócić do otwartego. | „usunięty", „zakończony" |
 | data dopytania | `FollowUpDate` | Opcjonalna data na akcji typu czekam na kogoś; po terminie widoczny znacznik przeterminowania. Bez powiadomień. | „deadline", „przypomnienie" |
 | tygodniowy bilans | `WeekSummary` | Agregacja wpisów dziennika na tydzień z nawigacją ← / → i podglądem dzień po dniu. | „statystyki", „raporty" |
-| ekran główny | `Workbench` | Podzielony ekran pracy: lista wątków po lewej + panel akcji z celem po prawej; jedyny pisarz wpisów zwycięstw. | „dashboard", „kokpit" |
+| teraz | `Now` | Główny ekran pracy i widok startowy aplikacji (ADR-0020): dzisiejsza data z dniem tygodnia, żywy zegar i ręcznie układana kolejka wybranych akcji. | „dzisiaj" jako etykieta, „home page", „cockpit" |
+| kolejka | `NowQueue` | Wszystkie pozycje ekranu Teraz w ręcznym porządku (drag & drop); góra = następne do zrobienia. Doklejana na koniec, kaskadowo czyszczona razem ze źródłami. | „lista dziś", „todo list" |
+| pozycja kolejki | `NowItem` | Wskaźnik na jedną akcję wybraną do Teraz (`now:${actionId}`); treść zawsze czytana ze źródła. Nie przeżywa usunięcia/domknięcia/porzucenia wątku. | „zadanie dnia", kopia treści |
+| przełącznik Teraz | `PickForNowToggle` | Kontrolka przy akcji dokładająca/zdejmująca ją z kolejki — wygląda i znaczy to samo na liście Zadania i w workbench; disabled dla done. | mylenie z checkboxem done |
+| zadania (widok) | `TaskCatalog` | Katalog wszystkich akcji otwartych wątków pogrupowanych po wątku; tylko czytanie i wybór przez przełącznik Teraz. Użytkownik mówi tu „zadanie" o **akcji**. | „lista wątków" (to workbench), edycja treści tutaj |
+| workbench | `Workbench` | Ekran autorski wątków: podzielony na listę wątków po lewej + panel akcji z celem po prawej; jedyna powierzchnia mutacji struktury (tytuły, typy, dopytania, domknięcie). Od 2026-08-27 nie jest widokiem startowym. | „ekran główny", „dashboard", „kokpit" |

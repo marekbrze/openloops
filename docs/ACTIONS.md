@@ -27,9 +27,10 @@ Complete list of actions users can perform, organized by entity.
 |--------|------------|------|-------|
 | Add Action | Dopisanie kroku do zaznaczonego wątku | Owner | nowa trafia na koniec listy (nad przypiętym celem) |
 | Edit Action | Zmiana etykiety klik-to-edit; przełączenie typu mój ruch ⇄ czekam na kogoś; ustawienie/usunięcie daty dopytania | Owner | data dopytania tylko dla WaitingOn; po terminie znacznik przy akcji + plakietka na karcie wątku |
-| Toggle Done | Odhaczenie skończonej akcji / odhaczenie z powrotem | Owner | check = małe zwycięstwo → wpis dziennika; uncheck = wpis znika, bilans dnia wraca do stanu realnego |
+| Toggle Done | Odhaczenie skończonej akcji / odhaczenie z powrotem | Owner | check = małe zwycięstwo → wpis dziennika; uncheck = wpis znika, bilans dnia wraca do stanu realnego; dostępne w workbench **i** na ekranie Teraz — ta sama semantyka |
+| Pick For Now / Unpick | Dołączenie akcji do kolejki Teraz / zdjęcie z niej | Owner | drugi przełącznik obok checkboxa (ADR-0022) — na liście Zadania i w panelu workbench; disabled dla done; dokleja na koniec kolejki (ADR-0023); `nowRepo` jest jedynym pisarzem |
 | Reorder Actions | Ręczna kolejność działań drag & drop — plan wykonania | Owner | cel (`Goal`) przypięty jako ostatni element; nie da się go przeciągnąć powyżej końca listy |
-| Delete Action | Usunięcie pojedynczego kroku z wątku | Owner | destrukcyjne, wymaga potwierdzenia gdy done; bilans dnia traci jej bieżące zwycięstwo (akcji nie ma ⇒ nie była wykonana); snapy z poprzednich dni zostają |
+| Delete Action | Usunięcie pojedynczego kroku z wątku | Owner | destrukcyjne, wymaga potwierdzenia gdy done; bilans dnia traci jej bieżące zwycięstwo (akcji nie ma ⇒ nie była wykonana); snapy z poprzednich dni zostają; kaskadowo czyści pozycję Teraz |
 
 ### Goal
 
@@ -37,6 +38,30 @@ Complete list of actions users can perform, organized by entity.
 |--------|------------|------|-------|
 | Edit Goal | Dopisanie/zmiana opisu „po czym wiem, że gotowe" | Owner | edytowalny zawsze, także po domknięciu |
 | Pin at End (system) | Cel zawsze renderowany jako ostatni element listy działań | System | wyłącza go z drag & drop poza pozycję końcową |
+
+### NowItem / kolejka „Teraz" (widok Teraz)
+
+Kolejka żyje na wskaźnikach (`now:${actionId}`); treść czytana na żywo ze źródła. Kaskady: usunięcie akcji/nowego wątku/domknięcie/porzucenie czyszczą pozycje automatycznie; reopen nie odtwarza.
+
+| Action | Description | Role | Notes |
+|--------|------------|------|-------|
+| Open Now | Zakładka „Teraz" — widok startowy aplikacji (ADR-0020) | Owner | nawigacja tobaru |
+| Read Day | Dzisiejsza data z dniem tygodnia + żywy zegar HH:MM + meta liczności kolejki | Owner | czas lokalny pl-PL; dogania północ/uśpienie karty |
+| Reorder Queue | Drag & drop pozycji — plan wykonania dnia; numeracja widoczna | Owner | dotyczy tylko kolejki; źródła nietknięte |
+| Toggle Done in Queue | Odhaczenie akcji prosto z Teraz | Owner | identyczna ścieżka jak Toggle Done w workbench → wpis dziennika |
+| Remove From Queue | Zdjęcie pojedynczej pozycji (X) — źródło zostaje nietknięte | Owner | done-akcje zostają skreślone aż do świadomego zdjęcia (ADR-0023) |
+| Remove Done In Bulk | „Zdejmij zrobione (n)" — masowe oczyszczenie kolejki | Owner | CTA pojawia się gdy ≥1 pozycja done |
+
+### TaskCatalog (widok Zadania)
+
+Katalog wszystkich zadań: czytanie + wybór. Bez edycji treści, typów ani usuwania — to domena workbench (ADR-0022).
+
+| Action | Description | Role | Notes |
+|--------|------------|------|-------|
+| Open Tasks | Zakładka „Zadania" | Owner | nawigacja tobaru |
+| Browse Catalog | Akcje otwartych wątków pogrupowane po wątku, w ich ręcznej kolejności | Owner | grupy wg priorytetu wątków; licznik „N do zrobienia" |
+| Pick For Now / Unpick | Przełącznik przy każdym wierszu — ten sam co w workbench/Teraz | Owner | wspólny stan przez `usePickedActionIds`; disabled gdy done albo członkostwo jeszcze nieczytelne |
+| Open Workbench | Z stanów pustych (świat pusty / wątki bez kroków) | Owner | zdarzenie `openloops:navigate` |
 
 ### DayLog / WeekSummary (widok Dziennik)
 
