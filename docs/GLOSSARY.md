@@ -20,3 +20,4 @@ Terms and concepts specific to this project. Used across all project skills to m
 | porzucony | `Abandoned` | Status wątku świadomie odpuszczonego (open → abandoned). Nie liczy się jako zwycięstwo; można przywrócić do otwartego. | „usunięty", „zakończony" |
 | data dopytania | `FollowUpDate` | Opcjonalna data na akcji typu czekam na kogoś; po terminie widoczny znacznik przeterminowania. Bez powiadomień. | „deadline", „przypomnienie" |
 | tygodniowy bilans | `WeekSummary` | Agregacja wpisów dziennika na tydzień z nawigacją ← / → i podglądem dzień po dniu. | „statystyki", „raporty" |
+| ekran główny | `Workbench` | Podzielony ekran pracy: lista wątków po lewej + panel akcji z celem po prawej; jedyny pisarz wpisów zwycięstw. | „dashboard", „kokpit" |
