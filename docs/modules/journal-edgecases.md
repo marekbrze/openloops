@@ -1,38 +1,38 @@
 # Journal — Edge Cases
 
-*Audyt stres-testowy z 2026-08-27 (proto-edgecases), baseline przed proto-harden.*
-*Statusy w ewidencji workbench stosowane dopiero po harden; tutaj: zachowanie dziś → sugerowane domyślne.*
+*Audyt stres-testowy z 2026-08-27 (proto-edgecases, commit `e959763`), po fazie **proto-harden** tego samego dnia.*
+*Statusy: ✅ zaimplementowane (+ miejsce), ⏸️ świadomie odroczone (powód), ✔︎ zweryfikowane jako nie-problem.*
 
-## Coverage
+## Coverage (po harden)
 
-- **Spec captured na starcie**: 6 pozycji z `docs/modules/journal.md` (pusty tydzień · tydzień przyszły · bieżący trwa · usunięte źródło · odhaczenie wstecz · stabilne sortowanie) — **wszystkie 6 zaimplementowane już w lofi** (bilans 0·0 z notką `week-balance.tsx:23`, nawigacja ograniczona dzisiaj `journal-screen.tsx:19`, snapshot-only bez deref źródła `day-card.tsx`, żywe liveQuery, tie-breaker po id `use-journal.ts:36-46`).
-- **Nowe luki z audytu**: 9 (+1 dziedziczona decyzja nieodroczenia).
-- **By severity**: 🔴 1 · 🟡 3 · 🟢 5.
+- **Spec captured na staracie**: 6 pozycji z `docs/modules/journal.md` — wszystkie 6 obsłużonych już w lofi.
+- **Nowe luki z audytu**: 9 (+1 dziedziczona nie-luka) → **7 zamkniętych**, **2 odroczonych świadomie**.
+- **Severity**: 🔴 1 · 🟡 3 · 🟢 5 → wszystkie 🔴 i 🟡 zamknięte.
 
 ## Inventory
 
-| # | Severity | Category | Edge case | Behavior today | Suggested behavior | Where |
-|---|----------|----------|-----------|----------------|--------------------|-------|
-| 1 | 🔴 | Cross-module / lifecycle | **Wpis-ghost przy odhaczeniu innego dnia**: odhaczę akcję w poniedziałek, cofnę we wtorek → usuwany jest wpis `${actionId}:${dzis}` (wtorek), a poniedziałkowy zostaje. „Bilans zawsze realny" (istota produktu) kłamie | `toggleDone` i `remove` czyszczą wyłącznie wpis DZISIEJSZEJ daty | Usuwać po indeksie `actionId` niezależnie od dnia: `db.dayEntries.where('actionId').equals(id).delete()` — indeks istnieje w schemacie v1 | `src/modules/data-layer/repositories/index.ts:133` i `:152` (`clearCurrentWinEntry`) |
-| 2 | 🟡 | Errors | Porażka odczytu mid-session nie ma ścieżki: błąd liveQuery = wieczny szkielet lub rzucony render (brak error boundary → biel) | `undefined` traktowany jak loading bez rozróżnienia porażki | Rozróżnić stan błędu od ładowania; komunikat przez istniejący kanał `AppNotices`/full-screen z retry — wzorzec z bootstrapu | `src/modules/journal/hooks/use-journal.ts:29`, `components/journal-screen.tsx:32,41` |
-| 3 | 🟡 | State transitions | Rekord o nieznanym `kind` (ręczna edycja IndexedDB, literówka w scenariuszu dev) rzuca TypeError przy renderze wpisu → biel bez boundary | `KIND_META[entry.kind]` bez fallbacku | Wariant domyślny (neutralna ikona, etykieta „wpis”) zamiast wybuchu całej aplikacji | `src/modules/journal/components/day-card.tsx:68` |
-| 4 | 🟡 | A11y / Action outcomes | Odhaczenie/domknięcie w workbench jest nieme dla SR patrzącego na Dziennik — bilans zmienia się bez ogłoszenia | `aria-live` tylko na nagłówku tygodnia | `aria-live="polite"` na wartościach bilansu albo sr-only announcer („3 małe zwycięstwa”) — paritet z PL announcementami dnd workbench | `src/modules/journal/components/week-balance.tsx:52` |
-| 5 | 🟢 | Loading & async | Błysk szkieletu przy każdej zmianie tygodnia: między nawigacją a odpowiedzią liveQuery dane są chwilowo `undefined` | pumpa szkieletów przy każdym ←/→ | keep-previous-data albo opóźniony szkielet (~150 ms) — estetyka przejścia | `src/modules/journal/hooks/use-journal.ts:29` |
-| 6 | 🟢 | Data states | Sesja otarta o północ: kotwica tygodnia niestyczna — strzałki/„Dziś” liczone ze starej daty aż do pierwszej interakcji (po kliknięciu samo się poprawia) | `useState(() => startOfWeek(new Date()))` raz przy montażu | Resync kotwicy przy `visibilitychange`/focus karty | `src/modules/journal/components/journal-screen.tsx:13` |
-| 7 | 🟢 | Navigation | Brak skrótów klawiaturowych ← / → / T dla nawigacji tygodniami | wyłącznie klik przycisków | ArrowLeft/ArrowRight gdy fokus w obszarze widoku; opcjonalne — prototype-level nic nie blokuje | `src/modules/journal/components/journal-screen.tsx` |
-| 8 | 🟢 | Data states | Niełamliwy token w snapshocie łamany słabiej niż chipy tagów workbench (`overflow-wrap:break-word` vs ich `anywhere`) | `break-words` na treści wpisu | Ujednolicić do `[overflow-wrap:anywhere]` + `title=` z pełną treścią jak w workbench | `src/modules/journal/components/day-card.tsx:81` |
-| 9 | 🟢 | Prototype-specific | Brak synchronizacji międzykartami przeglądarki: dwie zakładki = dwa rozjechane bilanse do czasu re-renderu | liveQuery nasłuchuje tylko własnej karty | Świadome odroczenie (single-user single-tab); ewentualnie Dexie observable/storage bridge w data-layer później | nota infrastrukturalna: `src/modules/data-layer/db/db.ts` |
-| 10 | 🟢 | Navigation | Deep-link/hash na konkretny tydzień nie istnieje (refresh wraca na bieżący) | routing stanem komponentu | ✔︎ **Nie-luka**: świadome odroczenie całej aplikacji (workbench-edgecases #10) — dziedziczę decyzję | `src/modules/journal/components/journal-screen.tsx` |
+| # | Severity | Category | Edge case | Status | Gdzie / powód |
+|---|----------|----------|-----------|--------|---------------|
+| 1 | 🔴 | Cross-module / lifecycle | Ghost-wpis przy odhaczeniu akcji innego dnia niż odhaczenie | ✅ | Czyszczenie po indeksie `actionId` niezależnie od daty (`clearWinEntries`) — `repositories/index.ts:166-170`, wołane z `toggleDone` i `remove`; smoke E2E: wstrzyknięty ghost + toggle ± ⇒ 0 rekordów |
+| 2 | 🟡 | Errors | Porażka odczytu mid-session = wieczny szkielet / biel | ✅ | Sentinel `READ_ERROR` w liveQuery (`use-journal.ts:33-45`) → karta z rolą `alert` i retry-tokenem (`journal-read-error.tsx`, `journal-screen.tsx:76-78`) |
+| 3 | 🟡 | State transitions | Rekord o nieznanym `kind` wywala render (TypeError na ikonie) | ✅ | `Partial<Record>` + fallback „Wpis” z neutralną ikoną (`day-card.tsx:26-32,69`); mini-liczniki dnia liczą wyłącznie znane rodzaje; story `AnomalousKindSurvives` |
+| 4 | 🟡 | A11y / Action outcomes | Zmiany bilansu nieme dla SR | ✅ | sr-only `role="status"` z konstrukcją bezodmienną „Małe zwycięstwa: N.” (`week-balance.tsx:20-23`) |
+| 5 | 🟢 | Loading & async | Błysk szkieletu przy zmianie tygodnia | ✅ | Stan dziennika trzymany między odpowiedziami liveQuery — szkielet tylko przy pierwszym renderze (`use-journal.ts:53-66`) |
+| 6 | 🟢 | Data states | Kotwica tygodnia niestyczna po północy w otwartej sesji | ✅ | Resync na `visibilitychange`/`focus`, ale tylko gdy użytkownik nie nawigował celowo (`manualNavRef`, `journal-screen.tsx:26-41`) |
+| 7 | 🟢 | Navigation | Brak skrótów ← / → z klawiatury | ⏸️ | Opcjonalne przed testami userów; globalny listener przechwytujący strzałki grozi kolizją z dnd-kit i checkboxami — decyzja po testach |
+| 8 | 🟢 | Data states | Niełamliwy token słabiej łamany niż chipy workbench | ✅ | `[overflow-wrap:anywhere]` + `title=` z pełną treścią (`day-card.tsx:86-89`) |
+| 9 | 🟢 | Prototype-specific | Brak synchronizacji międzykartami przeglądarki | ⏸️ | Single-user single-tab zgodnie z założeniem produktu; most Dexie↔storage-events dopiero gdy testy pokażą potrzebę |
+| 10 | 🟢 | Navigation | Deep-link/hash tygodnia | ✔︎ | Dziedziczona decyzja aplikacyjna (workbench-edgecases #10) — nie nowa luka |
 
-**Kategorie sprawdzone bez uwag**: Forms & input ✔︎ (moduł read-only — zero formularzy), Validation ✔︎ (brak inputów użytkownika), Destructive actions ✔︎ (brak — ADR-0013), Empty states ✔︎ (tydzień 0·0, dzień „Brak zwycięstw” — od startu), Loading initial ✔︎ (szkielety bilansu i dni), Boundary values ✔︎ (0/max/tabular-nums), Unicode/RTL/emoji ✔︎ (czysty path tekstowy React), Offline ✔︎ (zasoby bundlowane), Referenced-item-deleted ✔︎ (snapshot celowo samowystarczalny; reopen nie kasuje historii — decyzja deepen).
+**Kategorie sprawdzone bez uwag**: Forms & input ✔︎, Validation ✔︎, Destructive actions ✔︎ (read-only per ADR-0013), Empty states ✔︎, Loading initial ✔︎, Boundary values ✔︎, Unicode/RTL/emoji ✔︎, Offline ✔︎, Referenced-item-deleted ✔︎.
 
-## Priority list
+## Priority list (historia wykonania)
 
-1. **Luka #1 (🔴)** — jedyna naruszająca obietnicę produktu: bilans dnia ma być zawsze realny, a ghost-wpis z poprzedniego dnia go fałszuje. Naprawa w `data-layer` (jedyna piszącą tabelę jest workbench, ale konsekwencją jest fałszywy dziennik) — dwie linie z indeksem `actionId`.
-2. **#2 powierzchnia błędu odczytu** — bez niej moduł umiera ciszą/kwetą szkieletu.
-3. **#4 ogłaszanie SR** — motywacyjny rdzeń aplikacji ma być słyszalny, nie tylko widoczny.
-4. Dalej 🟢 wg kolejności tabeli (#3 fallback kind-a praktycznie wcześniej, bo to jeden case-guard).
+1. ~~Ghost-wpis (🔴)~~ → naprawiony w data-layer, dowód E2E w smoke.
+2. ~~Powierzchnia błędu odczytu~~ → karta alert+retry.
+3. ~~Ogłaszanie SR~~ → bezodmienny status.
+4. Fallback nieznanego kind-a · anti-błysk · resync północy · anywhere/title → done. Skróty klawiaturowe i multi-tab odroczone z powodami.
 
-## Hand-off to proto-harden
+## Hand-off status
 
-Zaimplementować po kolei: **#1 → #2 → #3 → #4**, potem tanie zielone (#8 jednym atrybutem, #6 resync visibility, #7 skróty klawiaturowe opcjonalne, #5 keep-previous). #9/#10 pozostają świadomie odroczone z powodami.
+proto-harden zamknął cały obowiązkowy zakres 2026-08-27 (ADR-0019). Kolejny baseline da re-run proto-edgecases; warstwa wizualna: proto-brand → proto-design → proto-polish.

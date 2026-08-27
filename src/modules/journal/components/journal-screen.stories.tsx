@@ -99,6 +99,26 @@ export const ShowcasedWeek: Story = {
   decorators: [heightDecorator, seededWith(seedJournalShowcase)],
 }
 
+/** Rekord o nieznanym `kind` nie ma prawa wywalić ekranu — renderuje się jako neutralny „Wpis” (luka #3). */
+export const AnomalousKindSurvives: Story = {
+  decorators: [
+    heightDecorator,
+    seededWith(async () => {
+      await seedJournalShowcase()
+      const todayKey = toDayKey(new Date())
+      await db.dayEntries.add({
+        id: `story-anomalia:${todayKey}`,
+        kind: 'totally-unknown' as DayEntry['kind'],
+        loopId: '',
+        snapshotText: 'Rekord zepsutego rodzaju — fallback zamiast crashu',
+        dayKey: todayKey,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+    }),
+  ],
+}
+
 export const EmptyCurrentWeek: Story = {
   decorators: [heightDecorator, seededWith(() => applyScenarioWithoutReload('empty'))],
 }

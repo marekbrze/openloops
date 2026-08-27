@@ -40,6 +40,7 @@ Zasady kierujące (z dokumentów źródłowych + wywiadu 2026-08-27):
 - **Nagłówek widoku**: tytuł zakresu dat (np. „24–30 sierpnia 2026"), strzałki ← / →, przycisk „Dziś".
 - **Blok bilansu tygodnia**: dwie duże liczby z podpisami „małych zwycięstw" / „większych zwycięstw" — najcięższy wizualnie element ekranu.
 - **Lista dni**: 7 kart-dni; karta dnia = data + mini-bilans + wpisów-lista (godzina, ikona rodzaju, snapshot). Dzisiejszy dzień wyróżniony subtelnym znacznikiem.
+- **Karta błędu odczytu**: alert z wyjaśnieniem i „Spróbuj ponownie" — zastępuje wieczny szkielet przy porażce IndexedDB.
 - **Pusty tydzień**: pełny szkielet dni zostaje; świadome „0 · 0 — ten tydzień nie zapisał żadnych zwycięstw".
 
 ## Actions
@@ -53,14 +54,19 @@ Zasady kierujące (z dokumentów źródłowych + wywiadu 2026-08-27):
 
 ## Edge Cases
 
-*Uchwycone naturalnie podczas detalu; pełny audyt będzie w proto-edgecases.*
+*Zachowania rozstrzygnięte i zaimplementowane (harden 2026-08-27 — pełna ewidencja: `journal-edgecases.md`).*
 
-- **Tydzień całkiem pusty** (w tym dzień-dzień pierwszy uruchomienia wstecz): bilans 0·0, wszystkie dni w formie wygaszonych wierszy.
-- **Tydzień przyszły**: niedostępny — nawigacja → zatrzymuje się na bieżącym tygodniu.
-- **Bieżący tydzień trwa**: dni późniejsze niż dziś wyglądają jak zwykłe puste dni (jawnie „jeszcze nic" nie obiecują).
-- **Usunięte źródło wpisu**: snapshot pozostaje; treść czyta się samodzielnie (rodzaj wpisu nazywa co było akcją, a czym wątkiem).
-- **Odhaczenie po powrocie w czasie**: brak śladu — bilans zawsze pokazuje stan realny danych, historii nie inscenizuje.
-- **Wiele wpisów jednym momencie**: stabilne sortowanie po `createdAt` (sekwencyjne id jako tie-breaker) — godziny się nie przeskakują.
+- **Tydzień całkiem pusty**: uczciwe 0·0 z notką; wszystkie dni jako wygaszone wiersze (ADR-0017).
+- **Tydzień przyszły**: niedostępny — nawigacja → zatrzymuje się na bieżącym tygodniu (ADR-0015).
+- **Bieżący tydzień trwa**: dni późniejsze niż dziś wyglądają jak zwykłe puste dni.
+- **Usunięte źródło wpisu**: snapshot czyta się samodzielnie, rodzaj wpisu nazywa kontekst.
+- **Cofnięcie odhaczenia między dniami**: akcja niezrobiona ⇒ żadnego dnia nie było od niej zwycięstwa — wpisy czyszczone po indeksie `actionId` we wszystkich datach (luka #1, ADR-0019).
+- **Porażka odczytu IndexedDB mid-session**: karta z rolą alert i „Spróbuj ponownie”, nigdy wieczny szkielet ani biel aplikacji.
+- **Rekord o nieznanym rodzaju** (ręczna edycja bazy, zepsuty seed dev): neutralny „Wpis” zamiast wysypania modułu.
+- **Sesja przez północ**: kotwica bieżącego tygodnia dogania datę po odzyskaniu widoczności karty; celowo przeglądany przeszły tydzień zostaje nietknięty.
+- **Czytniki ekranu**: zmiany bilansu ogłaszane bezodmienną konstrukcją („Małe zwycięstwa: N”).
+- **Wiele wpisów jednym momencie**: stabilne sortowanie po `createdAt`, tie-breaker po id.
+- **Long-token snapshot**: łamany `[overflow-wrap:anywhere]` + pełna treść w `title`.
 
 ## Integration Points
 

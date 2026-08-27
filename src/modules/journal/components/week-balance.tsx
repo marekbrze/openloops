@@ -11,6 +11,10 @@ export function WeekBalanceCard({ smallWins, bigWins }: WeekBalanceCardProps) {
   const emptyWeek = smallWins + bigWins === 0
   return (
     <section aria-label="Bilans tygodnia" className="space-y-2">
+      {/* Kolejność słowna zamiast odmiany liczebnika: konstrukcja poprawna dla każdej wartości (luka #4). */}
+      <p role="status" className="sr-only">
+        {`Małe zwycięstwa: ${smallWins}. Większe zwycięstwa: ${bigWins}.`}
+      </p>
       <div className="grid grid-cols-2 gap-3">
         <BalanceTile
           icon={<CheckCircle2 className="size-4" aria-hidden="true" />}

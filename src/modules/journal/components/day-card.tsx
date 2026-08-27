@@ -1,4 +1,4 @@
-import { CheckCircle2, Trophy } from 'lucide-react'
+import { CheckCircle2, CircleSlash, Trophy } from 'lucide-react'
 import type { DayEntry } from '@/modules/data-layer'
 import type { DayGroup } from '../hooks/use-journal'
 import { formatDayTitle, formatEntryTime } from '../lib/journal-date'
@@ -9,19 +9,31 @@ interface DayCardProps {
   isToday: boolean
 }
 
+interface KindMeta {
+  label: string
+  Icon: typeof CheckCircle2
+}
+
 /** Rodzaj wpisu = język zwycięstw z GLOSSARY: małe (akcja) vs większe (domknięty wątek). */
-const KIND_META: Record<DayEntry['kind'], { label: string; Icon: typeof CheckCircle2 }> = {
+const KIND_META: Partial<Record<DayEntry['kind'], KindMeta>> = {
   'action-done': { label: 'Małe zwycięstwo', Icon: CheckCircle2 },
   'loop-closed': { label: 'Większe zwycięstwo', Icon: Trophy },
 }
+
+/**
+ * Dane poza typem (ręczna edycja IndexedDB, literówka w scenariuszu dev) nie mają prawa
+ * wysypać całej aplikacji — dziennik pokazuje neutralny „Wpis” (luka #3 audytu).
+ */
+const UNKNOWN_KIND: KindMeta = { label: 'Wpis', Icon: CircleSlash }
 
 /**
  * Karta jednego dnia tygodnia. Dni zawsze widoczne — pełna karta ze wpisami albo
  * wygaszony wiersz „Brak zwycięstw”; zero stanów rozwijania (ADR-0016).
  */
 export function DayCard({ date, group, isToday }: DayCardProps) {
+  // Jawne po rodzajach — rekord-anomalia (nieznany kind) nie podbija licznika trofeów.
   const smallWins = group.entries.filter((e) => e.kind === 'action-done').length
-  const bigWins = group.entries.length - smallWins
+  const bigWins = group.entries.filter((e) => e.kind === 'loop-closed').length
 
   return (
     <article
@@ -65,7 +77,7 @@ export function DayCard({ date, group, isToday }: DayCardProps) {
 }
 
 function EntryRow({ entry }: { entry: DayEntry }) {
-  const meta = KIND_META[entry.kind]
+  const meta = KIND_META[entry.kind] ?? UNKNOWN_KIND
   return (
     <li className="flex items-start gap-2 py-2 first:mt-1">
       <time
@@ -78,7 +90,10 @@ function EntryRow({ entry }: { entry: DayEntry }) {
         className="mt-0.5 size-4 shrink-0 text-muted-foreground"
         aria-hidden="true"
       />
-      <p className="min-w-0 text-sm leading-snug break-words">
+      <p
+        title={entry.snapshotText}
+        className="min-w-0 text-sm leading-snug [overflow-wrap:anywhere]"
+      >
         <span className="sr-only">{meta.label}: </span>
         {entry.snapshotText}
       </p>

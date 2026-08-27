@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/modules/data-layer'
 import type { DayEntry } from '@/modules/data-layer'
@@ -21,12 +21,60 @@ export interface DayGroup {
 }
 
 /**
- * Wpisy dla kluczy dni tygodnia. Zależność to joined-string kluczy —
- * chroni liveQuery przed fluktuacją referencji tablicy przy każdym renderze.
+ * Sentinel porażki odczytu (luka #2 audytu) — rozróżnia „jeszcze ładuje”
+ * od „baza odpowiedziała błędem”; ten drugi stan ma własną kartę z retry.
  */
-export function useWeekEntries(dayKeys: string[]): DayEntry[] | undefined {
+const READ_ERROR = Symbol('journal-read-error')
+type JournalRead = DayEntry[] | typeof READ_ERROR
+
+/**
+ * Wpisy dla kluczy dni tygodnia. Zależność to joined-string kluczy (+ token retry
+ * z karty błędu) — chroni liveQuery przed fluktuacją referencji tablicy przy renderze.
+ */
+function useWeekEntries(dayKeys: string[], retryToken: number): JournalRead | undefined {
   const keys = dayKeys.join(',')
-  return useLiveQuery(() => db.dayEntries.where('dayKey').anyOf(dayKeys).toArray(), [keys])
+  return useLiveQuery(
+    async () => {
+      try {
+        return await db.dayEntries.where('dayKey').anyOf(dayKeys).toArray()
+      } catch (error) {
+        console.error('[openloops] odczyt wpisów dziennika nie powiódł się', error)
+        return READ_ERROR
+      }
+    },
+    [keys, retryToken],
+  )
+}
+
+/** Stan widoku tygodnia: dane albo karta błędu; `loading` tylko przy pierwszym renderze. */
+export interface JournalWeekState {
+  grouped?: DayGroup[]
+  balance?: WeekBalance
+  readFailed: boolean
+  loading: boolean
+}
+
+export function useJournalWeek(dayKeys: string[], retryToken = 0): JournalWeekState {
+  const entries = useWeekEntries(dayKeys, retryToken)
+  const [state, setState] = useState<JournalWeekState>({ readFailed: false, loading: true })
+
+  // Leniwy efekt zamiast liczenia w renderze: między przełączeniem tygodnia a odpowiedzią
+  // liveQuery poprzednie dane zostają na ekranie (luka #5 — bez błysku szkieletu).
+  useEffect(() => {
+    if (entries === undefined) return
+    if (entries === READ_ERROR) {
+      setState({ readFailed: true, loading: false })
+      return
+    }
+    setState({
+      grouped: groupByDay(entries, dayKeys),
+      balance: weekBalance(entries),
+      readFailed: false,
+      loading: false,
+    })
+  }, [entries, dayKeys])
+
+  return state
 }
 
 /**
@@ -49,16 +97,4 @@ export function weekBalance(entries: DayEntry[]): WeekBalance {
     else if (entry.kind === 'loop-closed') balance.bigWins += 1
   }
   return balance
-}
-
-/** Grupowanie+bilans memoizowane jednym wywołaniem — dane tej samej paczki liveQuery. */
-export function useJournalWeek(dayKeys: string[]): { grouped?: DayGroup[]; balance?: WeekBalance } {
-  const entries = useWeekEntries(dayKeys)
-  return useMemo(
-    () =>
-      entries
-        ? { grouped: groupByDay(entries, dayKeys), balance: weekBalance(entries) }
-        : {},
-    [entries, dayKeys],
-  )
 }

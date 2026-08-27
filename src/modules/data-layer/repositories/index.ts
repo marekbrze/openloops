@@ -109,7 +109,8 @@ export const actionsRepo = {
   },
   /**
    * Toggle Done + semantyka zwycięstw: check zapisuje DayEntry ('action-done'),
-   * odhaczenie usuwa swój wpis — bilans dnia wraca do stanu realnego.
+   * odhaczenie usuwa WSZYSTKIE swoje wpisy (nie tylko dzisiejszy — luka #1 audytu
+   * dziennika) — bilans dnia wraca do stanu realnego.
    */
   async toggleDone(action: LoopAction): Promise<void> {
     const today = dayKey()
@@ -130,7 +131,7 @@ export const actionsRepo = {
         await db.dayEntries.put(entry)
       } else {
         await db.actions.update(action.id, { done: false, doneAt: undefined, updatedAt: now() })
-        await db.dayEntries.delete(entryId)
+        await clearWinEntries(action.id)
       }
     })
   },
@@ -149,7 +150,7 @@ export const actionsRepo = {
   async remove(action: LoopAction): Promise<void> {
     await db.transaction('rw', db.actions, db.dayEntries, async () => {
       await db.actions.delete(action.id)
-      if (action.done) await clearCurrentWinEntry(action.id)
+      if (action.done) await clearWinEntries(action.id)
     })
   },
   listForLoop(loopId: string): Promise<LoopAction[]> {
@@ -157,9 +158,14 @@ export const actionsRepo = {
   },
 }
 
-/** Wpis zwycięstwa danej akcji dla dzisiejszego dnia — usuwany przy uncheck/usunięciu akcji. */
-function clearCurrentWinEntry(actionId: string): Promise<void> {
-  return db.dayEntries.delete(`${actionId}:${dayKey()}`)
+/**
+ * Akcja niezrobiona ⇒ żadnego dnia nie było od niej zwycięstwa: czyszczenie PO INDEKSIE
+ * actionId, niezależnie od daty. Poprzednio usuwano wyłącznie wpis dzisiejszej daty,
+ * więc cofnięcie odhaczenia następnego dnia zostawiało ghost-wpis i fałszowało bilans
+ * dziennika (luka #1 audytu, ADR-0019).
+ */
+function clearWinEntries(actionId: string): Promise<number> {
+  return db.dayEntries.where('actionId').equals(actionId).delete()
 }
 
 /* ---------- tags ---------- */
