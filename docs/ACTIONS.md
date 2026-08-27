@@ -54,6 +54,6 @@ Dziennik jest agregacją `DayEntry` — użytkownik nie tworzy wpisów wprost; l
 | Action | Description | Role | Notes |
 |--------|------------|------|-------|
 | Open Journal | Przejście do osobnego widoku Dziennik z głównego ekranu | Owner | nawigacja zakładką/przełącznikiem widoku |
-| Navigate Weeks | Strzałki ← / → między tygodniami; skrót „dziś" | Owner | |
+| Navigate Weeks | Strzałki ← / → między tygodniami; skrót „dziś” | Owner | wstecz bez limitu; naprzód zatrzymuje się na bieżącym tygodniu (ADR-0015) |
 | Read Weekly Balance | Bilans całego tygodnia: ile małych zwycięstw (akcje) i większych (domknięte wątki) | Owner | cele motywacyjne systemu — widoczne od razu |
 | Browse Day Entries | Rozwinięcie dnia: lista wykonanych akcji i domkniętych wątków z godzinami | Owner | wpisy mają snapshoty tekstu, czytelne także po usunięciu źródła |
