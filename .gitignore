@@ -12,9 +12,8 @@ dist
 dist-ssr
 *.local
 
-# Lockfiles — this template is package-manager agnostic (npm/pnpm/bun/yarn/deno).
-# Each user generates their own after install.
-package-lock.json
+# Lockfiles — this project ships with npm's lock for reproducible CI (npm ci).
+# Locks of other package managers stay ignored.
 pnpm-lock.yaml
 yarn.lock
 bun.lockb
