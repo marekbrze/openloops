@@ -17,5 +17,5 @@ const loops: Loop[] = [
 
 /** Jeden nagły wątek bez rozpisanych kroków — stan „rozpisz kroki…”. */
 export function minimalScenario(): ScenarioData {
-  return { loops, actions: [], dayEntries: [] }
+  return { loops, actions: [], dayEntries: [], nowItems: [] }
 }

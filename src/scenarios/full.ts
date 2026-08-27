@@ -1,4 +1,4 @@
-import type { DayEntry, Loop, LoopAction } from '@/modules/data-layer'
+import type { DayEntry, Loop, LoopAction, NowItem } from '@/modules/data-layer'
 import type { ScenarioData } from './types'
 
 /* Pomocnice dat — fixture'y liczą się względem „dziś”, żeby overdue/dziennik zawsze żyły. */
@@ -181,7 +181,22 @@ const dayEntries: DayEntry[] = [
   },
 ]
 
-/** Pełny świat demo: 6 otwartych wątków o różnych kształtach + sekcja domkniętych. */
+/* Kolejka „Teraz" na start dnia: mój ruch najpierw, czekanie jako ostatnie przypomnienie (ADR-0023). */
+const nowItems: NowItem[] = [
+  'act-loop-onboarding-1-makieta',
+  'act-loop-brief-q4-0-kpi',
+  'act-loop-abonamenty-0-roczne',
+  'act-loop-brief-q4-1-budget',
+].map((actionId, index) => ({
+  id: `now:${actionId}`,
+  actionId,
+  sortOrder: index,
+  addedAt: iso(-1 + index),
+  createdAt: iso(0),
+  updatedAt: iso(0),
+}))
+
+/** Pełny świat demo: 6 otwartych wątków o różnych kształtach + sekcja domkniętych + kolejka Teraz. */
 export function fullScenario(): ScenarioData {
-  return { loops, actions, dayEntries }
+  return { loops, actions, dayEntries, nowItems }
 }

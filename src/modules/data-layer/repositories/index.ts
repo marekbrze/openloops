@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 import { db } from '../db/db'
-import type { DayEntry, Loop, LoopAction } from '../types'
+import type { DayEntry, Loop, LoopAction, NowItem } from '../types'
 import { generateId } from '../../../shared/types'
 
 /** Lokalna data w formacie YYYY-MM-DD — klucz agregacji dziennika. */
@@ -55,9 +55,16 @@ export const loopsRepo = {
       (b.closedAt ?? b.abandonedAt ?? b.updatedAt).localeCompare(a.closedAt ?? a.abandonedAt ?? a.updatedAt),
     )
   },
-  /** Porzucenie celowo nie tworzy wpisu dziennika — nie jest zwycięstwem. */
-  abandon(id: string): Promise<void> {
-    return db.loops.update(id, { status: 'abandoned', abandonedAt: now(), updatedAt: now() }).then(() => undefined)
+  /**
+   * Porzucenie celowo nie tworzy wpisu dziennika — nie jest zwycięstwem.
+   * Kaskada Teraz (ADR-0021): akcje porzuconego wątku znikają z kolejki.
+   */
+  async abandon(id: string): Promise<void> {
+    await db.transaction('rw', db.loops, db.actions, db.nowItems, async () => {
+      const actionIds = (await db.actions.where('loopId').equals(id).toArray()).map((a) => a.id)
+      await clearNowItems(actionIds)
+      await db.loops.update(id, { status: 'abandoned', abandonedAt: now(), updatedAt: now() })
+    })
   },
   /** Reopen wraca na koniec listy otwartej (ADR-0003: przechwycenie ≠ przywrócenie); wpisów dziennika nie rusza. */
   async reopen(id: string): Promise<void> {
@@ -71,8 +78,10 @@ export const loopsRepo = {
     })
   },
   async remove(id: string): Promise<void> {
-    // Twarde usunięcie wątku z akcjami; wpisy dziennika zostają ze snapshotem tekstu.
-    await db.transaction('rw', db.loops, db.actions, async () => {
+    // Twarde usunięcie wątku z akcjami i pozycjami Teraz; wpisy dziennika zostają ze snapshotem tekstu.
+    await db.transaction('rw', db.loops, db.actions, db.nowItems, async () => {
+      const actionIds = (await db.actions.where('loopId').equals(id).toArray()).map((a) => a.id)
+      await clearNowItems(actionIds)
       await db.actions.where('loopId').equals(id).delete()
       await db.loops.delete(id)
     })
@@ -145,9 +154,11 @@ export const actionsRepo = {
   /**
    * Usunięcie akcji: done-akcja traci też bieżące zwycięstwo dnia
    * (akcji nie ma ⇒ nie była wykonana); snapy z poprzednich dni zostają.
+   * Kaskada Teraz: rekord kolejki odchodzi razem ze źródłem (ADR-0021).
    */
   async remove(action: LoopAction): Promise<void> {
-    await db.transaction('rw', db.actions, db.dayEntries, async () => {
+    await db.transaction('rw', db.actions, db.dayEntries, db.nowItems, async () => {
+      await clearNowItems([action.id])
       await db.actions.delete(action.id)
       if (action.done) await clearWinEntries(action.id)
     })
@@ -167,6 +178,63 @@ function clearWinEntries(actionId: string): Promise<number> {
   return db.dayEntries.where('actionId').equals(actionId).delete()
 }
 
+/* ---------- now items (kolejka „Teraz") ---------- */
+
+/** Deterministyczny klucz pozycji kolejki — jeden rekord na akcję, toggle bez ryzyka duplikatów. */
+export const nowItemId = (actionId: string): string => `now:${actionId}`
+
+/**
+ * Kaskada ADR-0021: pozycja kolejki nie przeżywa swojego źródła. Wywoływana przy usunięciu
+ * akcji oraz przy domknięciu/porzuceniu/usunięciu wątku — akcje nieczynne nie mogą wisieć
+ * na ekranie pracy jako duchy.
+ */
+function clearNowItems(actionIds: string[]): Promise<void> {
+  if (actionIds.length === 0) return Promise.resolve()
+  return db.nowItems.where('actionId').anyOf(actionIds).delete().then(() => undefined)
+}
+
+export const nowRepo = {
+  list(): Promise<NowItem[]> {
+    return db.nowItems.orderBy('sortOrder').toArray()
+  },
+  /**
+   * Dołączenie akcji do kolejki — idempotentne (deterministyczny klucz), doklejane na KONIEC
+   * (ADR-0023): ułożony plan pracy nie traci głowy.
+   */
+  async add(actionId: string): Promise<void> {
+    const item: NowItem = {
+      id: nowItemId(actionId),
+      actionId,
+      sortOrder: 0,
+      addedAt: now(),
+      createdAt: now(),
+      updatedAt: now(),
+    }
+    await db.transaction('rw', db.nowItems, async () => {
+      if (await db.nowItems.get(item.id)) return
+      const last = await db.nowItems.orderBy('sortOrder').last()
+      item.sortOrder = (last?.sortOrder ?? -1) + 1
+      await db.nowItems.put(item)
+    })
+  },
+  removeByActionId(actionId: string): Promise<void> {
+    return db.nowItems.delete(nowItemId(actionId)).then(() => undefined)
+  },
+  /** Masowe zdejmowanie („Zdejmij zrobione") — pojedyncza transakcja zamiast serii kliknięć. */
+  removeByActionIds(actionIds: string[]): Promise<void> {
+    if (actionIds.length === 0) return Promise.resolve()
+    return db.nowItems.where('actionId').anyOf(actionIds).delete().then(() => undefined)
+  },
+  /** Ręczne ułożenie kolejki — zamówione id pozycji (= `now:${actionId}`) dostają kolejne indeksy. */
+  async reorder(orderedIds: string[]): Promise<void> {
+    await db.transaction('rw', db.nowItems, async () => {
+      for (let i = 0; i < orderedIds.length; i++) {
+        await db.nowItems.update(orderedIds[i], { sortOrder: i, updatedAt: now() })
+      }
+    })
+  },
+}
+
 /* ---------- day entries (dziennik) ---------- */
 
 export const dayEntriesRepo = {
@@ -182,10 +250,11 @@ export const dayEntriesRepo = {
 /**
  * Domknięcie wątku = większe zwycięstwo: wpis 'loop-closed' dla dzisiejszego dnia.
  * Porzucenie (abandon) celowo nie tworzy wpisu — porzucenie nie jest zwycięstwem.
+ * Kaskada Teraz (ADR-0021): domknięty wątek zabiera swoje akcje z kolejki.
  */
 export async function closeLoopWithWin(loop: Loop): Promise<void> {
   const today = dayKey()
-  await db.transaction('rw', db.loops, db.dayEntries, async () => {
+  await db.transaction('rw', db.loops, db.actions, db.dayEntries, db.nowItems, async () => {
     const entry: DayEntry = {
       id: `close:${loop.id}:${today}`,
       kind: 'loop-closed',
@@ -195,6 +264,8 @@ export async function closeLoopWithWin(loop: Loop): Promise<void> {
       createdAt: now(),
       updatedAt: now(),
     }
+    const actionIds = (await db.actions.where('loopId').equals(loop.id).toArray()).map((a) => a.id)
+    await clearNowItems(actionIds)
     await db.loops.update(loop.id, { status: 'closed', closedAt: now(), updatedAt: now() })
     await db.dayEntries.put(entry)
   })

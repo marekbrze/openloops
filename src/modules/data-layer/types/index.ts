@@ -51,3 +51,15 @@ export interface DayEntry extends BaseEntity {
   /** Lokalna data zdarzenia w formacie YYYY-MM-DD. */
   dayKey: string
 }
+
+/**
+ * Pozycja kolejki „Teraz" — wskaźnik na akcję dołączoną do dzisiejszego ekranu pracy.
+ * Treść zawsze żyje w źródle (LoopAction); rekord trzyma wyłącznie przynależność i
+ * ręczny porządek kolejki. Deterministyczny id (`now:${actionId}`) czyni toggle idempotentnym.
+ */
+export interface NowItem extends BaseEntity {
+  actionId: string
+  /** Ręczna kolejność w kolejce — drag & drop na ekranie Teraz (ADR-0023). */
+  sortOrder: number
+  addedAt: string
+}

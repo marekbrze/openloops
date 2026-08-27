@@ -1,4 +1,4 @@
-import type { DayEntry, Loop, LoopAction } from '@/modules/data-layer'
+import type { DayEntry, Loop, LoopAction, NowItem } from '@/modules/data-layer'
 
 export type ScenarioName = 'empty' | 'minimal' | 'full' | string
 
@@ -10,6 +10,8 @@ export interface ScenarioData {
   loops: Loop[]
   actions: LoopAction[]
   dayEntries: DayEntry[]
+  /** Kolejka „Teraz" (ADR-0021) — referencje po actionId akcji z tego samego scenariusza. */
+  nowItems: NowItem[]
 }
 
-export const EMPTY_DATA: ScenarioData = { loops: [], actions: [], dayEntries: [] }
+export const EMPTY_DATA: ScenarioData = { loops: [], actions: [], dayEntries: [], nowItems: [] }
