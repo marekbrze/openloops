@@ -6,7 +6,6 @@
 erDiagram
     LOOP ||--|| GOAL : "defines"
     LOOP ||--o{ ACTION : "contains"
-    LOOP }o--o{ TAG : "tagged-with"
     LOOP ||--o{ DAY_ENTRY : "wins-of"
     ACTION ||--o{ DAY_ENTRY : "wins-of"
 
@@ -35,11 +34,6 @@ erDiagram
         datetime done_at
         int sort_order "reczny drag-and-drop"
     }
-    TAG {
-        string id PK
-        string name "unikalny w puli uzytkownika"
-        string color
-    }
     DAY_ENTRY {
         string id PK
         enum kind "action-done | loop-closed"
@@ -61,7 +55,7 @@ Uwaga modelowa: „wątek zablokowany na innych" nie jest polem — jest **pocho
 **Ownership**: User (aplikacja single-user, brak encji User w danych).
 **Lifecycle**: Powstaje w momencie dodania tematu; żyje jako `open`, aż użytkownik ręcznie go domknie (`closed`) albo porzuci (`abandoned`). Domknięte/porzucone można otworzyć ponownie; każdy wątek może być trwale usunięty wraz z zawartością.
 **States**: `open` → `closed` (domknięcie ręczne przez osiągnięty cel — duże zwycięstwo w dzienniku), `open` → `abandoned` (porzucenie — nie jest zwycięstwem), `closed | abandoned` → `open` (przywrócenie).
-**Contains**: Action (1:N), Goal (1:1), Tag (M:N), DayEntry (1:N jako źródło zdarzeń).
+**Contains**: Action (1:N), Goal (1:1), DayEntry (1:N jako źródło zdarzeń). *(Relacja M:N z Tag usunięta 2026-08-27 razem z wycofaniem modułu tags.)*
 **Belongs to**: nic — wierzchołek grafu.
 
 ### Goal
@@ -81,15 +75,6 @@ Uwaga modelowa: „wątek zablokowany na innych" nie jest polem — jest **pocho
 **States**: `todo` ⇄ `done`. Odhaczenie **usuwa** powiązany wpis zwycięstwa z dziennika (bilans dnia wraca do stanu realnego).
 **Contains**: —
 **Belongs to**: Loop (1:N, sortowana ręcznie — `sort_order`).
-
-### Tag
-**Description**: Swobodna etykieta grupująca wątki (projekt, obszar, kontekst).
-**Instances per user**: Współdzielona pula wielu tagów, używana przez wiele wątków (M:N).
-**Ownership**: User.
-**Lifecycle**: Powstaje przy pierwszym użyciu (wolne wpisywanie); rename działa globalnie na wszystkie wątki; usunięcie tagu odczepia go od wątków — nie usuwa wątków.
-**States**: brak stanów domenowych.
-**Contains**: —
-**Belongs to**: Loop (M:N przez powiązanie).
 
 ### DayEntry
 **Description**: Pojedynczy wpis zwycięstwa w dzienniku: skończona akcja (małe zwycięstwo) albo domknięty wątek (większe zwycięstwo). Trzyma snapshot tekstu, żeby historia była czytelna nawet po edycji/usunięciu źródła.

@@ -10,7 +10,6 @@ const loops: Loop[] = [
     status: 'open',
     sortOrder: -1,
     goalText: '',
-    tagIds: [],
     createdAt: ts,
     updatedAt: ts,
   },
@@ -18,5 +17,5 @@ const loops: Loop[] = [
 
 /** Jeden nagły wątek bez rozpisanych kroków — stan „rozpisz kroki…”. */
 export function minimalScenario(): ScenarioData {
-  return { loops, actions: [], tags: [], dayEntries: [] }
+  return { loops, actions: [], dayEntries: [] }
 }

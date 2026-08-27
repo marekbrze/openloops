@@ -16,13 +16,13 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { dayKey, loopsRepo, tagsRepo } from '@/modules/data-layer'
-import type { Loop, LoopAction, Tag } from '@/modules/data-layer'
+import { dayKey, loopsRepo } from '@/modules/data-layer'
+import type { Loop, LoopAction } from '@/modules/data-layer'
 import { ConfirmDialog } from '@/shared/components/confirm-dialog'
 import { SkeletonCards } from '@/shared/components/skeleton-cards'
 import { guard } from '@/shared/lib/mutations'
 import { plDndAccessibility } from '@/shared/lib/pl-dnd'
-import { useAllActions, useClosedLoops, useOpenLoops, useTags } from '../hooks/use-workbench'
+import { useAllActions, useClosedLoops, useOpenLoops } from '../hooks/use-workbench'
 import { AddLoopForm } from './add-loop-form'
 import { ClosedLoopsSection } from './closed-loops-section'
 import { LoopCard, draggingStyle } from './loop-card'
@@ -36,7 +36,6 @@ interface LoopListColumnProps {
 export function LoopListColumn({ selectedId, onSelectLoop }: LoopListColumnProps) {
   const openLoops = useOpenLoops()
   const closedLoops = useClosedLoops()
-  const tags = useTags()
   const allActions = useAllActions()
   const [pendingDelete, setPendingDelete] = useState<Loop | undefined>(undefined)
 
@@ -91,7 +90,6 @@ export function LoopListColumn({ selectedId, onSelectLoop }: LoopListColumnProps
                     key={loop.id}
                     loop={loop}
                     actions={actionsByLoop.get(loop.id) ?? []}
-                    tagsPool={tags}
                     selected={selectedId === loop.id}
                     onSelect={() => onSelectLoop(loop.id)}
                   />
@@ -129,13 +127,11 @@ export function LoopListColumn({ selectedId, onSelectLoop }: LoopListColumnProps
 function SortableLoopItem({
   loop,
   actions,
-  tagsPool,
   selected,
   onSelect,
 }: {
   loop: Loop
   actions: LoopAction[]
-  tagsPool: Tag[]
   selected: boolean
   onSelect: () => void
 }) {
@@ -148,27 +144,10 @@ function SortableLoopItem({
       <LoopCard
         loop={loop}
         actions={actions}
-        tagsPool={tagsPool}
         selected={selected}
         todayKey={dayKey()}
         onSelect={onSelect}
         onRename={(title) => void guard(() => loopsRepo.update(loop.id, { title }))}
-        onAttachTag={(tag) =>
-          void guard(() =>
-            loop.tagIds.includes(tag.id)
-              ? Promise.resolve()
-              : loopsRepo.update(loop.id, { tagIds: [...loop.tagIds, tag.id] }),
-          )
-        }
-        onDetachTag={(tag) =>
-          void guard(() => loopsRepo.update(loop.id, { tagIds: loop.tagIds.filter((t) => t !== tag.id) }))
-        }
-        onCreateTagAndAttach={(name) =>
-          void guard(async () => {
-            const tag = await tagsRepo.findOrCreate(name)
-            if (!loop.tagIds.includes(tag.id)) await loopsRepo.update(loop.id, { tagIds: [...loop.tagIds, tag.id] })
-          })
-        }
         handleRef={setActivatorNodeRef}
         attributes={attributes as unknown as Record<string, unknown>}
         listeners={listeners as unknown as Record<string, unknown> | undefined}

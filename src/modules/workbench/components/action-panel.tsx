@@ -10,7 +10,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { actionsRepo, closeLoopWithWin, loopsRepo, tagsRepo } from '@/modules/data-layer'
+import { actionsRepo, closeLoopWithWin, loopsRepo } from '@/modules/data-layer'
 import type { LoopAction } from '@/modules/data-layer'
 import { Button } from '@/components/ui/button'
 import { SimpleMenu } from '@/shared/components/simple-menu'
@@ -19,8 +19,7 @@ import { EditableText } from '@/shared/components/editable-text'
 import { guard } from '@/shared/lib/mutations'
 import { notify, openView } from '@/shared/lib/notify'
 import { plDndAccessibility } from '@/shared/lib/pl-dnd'
-import { TagEditor } from './tag-editor'
-import { useLoop, useLoopActions, useTags } from '../hooks/use-workbench'
+import { useLoop, useLoopActions } from '../hooks/use-workbench'
 import { ActionAddForm } from './action-add-form'
 import { CloseLoopModal } from './close-loop-modal'
 import { PinnedGoal } from './pinned-goal'
@@ -40,7 +39,6 @@ interface ActionPanelProps {
 export function ActionPanel({ loopId, firstRun }: ActionPanelProps) {
   const loop = useLoop(loopId)
   const actions = useLoopActions(loopId)
-  const tags = useTags()
   const [closeOpen, setCloseOpen] = useState(false)
   const [pendingDeleteAction, setPendingDeleteAction] = useState<LoopAction | undefined>(undefined)
   const [confirmLoopDelete, setConfirmLoopDelete] = useState(false)
@@ -95,30 +93,6 @@ export function ActionPanel({ loopId, firstRun }: ActionPanelProps) {
               },
               { label: 'Usuń…', onSelect: () => setConfirmLoopDelete(true), destructive: true },
             ]}
-          />
-        </div>
-
-        <div className="pt-1.5 pl-1">
-          <TagEditor
-            tagsPool={tags}
-            attachedTagIds={loop.tagIds}
-            onAttach={(tag) =>
-              void guard(() =>
-                loop.tagIds.includes(tag.id)
-                  ? Promise.resolve()
-                  : loopsRepo.update(loop.id, { tagIds: [...loop.tagIds, tag.id] }),
-              )
-            }
-            onDetach={(tag) =>
-              void guard(() => loopsRepo.update(loop.id, { tagIds: loop.tagIds.filter((t) => t !== tag.id) }))
-            }
-            onCreateAndAttach={(name) =>
-              void guard(() =>
-                tagsRepo.findOrCreate(name).then(async (tag) => {
-                  if (!loop.tagIds.includes(tag.id)) await loopsRepo.update(loop.id, { tagIds: [...loop.tagIds, tag.id] })
-                }),
-              )
-            }
           />
         </div>
       </header>

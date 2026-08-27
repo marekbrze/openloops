@@ -12,11 +12,10 @@ export function getCurrentScenarioName(): string {
 
 async function seedDatabase(name: string): Promise<void> {
   const data = getScenario(name);
-  await db.transaction('rw', db.loops, db.actions, db.tags, db.dayEntries, async () => {
-    await Promise.all([db.loops.clear(), db.actions.clear(), db.tags.clear(), db.dayEntries.clear()]);
+  await db.transaction('rw', db.loops, db.actions, db.dayEntries, async () => {
+    await Promise.all([db.loops.clear(), db.actions.clear(), db.dayEntries.clear()]);
     await db.loops.bulkAdd(data.loops);
     await db.actions.bulkAdd(data.actions);
-    await db.tags.bulkAdd(data.tags);
     await db.dayEntries.bulkAdd(data.dayEntries);
   });
 }

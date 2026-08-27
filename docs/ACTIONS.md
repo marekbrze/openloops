@@ -12,10 +12,9 @@ Complete list of actions users can perform, organized by entity.
 
 | Action | Description | Role | Notes |
 |--------|------------|------|-------|
-| Add Loop | Przechwycenie nowego otwartego tematu: tytuł + (opcjonalnie od razu) cel i tagi | Owner | inline form nad listą (bez modala); **nowy trafia na górę** i zostaje auto-zaznaczony |
+| Add Loop | Przechwycenie nowego otwartego tematu: tytuł + (opcjonalnie od razu) cel | Owner | inline form nad listą (bez modala); **nowy trafia na górę** i zostaje auto-zaznaczony |
 | Edit Loop | Zmiana tytułu klik-to-edit (karta i panel); zmiana treści celu przez edycję Goal | Owner | konwencja: teksty bez dialogów |
 | Reorder Loops | Ręczne ustawienie priorytetów drag & drop na liście po lewej | Owner | `sort_order`; kolejność nie resetuje się sama |
-| Tag Loop / Untag Loop | Dobranie/odjęcie tagów do wątku | Owner | wolne wpisywanie tworzy nowe tagi w puli |
 | Select Loop | Zaznaczenie wątku otwiera jego akcje w prawym panelu | Owner | akcja nawigacyjna — nie zmienia danych; przy braku zaznaczenia panel pokazuje zachętę |
 | Close Loop | Ręczne domknięcie: „cel osiągnięty". open → closed | Owner | CTA w nagłówku panelu → **modal celebracyjny** z notką o wpisie do dziennika; nie wymaga odhaczonych wszystkich akcji; **większe zwycięstwo** |
 | Abandon Loop | Świadome porzucenie tematu. open → abandoned | Owner | pozycja w menu ⋯ nagłówka panelu; nie jest zwycięstwem |
@@ -38,14 +37,6 @@ Complete list of actions users can perform, organized by entity.
 |--------|------------|------|-------|
 | Edit Goal | Dopisanie/zmiana opisu „po czym wiem, że gotowe" | Owner | edytowalny zawsze, także po domknięciu |
 | Pin at End (system) | Cel zawsze renderowany jako ostatni element listy działań | System | wyłącza go z drag & drop poza pozycję końcową |
-
-### Tag
-
-| Action | Description | Role | Notes |
-|--------|------------|------|-------|
-| Create Tag | Powstaje przy pierwszym wpisaniu nowej etykiety przy wątku | Owner | pula wspólna dla wszystkich wątków |
-| Rename Tag | Globalna zmiana nazwy tagu we wszystkich wątkach | Owner | |
-| Delete Tag | Usunięcie tagu z puli; odczepia go od wątków | Owner | wątki zostają, tracą tylko etykietę |
 
 ### DayLog / WeekSummary (widok Dziennik)
 

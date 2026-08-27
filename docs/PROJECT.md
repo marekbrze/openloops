@@ -18,7 +18,7 @@ Pojedynczy użytkownik — Ty: osoba pracująca kreatywno/projektowo (UX), prowa
 ## Key Actions
 
 1. **Dodaj wątek** — nazwij otwarty temat i zapisz mu cel („po czym wiem, że gotowe").
-2. **Priorytetyzuj listę** — układaj wątki ręcznie (drag & drop), dobieraj tagi; to jest twoja mapa dnia.
+2. **Priorytetyzuj listę** — układaj wątki ręcznie (drag & drop); to jest twoja mapa dnia.
 3. **Rozpisz akcje** — dla zaznaczonego wątku dodaj działania, oznacz każdy jako „mój ruch" albo „czekam na kogoś" i ułóż je ręcznie (drag & drop) w kolejności wykonania.
 4. **Odhaczaj i śledź progres** — zaznaczaj skończone akcje; progres bar wątku rośnie na akcjach typu „mój ruch".
 5. **Domknij wątek** — gdy cel osiągnięty, kliknij „domknij": wątek zniknie z otwartej listy i wpisze się do dziennika.
@@ -45,6 +45,6 @@ Otwierasz aplikację → widzisz posortowaną priorytetowo listę otwartych wąt
 
 ## Open Questions
 
-- ~~**Tagi**: swobodne wpisywane czy zarządzana lista z edycją globalną (rename/remove)?~~ *(rozstrzygnięte w proto-detail 2026-08-27: potwierdzone wolne wpisywanie + globalny rename/remove; patrz docs/modules/workbench.md i ADR-0008)*
+- ~~**Tagi**: swobodne wpisywane czy zarządzana lista z edycją globalną (rename/remove)?~~ *(rozstrzygnięte w proto-detail 2026-08-27, następnie **wycofane** decyzją użytkownika 2026-08-27: moduł tags usunięty — workbench nie operuje na tagach; patrz MODULES.md)*
 - ~~Jak dokładnie wygląda moment domknięcia w UI~~ *(rozstrzygnięte w proto-detail 2026-08-27: przycisk „Domknij” w nagłówku panelu akcji + modal celebracyjny „Cel osiągnięty”; ADR-0001)*
 - Pozostałe decyzje UX workbench spisane w `docs/modules/workbench.md` (ADR-0002…0010).

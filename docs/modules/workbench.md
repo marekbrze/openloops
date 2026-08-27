@@ -2,7 +2,9 @@
 
 ## Vision
 
-Workbench to ekran główny aplikacji — mapa dnia użytkownika. Lewa kolumna to ręcznie priorytetyzowana lista **otwartych** wątków: karty z tagami, progresem liczącym wyłącznie akcje „mój ruch" i wskaźnikiem „czeka na innych". Zaznaczenie wątku otwiera prawą kolumnę: jego akcje z typami, ręczną kolejnością i opcjonalną datą dopytania, z **przypiętym celem zawsze jako ostatnim elementem listy**. Tu zapada decyzja o domknięciu — chwila nagrody, nie administracji.
+Workbench to ekran główny aplikacji — mapa dnia użytkownika. Lewa kolumna to ręcznie priorytetyzowana lista **otwartych** wątków: karty z progresem liczącym wyłącznie akcje „mój ruch" i wskaźnikiem „czeka na innych". Zaznaczenie wątku otwiera prawą kolumnę: jego akcje z typami, ręczną kolejnością i opcjonalną datą dopytania, z **przypiętym celem zawsze jako ostatnim elementem listy**. Tu zapada decyzja o domknięciu — chwila nagrody, nie administracji.
+
+*Nota z 2026-08-27: wszelkie wzmianki o tagach wycofane razem z modułem tags (kod usunięty); pierwotne rozstrzygnięcia patrz ADR-0008.*
 
 Zasady kierujące (z wywiadu 2026-08-27):
 
@@ -55,8 +57,8 @@ Zasady kierujące (z wywiadu 2026-08-27):
 ## Screens (rough)
 
 - **Lewa kolumna — lista wątków**: nagłówek z licznikiem otwartych, inline formularz dodawania (tytuł [+ cel]), lista kart, na dole zwijana sekcja „Domknięte i porzucone (N)". Przewaga: jedna kolumna przewijalna, zero modali przy codziennej pracy.
-- **Karta wątku**: tytuł, chipy tagów (+ dobieranie), pasek progresu **lub** etykieta zastępcza (brak akcji „mój ruch"), wskaźnik „czeka na innych N", plakietka „X po terminie" gdy dotyczy.
-- **Prawa kolumna — panel akcji**: nagłówek (tytuł klik-to-edit, tagi, przycisk „Domknij", menu ⋯: Porzuć / Usuń…), lista akcji (checkbox, etykieta klik-to-edit, przełącznik typu, data dopytania, handle DnD), **przypięty cel** jako ostatni element (wyróżniony wizualnie, klik-to-edit, nieruchomy w DnD).
+- **Karta wątku**: tytuł, pasek progresu **lub** etykieta zastępcza (brak akcji „mój ruch"), wskaźnik „czeka na innych N", plakietka „X po terminie" gdy dotyczy.
+- **Prawa kolumna — panel akcji**: nagłówek (tytuł klik-to-edit, przycisk „Domknij", menu ⋯: Porzuć / Usuń…), lista akcji (checkbox, etykieta klik-to-edit, przełącznik typu, data dopytania, handle DnD), **przypięty cel** jako ostatni element (wyróżniony wizualnie, klik-to-edit, nieruchomy w DnD).
 - **Panel bez zaznaczenia**: placeholder — ikona/krótka zachęta „Wybierz wątek…" + wskazówka o dodaniu pierwszego, gdy lista też pusta.
 - **Modal domknięcia**: nagłówek „Cel osiągnięty”, nazwa wątku, notka o wpisie do dziennika, Confirm/Anuluj; po potwierdzeniu toast z przejściem do Dziennika.
 - **Dialog usuwania** (wątek/akcja): ostrzeżenie o destrukcyjności + co zostaje (wpisy dziennika ze snapshotem).
@@ -71,7 +73,6 @@ Zasady kierujące (z wywiadu 2026-08-27):
 | Edit Loop | Tytuł klik-to-edit (karta i panel) | Loop | |
 | Reorder Loops | Drag & drop; ręczny priorytet; kolejność nigdy się nie resetuje | Loop | |
 | Select Loop | Klik na kartę → prawa kolumna | Loop | nawigacja, bez zmiany danych |
-| Tag Loop / Untag | Chipy na karcie/w panelu; wolne wpisywanie tworzy tag | Loop, Tag | kolor auto z palety |
 | Add Action | Na koniec listy, nad przypiętym celem | Action | |
 | Edit Action | Etykieta klik-to-edit; przełącznik typu; data dopytania tylko WaitingOn | Action | |
 | Toggle Done | Checkbox; mój-ruch napędza progres + wpis dziennika; uncheck usuwa wpis | Action | jedyny pisarz DayEntry |
@@ -95,8 +96,6 @@ Zasady kierujące (z wywiadu 2026-08-27):
 - **Nieudany zapis** (IndexedDB odmowa/quota): baner błędu zamiast ciszy; formularze zachowują treść, modal domknięcia zostaje otwarty.
 - **Aplikacja nie może otworzyć bazy**: pełnoekranowy alert z „Spróbuj ponownie".
 - **Podwójny submit**: flaga busy w obu formularzach — duplikaty niemożliwe.
-- **Wyścig tworzenia tagu**: unique-indeks dogrywa istniejący rekord.
-- **Długie tokeny tekstowe**: chipy tagów łamią wyraz (`overflow-wrap:anywhere`).
 - **Cel przy DnD**: ostatnia pozycja zastrzeżona — cel poza sortowalnym kontekstem.
 - **Data dopytania w przeszłości przy done**: znacznik tylko dla undone.
 - **Pusty tytuł**: inline walidacja blokuje Enter; klik-to-edit nie wypala treści do pustki.
@@ -104,6 +103,5 @@ Zasady kierujące (z wywiadu 2026-08-27):
 
 ## Integration Points
 
-- **data-layer**: wszystkie zapisy (Loop/Action/Goal/Tag) przez repozytoria; wymaga dostępu do listy zamkniętych (sekcja na dole) — dziś repo ma `listOpen()`, do doróbki `listClosed()`/lista statusowa.
+- **data-layer**: wszystkie zapisy (Loop/Action/Goal) przez repozytoria; wymaga dostępu do listy zamkniętych (sekcja na dole) — dziś repo ma `listOpen()`, do doróbki `listClosed()`/lista statusowa.
 - **journal**: workbench jest **jedynym pisarzem** `DayEntry` — `Toggle Done` (małe zwycięstwo) i `Close Loop` (większe); cofnięcia usuwają wpis.
-- **tags**: inline tworzenie z workbench zasila wspólną pulę; rename/delete globalne zostaje w mód. tags.

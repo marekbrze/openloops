@@ -2,7 +2,7 @@
 
 **Date**: 2026-08-27
 **Module**: workbench
-**Status**: Accepted
+**Status**: Superseded (2026-08-27 — moduł tags wycofany decyzją użytkownika; kod, encja `Tag` i tabela `tags` usunięte, patrz MODULES.md)
 
 ## Context
 Otwarte pytanie z PROJECT.md: tagi swobodnie wpisywane czy zarządzana lista? Deepen przyjęło swobodne + globalny rename/remove; decyzja czekała na potwierdzenie w detail/lofi.

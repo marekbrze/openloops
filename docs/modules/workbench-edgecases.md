@@ -1,7 +1,7 @@
 # Workbench — Edge Cases
 
 *Audyt stres-testowy z 2026-08-27 (proto-edgecases, commit `16567a6`), po fazie **proto-harden** tego samego dnia.*
-*Statusy: ✅ zaimplementowane (+ miejsce), ⏸️ świadomie odroczone (powód), ✔︎ zweryfikowane jako nie-problem.*
+*Statusy: ✅ zaimplementowane (+ miejsce), ⏸️ świadomie odroczone (powód), ✔︎ zweryfikowane jako nie-problem, ⛔️ nieaktualne (funkcja usunięta z kodu).*
 
 ## Coverage (po harden)
 
@@ -18,8 +18,8 @@
 | 3 | 🔴 | Action outcomes | Nieme odrzucenia mutacji (`void repo.x()`) | ✅ | Wspólny wrapper `shared/lib/mutations.ts` (guard → baner błędu); wszystkie call-site'y owinięte |
 | 4 | 🟡 | Forms | Podwójny Enter duplikuje rekordy | ✅ | Flaga `busy` + disable; akcja czyści pole tylko po sukcesie (`add-loop-form.tsx`, `action-add-form.tsx`) |
 | 5 | 🟡 | Action outcomes | Po domknięciu brak feedbacku | ✅ | Toast „Domknięto… czeka w Dzienniku” z przyciskiem przełączającym widok (`action-panel.tsx` onConfirm + `app-notices.tsx`); decyzja użytkownika 2026-08-27 |
-| 6 | 🟡 | Data states | Niełamliwy token rozwala kartę/chip | ✅ | `[overflow-wrap:anywhere]` + `title=` na chipach tagów `tag-editor.tsx:46-49` |
-| 7 | 🟡 | Cross-module | Wyścig findOrCreate na unique indeksie | ✅ | Catch ConstraintError → dogranie istniejącego rekordu `repositories/index.ts:176-193` |
+| 6 | 🟡 | Data states | Niełamliwy token rozwala kartę/chip | ⛔️ | Dotyczyło chipów tagów (`tag-editor.tsx`) — **nieaktualne od 2026-08-27**: moduł tags usunięty |
+| 7 | 🟡 | Cross-module | Wyścig findOrCreate na unique indeksie | ⛔️ | Dotyczyło tworzenia tagów — **nieaktualne od 2026-08-27**: moduł tags usunięty |
 | 8 | 🟡 | Navigation | First-run copy prawego panelu | ✅ | Prop `firstRun` liczy go WorkbenchScreen z obu kwerend (`workbench-screen.tsx`); warianty copy w `PanelPlaceholder` |
 | 9 | 🟢 | Loading & async | Initial load bez szkieletu | ✅ | `SkeletonCards` o rytmie karty w lewej kolumnie `loop-list-column.tsx` |
 | 10 | 🟢 | Navigation | Back button / deep-link / URL-brak | ⏸️ | Lo-fi decyzja: routing stanem komponentu; hash-routing rozważymy, jeśli testy userów pokażą potrzebę |

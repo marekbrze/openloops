@@ -1,4 +1,4 @@
-import type { DayEntry, Loop, LoopAction, Tag } from '@/modules/data-layer'
+import type { DayEntry, Loop, LoopAction } from '@/modules/data-layer'
 
 export type ScenarioName = 'empty' | 'minimal' | 'full' | string
 
@@ -9,8 +9,7 @@ export type ScenarioName = 'empty' | 'minimal' | 'full' | string
 export interface ScenarioData {
   loops: Loop[]
   actions: LoopAction[]
-  tags: Tag[]
   dayEntries: DayEntry[]
 }
 
-export const EMPTY_DATA: ScenarioData = { loops: [], actions: [], tags: [], dayEntries: [] }
+export const EMPTY_DATA: ScenarioData = { loops: [], actions: [], dayEntries: [] }

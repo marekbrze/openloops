@@ -1,4 +1,4 @@
-import type { DayEntry, Loop, LoopAction, Tag } from '@/modules/data-layer'
+import type { DayEntry, Loop, LoopAction } from '@/modules/data-layer'
 import type { ScenarioData } from './types'
 
 /* Pomocnice dat — fixture'y liczą się względem „dziś”, żeby overdue/dziennik zawsze żyły. */
@@ -16,13 +16,6 @@ const winAt = (offsetDays: number, hour: number, minute: number) => {
   return d.toISOString()
 }
 
-const tags: Tag[] = [
-  { id: 'tag-ux', name: 'UX', createdAt: iso(-30), updatedAt: iso(-30) },
-  { id: 'tag-marketing', name: 'marketing', createdAt: iso(-25), updatedAt: iso(-25) },
-  { id: 'tag-dev', name: 'dev', createdAt: iso(-20), updatedAt: iso(-20) },
-  { id: 'tag-kooperacja', name: 'kooperacja', createdAt: iso(-18), updatedAt: iso(-18) },
-]
-
 const loops: Loop[] = [
   {
     id: 'loop-onboarding',
@@ -30,7 +23,6 @@ const loops: Loop[] = [
     status: 'open',
     sortOrder: -5,
     goalText: 'Nowy flow przechodzi test z 5 osobami bez blokera na kroku weryfikacji.',
-    tagIds: ['tag-ux', 'tag-kooperacja'],
     createdAt: iso(-6),
     updatedAt: iso(0),
   },
@@ -40,7 +32,6 @@ const loops: Loop[] = [
     status: 'open',
     sortOrder: -4,
     goalText: 'Brief zatwierdzony przez markę i salesa — jedna wersja dokumentu, zero ścian komentarzy.',
-    tagIds: ['tag-marketing'],
     createdAt: iso(-4),
     updatedAt: iso(0),
   },
@@ -50,7 +41,6 @@ const loops: Loop[] = [
     status: 'open',
     sortOrder: -3,
     goalText: 'Podpisana umowa z zakresem i stawką za ilustrację.',
-    tagIds: ['tag-kooperacja'],
     createdAt: iso(-9),
     updatedAt: iso(0),
   },
@@ -60,7 +50,6 @@ const loops: Loop[] = [
     status: 'open',
     sortOrder: -2,
     goalText: 'Opublikowane case study z procesu i wnioskami.',
-    tagIds: ['tag-ux'],
     createdAt: iso(-2),
     updatedAt: iso(-2),
   },
@@ -70,7 +59,6 @@ const loops: Loop[] = [
     status: 'open',
     sortOrder: -1,
     goalText: 'Retro spisane z trzema ustaleniami na kwartał.',
-    tagIds: ['tag-dev'],
     createdAt: iso(-12),
     updatedAt: iso(-1),
   },
@@ -80,7 +68,6 @@ const loops: Loop[] = [
     status: 'open',
     sortOrder: 0,
     goalText: 'Lista subskrypcji skrócona do używanych; roczna oszczędność policzona.',
-    tagIds: [],
     createdAt: iso(-15),
     updatedAt: iso(-3),
   },
@@ -91,7 +78,6 @@ const loops: Loop[] = [
     status: 'closed',
     sortOrder: 1,
     goalText: 'Audyt spisany: lista komponentów do migracji zaakceptowana przez devów.',
-    tagIds: ['tag-dev'],
     createdAt: iso(-40),
     closedAt: iso(-3),
     updatedAt: iso(-3),
@@ -102,7 +88,6 @@ const loops: Loop[] = [
     status: 'abandoned',
     sortOrder: 2,
     goalText: 'Rozliczenie przekazane do marketingu.',
-    tagIds: ['tag-marketing'],
     createdAt: iso(-60),
     abandonedAt: iso(-10),
     updatedAt: iso(-10),
@@ -198,5 +183,5 @@ const dayEntries: DayEntry[] = [
 
 /** Pełny świat demo: 6 otwartych wątków o różnych kształtach + sekcja domkniętych. */
 export function fullScenario(): ScenarioData {
-  return { loops, actions, tags, dayEntries }
+  return { loops, actions, dayEntries }
 }

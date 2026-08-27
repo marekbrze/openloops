@@ -21,8 +21,6 @@ export interface Loop extends BaseEntity {
   sortOrder: number
   /** Cel-definition-of-done: „po czym wiem, że gotowe". */
   goalText: string
-  /** Identyfikatory tagów z puli tags. */
-  tagIds: string[]
   closedAt?: string
   abandonedAt?: string
 }
@@ -38,12 +36,6 @@ export interface LoopAction extends BaseEntity {
   doneAt?: string
   /** Ręczna kolejność wykonania — cel zawsze zostaje ostatnim elementem (decyzja UI). */
   sortOrder: number
-}
-
-/** Swobodna etykieta grupująca wątki; wspólna pula użytkownika. */
-export interface Tag extends BaseEntity {
-  name: string
-  color?: string
 }
 
 /**

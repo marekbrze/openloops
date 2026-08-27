@@ -1,10 +1,9 @@
 import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react'
 import { Clock3, GripVertical } from 'lucide-react'
-import type { Loop, LoopAction, Tag } from '@/modules/data-layer'
+import type { Loop, LoopAction } from '@/modules/data-layer'
 import { cn } from '@/lib/utils'
 import { EditableText } from '@/shared/components/editable-text'
 import { getProgressView, hasWaitingOn, overdueCount } from '../lib/workbench-ui'
-import { TagEditor } from './tag-editor'
 
 /** Propsy uchwytu podłączone przez useSortable (typy luźne, bo API listenerów jest generyczne). */
 export interface DragHandleProps {
@@ -16,29 +15,21 @@ export interface DragHandleProps {
 
 interface LoopCardProps extends DragHandleProps {
   loop: Loop
-  tagsPool: Tag[]
   actions: LoopAction[]
   selected: boolean
   todayKey: string
   onSelect: () => void
   onRename: (title: string) => void
-  onAttachTag: (tag: Tag) => void
-  onDetachTag: (tag: Tag) => void
-  onCreateTagAndAttach: (name: string) => void
 }
 
-/** Karta wątku na liście po lewej: tytuł, tagi, progres/pochodne, uchwyt DnD (ADR: grip). */
+/** Karta wątku na liście po lewej: tytuł, progres/pochodne, uchwyt DnD (ADR: grip). */
 export function LoopCard({
   loop,
-  tagsPool,
   actions,
   selected,
   todayKey,
   onSelect,
   onRename,
-  onAttachTag,
-  onDetachTag,
-  onCreateTagAndAttach,
   handleRef,
   attributes,
   listeners,
@@ -79,16 +70,6 @@ export function LoopCard({
       </div>
 
       <ProgressArea actions={actions} todayKey={todayKey} />
-
-      <div className="pl-6 pt-1">
-        <TagEditor
-          tagsPool={tagsPool}
-          attachedTagIds={loop.tagIds}
-          onAttach={onAttachTag}
-          onDetach={onDetachTag}
-          onCreateAndAttach={onCreateTagAndAttach}
-        />
-      </div>
     </div>
   )
 }

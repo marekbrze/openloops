@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 import { db } from '../db/db'
-import type { DayEntry, Loop, LoopAction, Tag } from '../types'
+import type { DayEntry, Loop, LoopAction } from '../types'
 import { generateId } from '../../../shared/types'
 
 /** Lokalna data w formacie YYYY-MM-DD — klucz agregacji dziennika. */
@@ -25,7 +25,6 @@ export const loopsRepo = {
       status: 'open',
       sortOrder: (minOrder?.sortOrder ?? 1) - 1,
       goalText,
-      tagIds: [],
       createdAt: now(),
       updatedAt: now(),
     }
@@ -166,52 +165,6 @@ export const actionsRepo = {
  */
 function clearWinEntries(actionId: string): Promise<number> {
   return db.dayEntries.where('actionId').equals(actionId).delete()
-}
-
-/* ---------- tags ---------- */
-
-export const tagsRepo = {
-  list(): Promise<Tag[]> {
-    return db.tags.orderBy('name').toArray()
-  },
-  /**
-   * Wolne wpisywanie tworzy tag przy pierwszym użyciu.
-   * Unikalny indeks `&name` w razie wyścigu równoległych zapisów rzuca ConstraintError —
-   * wtedy po prostu dogrywamy istniejący rekord (luka #7 audytu).
-   */
-  async findOrCreate(name: string): Promise<Tag> {
-    const trimmed = name.trim()
-    const found = await db.tags.where('name').equals(trimmed).first()
-    if (found) return found
-    const tag: Tag = { id: generateId(), name: trimmed, createdAt: now(), updatedAt: now() }
-    try {
-      await db.tags.add(tag)
-      return tag
-    } catch (error) {
-      const raced = await db.tags
-        .where('name')
-        .equals(trimmed)
-        .first()
-        .catch(() => undefined)
-      if (raced) return raced
-      throw error
-    }
-  },
-  /** Globalny rename — nazwa zmienia się we wszystkich wątkach (referencja po id). */
-  async rename(id: string, name: string): Promise<void> {
-    await db.tags.update(id, { name: name.trim(), updatedAt: now() })
-  },
-  /** Usunięcie tagu odczepia go od wątków — wątki zostają. */
-  async remove(id: string): Promise<void> {
-    await db.transaction('rw', db.tags, db.loops, async () => {
-      await db.tags.delete(id)
-      // tagIds nie jest indeksowane w schemacie — filtrujemy w JS po pełnym skanie tabeli.
-      const tagged = (await db.loops.toArray()).filter((l) => l.tagIds.includes(id))
-      for (const loop of tagged) {
-        await db.loops.update(loop.id, { tagIds: loop.tagIds.filter((t) => t !== id), updatedAt: now() })
-      }
-    })
-  },
 }
 
 /* ---------- day entries (dziennik) ---------- */

@@ -20,9 +20,8 @@ npm run storybook  # komponenty w izolacji + a11y panel
 
 ## Moduły
 
-- **workbench** — ekran główny: lista wątków (priorytet ręczny, tagi, progres) + panel akcji z przypiętym celem
+- **workbench** — ekran główny: lista wątków (priorytet ręczny, progres) + panel akcji z przypiętym celem
 - **journal** — dziennik zwycięstw z nawigacją po tygodniach
-- **tags** — wspólna pula etykiet
 - **data-layer** — schemat Dexie, repozytoria, semantyka wpisów zwycięstw
 
 Narzędzia deweloperskie: pasek scenariuszy danych (`empty` / `minimal` / `full`) widoczny tylko w trybie dev.

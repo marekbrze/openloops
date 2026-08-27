@@ -4,7 +4,7 @@ interface SkeletonCardsProps {
 
 /**
  * Szkielet ładowania listy wątków — rytm zbliżony do prawdziwej karty
- * (tytuł + pasek + rząd tagów), bez fałszywej treści.
+ * (tytuł + pasek progresu), bez fałszywej treści.
  */
 export function SkeletonCards({ count = 3 }: SkeletonCardsProps) {
   return (
@@ -16,10 +16,6 @@ export function SkeletonCards({ count = 3 }: SkeletonCardsProps) {
             <div className="h-3.5 flex-1 rounded bg-muted" />
           </div>
           <div className="mt-2 h-1.5 w-2/3 rounded-full bg-muted" />
-          <div className="mt-2 flex gap-1">
-            <div className="h-3.5 w-14 rounded-full bg-muted" />
-            <div className="h-3.5 w-10 rounded-full bg-muted" />
-          </div>
         </div>
       ))}
     </div>

@@ -8,7 +8,6 @@ const loopFixture: Loop = {
   status: 'open',
   sortOrder: -1,
   goalText: 'Lista komponentów do migracji zaakceptowana przez devów.',
-  tagIds: [],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 }

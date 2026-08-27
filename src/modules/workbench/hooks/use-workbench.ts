@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/modules/data-layer'
-import type { Loop, LoopAction, Tag } from '@/modules/data-layer'
+import type { Loop, LoopAction } from '@/modules/data-layer'
 
 /**
  * Żywe zapytania Dexie — każda mutacja repozytorium odświeża UI automatycznie.
@@ -39,13 +39,4 @@ export function useLoopActions(loopId?: string): LoopAction[] {
 export function useAllActions(): LoopAction[] {
   const actions = useLiveQuery(() => db.actions.toArray())
   return actions ?? []
-}
-
-export function useTags(): Tag[] {
-  const tags = useLiveQuery(() => db.tags.orderBy('name').toArray())
-  return tags ?? []
-}
-
-export function useTagMap(): Map<string, Tag> {
-  return new Map(useTags().map((t) => [t.id, t]))
 }
