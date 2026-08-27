@@ -11,6 +11,7 @@ Terms and concepts specific to this project. Used across all project skills to m
 | mój ruch | `MyMove` | Typ akcji wymagający działania użytkownika — liczy się do progresu bar wątku. | „aktywne zadanie" |
 | czekam na kogoś | `WaitingOn` | Typ akcji zablokowanej na osobie trzeciej — nie liczy się do progresu; wektoryzuje zbiorczy status wątku. | „blocked" (bez wskazania komu), „delegowane" |
 | priorytet | `SortOrder` | Ręcznie ustawiana kolejność wątków na liście (drag & drop); to nie jest wyliczany score. | „priority score", „ważność" |
+| kolejność akcji | `ActionSortOrder` | Ręcznie ustawiana kolejność działań w wątku (drag & drop) — plan wykonania. Cel jest zawsze przypięty jako ostatni element i nie podlega przeciąganiu poza koniec. | „kolejność automatyczna", „sortowanie alfabetyczne" |
 | tag | `Tag` | Swobodna etykieta grupująca wątki (np. projekt, obszar); dołączana do wątku. | „kategoria" (brzmi jak zamknięta taksonomia) |
 | progres | `Progress` | Udział wykonanych akcji typu „mój ruch" względem wszystkich akcji tego typu w wątku; wizualizowany barem. | „postęp projektu" |
 | dziennik | `DayLog` | Osobny widok: log per dzień — wykonane akcje i domknięte wątki; źródło poczucia zwycięstw. | „historia", „log systemowy" |

@@ -19,7 +19,7 @@ Pojedynczy użytkownik — Ty: osoba pracująca kreatywno/projektowo (UX), prowa
 
 1. **Dodaj wątek** — nazwij otwarty temat i zapisz mu cel („po czym wiem, że gotowe").
 2. **Priorytetyzuj listę** — układaj wątki ręcznie (drag & drop), dobieraj tagi; to jest twoja mapa dnia.
-3. **Rozpisz akcje** — dla zaznaczonego wątku dodaj działania i oznacz każdy jako „mój ruch" albo „czekam na kogoś".
+3. **Rozpisz akcje** — dla zaznaczonego wątku dodaj działania, oznacz każdy jako „mój ruch" albo „czekam na kogoś" i ułóż je ręcznie (drag & drop) w kolejności wykonania.
 4. **Odhaczaj i śledź progres** — zaznaczaj skończone akcje; progres bar wątku rośnie na akcjach typu „mój ruch".
 5. **Domknij wątek** — gdy cel osiągnięty, kliknij „domknij": wątek zniknie z otwartej listy i wpisze się do dziennika.
 6. **Przejrzyj dziennik** — zobacz per dzień skończone akcje i domknięte wątki; Twój bilans zwycięstw.
@@ -31,6 +31,7 @@ Otwierasz aplikację → widzisz posortowaną priorytetowo listę otwartych wąt
 ## Decyzje obrane (potwierdzone)
 
 - „Czekam na kogoś" istnieje na **obu poziomach**: każda akcja ma typ (mój ruch / czekam na kogoś), a wątek zbiorczo pokazuje, że jest zablokowany na innych.
+- **Kolejność akcji jest ręczna** (drag & drop) — odzwierciedla plan wykonania; cel zawsze pozostaje ostatnim elementem listy.
 - **Domknięcie jest ręczne** — Ty oceniasz osiągnięcie celu; odhaczenie wszystkich akcji nie jest warunkiem.
 - **Progres bar liczy tylko akcje „mój ruch"** — bar nie staje w miejscu, gdy czekasz na innych.
 - **Dziennik to osobny widok** przełączany z głównego ekranu, z pełną historią po datach.
