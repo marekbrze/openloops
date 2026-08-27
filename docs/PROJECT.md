@@ -45,5 +45,6 @@ Otwierasz aplikację → widzisz posortowaną priorytetowo listę otwartych wąt
 
 ## Open Questions
 
-- **Tagi**: swobodne wpisywane czy zarządzana lista z edycją globalną (rename/remove)? *(deepen przyjęło: swobodne + globalny rename/remove; do potwierdzenia na etapie detail/lofi)*
-- Jak dokładnie wygląda moment domknięcia w UI — klik przy celu? osobna akcja w nagłówku wątku? *(rozdane do proto-detail)*
+- ~~**Tagi**: swobodne wpisywane czy zarządzana lista z edycją globalną (rename/remove)?~~ *(rozstrzygnięte w proto-detail 2026-08-27: potwierdzone wolne wpisywanie + globalny rename/remove; patrz docs/modules/workbench.md i ADR-0008)*
+- ~~Jak dokładnie wygląda moment domknięcia w UI~~ *(rozstrzygnięte w proto-detail 2026-08-27: przycisk „Domknij” w nagłówku panelu akcji + modal celebracyjny „Cel osiągnięty”; ADR-0001)*
+- Pozostałe decyzje UX workbench spisane w `docs/modules/workbench.md` (ADR-0002…0010).

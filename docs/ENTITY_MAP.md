@@ -13,7 +13,7 @@ erDiagram
     LOOP {
         string id PK
         string title
-        int sort_order "reczny priorytet drag-and-drop"
+        int sort_order "reczny priorytet drag-and-drop; nowy wpis trafia na gore"
         enum status "open | closed | abandoned"
         datetime created_at
         datetime closed_at

@@ -12,22 +12,22 @@ Complete list of actions users can perform, organized by entity.
 
 | Action | Description | Role | Notes |
 |--------|------------|------|-------|
-| Add Loop | Przechwycenie nowego otwartego tematu: tytuł + (opcjonalnie od razu) cel i tagi | Owner | szybki zapis ważniejszy niż pełny formularz |
-| Edit Loop | Zmiana tytułu; zmiana treści celu przez edycję Goal | Owner | |
+| Add Loop | Przechwycenie nowego otwartego tematu: tytuł + (opcjonalnie od razu) cel i tagi | Owner | inline form nad listą (bez modala); **nowy trafia na górę** i zostaje auto-zaznaczony |
+| Edit Loop | Zmiana tytułu klik-to-edit (karta i panel); zmiana treści celu przez edycję Goal | Owner | konwencja: teksty bez dialogów |
 | Reorder Loops | Ręczne ustawienie priorytetów drag & drop na liście po lewej | Owner | `sort_order`; kolejność nie resetuje się sama |
 | Tag Loop / Untag Loop | Dobranie/odjęcie tagów do wątku | Owner | wolne wpisywanie tworzy nowe tagi w puli |
-| Select Loop | Zaznaczenie wątku otwiera jego akcje w prawym panelu | Owner | akcja nawigacyjna — nie zmienia danych |
-| Close Loop | Ręczne domknięcie: „cel osiągnięty". open → closed | Owner | nie wymaga odhaczonych wszystkich akcji; **większe zwycięstwo** → wpis dziennika |
-| Abandon Loop | Świadome porzucenie tematu. open → abandoned | Owner | nie jest zwycięstwem; odróżnia „odpuściłem" od „domknąłem" |
-| Reopen Loop | Przywrócenie domkniętego lub porzuconego wątku → open | Owner | cofa datę domknięcia/porzucenia; historycznych wpisów dziennika nie kasuje |
-| Delete Loop | Trwałe usunięcie wątku razem z akcjami i celem | Owner | destrukcyjne, wymaga potwierdzenia; wpisy dziennika zostają ze snapshotem tekstu |
+| Select Loop | Zaznaczenie wątku otwiera jego akcje w prawym panelu | Owner | akcja nawigacyjna — nie zmienia danych; przy braku zaznaczenia panel pokazuje zachętę |
+| Close Loop | Ręczne domknięcie: „cel osiągnięty". open → closed | Owner | CTA w nagłówku panelu → **modal celebracyjny** z notką o wpisie do dziennika; nie wymaga odhaczonych wszystkich akcji; **większe zwycięstwo** |
+| Abandon Loop | Świadome porzucenie tematu. open → abandoned | Owner | pozycja w menu ⋯ nagłówka panelu; nie jest zwycięstwem |
+| Reopen Loop | Przywrócenie domkniętego lub porzuconego wątku → open | Owner | dostęp z sekcji „Domknięte i porzucone"; wraca na **koniec** listy otwartej; wpisów dziennika nie kasuje |
+| Delete Loop | Trwałe usunięcie wątku razem z akcjami i celem | Owner | menu ⋯ lub karta sekcji zamkniętych; destrukcyjne, wymaga potwierdzenia; wpisy dziennika zostają ze snapshotem tekstu |
 
 ### Action
 
 | Action | Description | Role | Notes |
 |--------|------------|------|-------|
 | Add Action | Dopisanie kroku do zaznaczonego wątku | Owner | nowa trafia na koniec listy (nad przypiętym celem) |
-| Edit Action | Zmiana etykiety; przełączenie typu mój ruch ⇄ czekam na kogoś; ustawienie/usunięcie daty dopytania | Owner | data dopytania tylko dla WaitingOn |
+| Edit Action | Zmiana etykiety klik-to-edit; przełączenie typu mój ruch ⇄ czekam na kogoś; ustawienie/usunięcie daty dopytania | Owner | data dopytania tylko dla WaitingOn; po terminie znacznik przy akcji + plakietka na karcie wątku |
 | Toggle Done | Odhaczenie skończonej akcji / odhaczenie z powrotem | Owner | check = małe zwycięstwo → wpis dziennika; uncheck = wpis znika, bilans dnia wraca do stanu realnego |
 | Reorder Actions | Ręczna kolejność działań drag & drop — plan wykonania | Owner | cel (`Goal`) przypięty jako ostatni element; nie da się go przeciągnąć powyżej końca listy |
 | Delete Action | Usunięcie pojedynczego kroku z wątku | Owner | destrukcyjne, wymaga potwierdzenia gdy done; bilans dnia traci jej bieżące zwycięstwo (akcji nie ma ⇒ nie była wykonana); snapy z poprzednich dni zostają |
