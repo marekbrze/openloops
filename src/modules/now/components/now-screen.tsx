@@ -11,7 +11,7 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Clock3, GripVertical, ListX, Sunrise, X } from 'lucide-react'
+import { Clock3, GripVertical, ListPlus, ListX, Sunrise, X } from 'lucide-react'
 import { actionsRepo, dayKey, nowRepo } from '@/modules/data-layer'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,7 @@ import { SkeletonCards } from '@/shared/components/skeleton-cards'
 import { guard } from '@/shared/lib/mutations'
 import { notify, openView } from '@/shared/lib/notify'
 import { plDndAccessibility } from '@/shared/lib/pl-dnd'
+import { TaskPickerModal } from '@/modules/tasks'
 import { formatClockTime, formatQueueMeta, formatTodayTitle } from '../lib/now-date'
 import { useNowClock } from '../hooks/use-now-clock'
 import { useNowQueue, useOpenLoopCount } from '../hooks/use-now'
@@ -29,40 +30,53 @@ import type { NowRow } from '../hooks/use-now'
  * dziś sprecyzowane datą i żywym zegarem + ręcznie układana kolejka wybranych akcji.
  * Kolejka żyje na danych źródłowych (ADR-0021); odhaczenie pisze dziennik tak samo
  * jak w workbench — ekran nie ma własnej semantyki zwycięstw.
+ * Dobieranie zadań: modal „Wybierz zadania" nad tym ekranem (ADR-0024).
  */
 export function NowScreen() {
   const today = useNowClock()
   const [readRetry, setReadRetry] = useState(0)
+  const [pickerOpen, setPickerOpen] = useState(false)
   const { rows, readFailed, loading } = useNowQueue(readRetry)
   const openLoopCount = useOpenLoopCount()
 
   const doneCount = (rows ?? []).filter((row) => row.action.done).length
 
   return (
-    <section aria-label="Teraz — dzisiejsza kolejka pracy" className="mx-auto flex h-full min-h-0 max-w-2xl flex-col">
-      <header className="flex shrink-0 items-end justify-between gap-4 pb-4">
-        <div className="min-w-0">
-          <h1 className="text-xl font-bold tracking-tight">{formatTodayTitle(today)}</h1>
-          {/* Meta kolejki dopiero z danymi — liczenie na undefined zawyżałoby stan pusty. */}
-          {rows && <p className="pt-1 text-xs text-muted-foreground">{formatQueueMeta(rows.length - doneCount, doneCount)}</p>}
-        </div>
-        <time dateTime={formatClockTime(today)} className="shrink-0 text-3xl font-semibold tabular-nums tracking-tight">
-          {formatClockTime(today)}
-        </time>
-      </header>
+    <>
+      <section aria-label="Teraz — dzisiejsza kolejka pracy" className="mx-auto flex h-full min-h-0 max-w-2xl flex-col">
+        <header className="flex shrink-0 items-end justify-between gap-4 pb-4">
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold tracking-tight">{formatTodayTitle(today)}</h1>
+            {/* Meta kolejki dopiero z danymi — liczenie na undefined zawyżałoby stan pusty. */}
+            {rows && <p className="pt-1 text-xs text-muted-foreground">{formatQueueMeta(rows.length - doneCount, doneCount)}</p>}
+          </div>
+          <div className="flex shrink-0 flex-col items-end gap-2">
+            <time dateTime={formatClockTime(today)} className="text-3xl font-semibold tabular-nums tracking-tight">
+              {formatClockTime(today)}
+            </time>
+            {/* ADR-0024: dobieranie zadań bez opuszczania głównego ekranu pracy. */}
+            <Button type="button" variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
+              <ListPlus data-icon="inline-start" />
+              Wybierz zadania
+            </Button>
+          </div>
+        </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto pb-12">
-        {readFailed ? (
-          <NowReadError onRetry={() => setReadRetry((token) => token + 1)} />
-        ) : loading || !rows ? (
-          <SkeletonCards count={4} />
-        ) : rows.length === 0 ? (
-          <EmptyQueue hasOpenLoops={(openLoopCount ?? 0) > 0} />
-        ) : (
-          <NowQueue rows={rows} />
-        )}
-      </div>
-    </section>
+        <div className="min-h-0 flex-1 overflow-y-auto pb-12">
+          {readFailed ? (
+            <NowReadError onRetry={() => setReadRetry((token) => token + 1)} />
+          ) : loading || !rows ? (
+            <SkeletonCards count={4} />
+          ) : rows.length === 0 ? (
+            <EmptyQueue hasOpenLoops={(openLoopCount ?? 0) > 0} onPickTasks={() => setPickerOpen(true)} />
+          ) : (
+            <NowQueue rows={rows} />
+          )}
+        </div>
+      </section>
+
+      <TaskPickerModal open={pickerOpen} onClose={() => setPickerOpen(false)} />
+    </>
   )
 }
 
@@ -211,7 +225,7 @@ function QueueGrip({
 }
 
 /** Stan pusty rozróżnia świeży świat (za mało danych) od braku wyboru (są wątki, nic nie wybrane). */
-function EmptyQueue({ hasOpenLoops }: { hasOpenLoops: boolean }) {
+function EmptyQueue({ hasOpenLoops, onPickTasks }: { hasOpenLoops: boolean; onPickTasks: () => void }) {
   return (
     <div className="mx-auto mt-6 max-w-sm rounded-xl border border-dashed border-border p-8 text-center">
       <span className="mx-auto flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
@@ -220,10 +234,11 @@ function EmptyQueue({ hasOpenLoops }: { hasOpenLoops: boolean }) {
       <p className="pt-3 text-sm font-medium">{hasOpenLoops ? 'Kolejka na dziś jest jeszcze pusta.' : 'Zacznij od pierwszego wątku…'}</p>
       <p className="pt-1 text-xs text-muted-foreground">
         {hasOpenLoops
-          ? 'Na liście Zadania oznacz akcje przełącznikiem „Teraz” — wskocz one w tę kolejkę.'
+          ? 'Otwórz „Wybierz zadania” i oznacz akcje przełącznikiem „Teraz” — wskoczą one w tę kolejkę.'
           : 'Workbench przechwyci temat i kroki; potem oznacz je przełącznikiem „Teraz”.'}
       </p>
-      <Button className="mt-4" variant={hasOpenLoops ? 'default' : 'outline'} onClick={() => openView(hasOpenLoops ? 'tasks' : 'workbench')}>
+      {/* ADR-0024: oba CTA — modal nad tym ekranem albo workbench; zero przeskoku zakładką. */}
+      <Button className="mt-4" variant={hasOpenLoops ? 'default' : 'outline'} onClick={hasOpenLoops ? onPickTasks : () => openView('workbench')}>
         {hasOpenLoops ? 'Wybierz zadania' : 'Otwórz workbench'}
       </Button>
     </div>

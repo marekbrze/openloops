@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Inbox, ListPlus, ListX, Clock3 } from 'lucide-react'
+import { Inbox, ListPlus, ListX, Clock3, X } from 'lucide-react'
 import type { LoopAction } from '@/modules/data-layer'
 import { dayKey, nowRepo } from '@/modules/data-layer'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { Dialog } from '@/shared/components/dialog'
 import { SkeletonCards } from '@/shared/components/skeleton-cards'
 import { guard } from '@/shared/lib/mutations'
 import { openView } from '@/shared/lib/notify'
@@ -11,13 +12,19 @@ import { usePickedActionIds } from '@/modules/now/hooks/use-now'
 import { useTaskCatalog } from '../hooks/use-tasks'
 import type { TaskGroup } from '../hooks/use-tasks'
 
+interface TaskPickerModalProps {
+  open: boolean
+  onClose: () => void
+}
+
 /**
- * Katalog wszystkich zadań (ADR-0022) — łatwy wybór „co robię dalej": akcje otwartych
- * wątków pogrupowane po wątku, każdy wiersz z przełącznikiem kolejki Teraz.
+ * Katalog wszystkich zadań (ADR-0022) jako modal na ekranie Teraz (ADR-0024) — łatwy wybór
+ * „co robię dalej" bez opuszczania głównego ekranu pracy: akcje otwartych wątków pogrupowane
+ * po wątku, każdy wiersz z przełącznikiem kolejki Teraz; kolejka pod spodem odświeża się na żywo.
  * Powierzchnia tylko do odczytu i wyboru: edycja treści/typu/usuwanie zostaje w workbench,
  * więc mutacje struktury mają jedno miejsce.
  */
-export function TaskListScreen() {
+export function TaskPickerModal({ open, onClose }: TaskPickerModalProps) {
   const [readRetry, setReadRetry] = useState(0)
   const { groups, readFailed, loading } = useTaskCatalog(readRetry)
   const pickedIds = usePickedActionIds()
@@ -26,19 +33,36 @@ export function TaskListScreen() {
   const hasOpenLoops = (groups ?? []).length > 0
   const hasAnyAction = (groups ?? []).some((group) => group.actions.length > 0)
 
+  /** Stany puste prowadzą do workbench — modal zamyka się przed nawigacją. */
+  const goToWorkbench = () => {
+    onClose()
+    openView('workbench')
+  }
+
   return (
-    <section aria-label="Wszystkie zadania według wątków" className="mx-auto flex h-full min-h-0 max-w-2xl flex-col">
-      <header className="mb-2 flex shrink-0 items-baseline justify-between px-1">
-        <h1 className="text-sm font-semibold tracking-tight">Wszystkie zadania</h1>
-        <span className="text-xs text-muted-foreground">{todoCount} do zrobienia</span>
-      </header>
-      <p className="shrink-0 px-1 pb-3 text-xs text-muted-foreground">
-        Przełącznik przy akcji dokłada ją do kolejki Teraz — głównego ekranu pracy.
+    <Dialog open={open} onClose={onClose} labelId="task-picker-title" describeId="task-picker-hint" className="max-w-2xl">
+      <div className="flex items-center gap-3">
+        <h2 id="task-picker-title" className="text-base font-semibold tracking-tight">
+          Wybierz zadania
+        </h2>
+        <span className="ml-auto shrink-0 text-xs text-muted-foreground">{todoCount} do zrobienia</span>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Zamknij wybór zadań"
+          className="-mr-1 shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <X className="size-4" />
+        </button>
+      </div>
+      <p id="task-picker-hint" className="pt-0.5 text-xs text-muted-foreground">
+        Przełącznik przy akcji dokłada ją do kolejki Teraz — widocznej pod spodem.
       </p>
 
-      <div className="min-h-0 flex-1 overflow-y-auto pb-12">
+      {/* Długi katalog scrolluje się w panelu, nie rozciąga strony pod spodem. */}
+      <div className="mt-3 max-h-[60vh] min-h-0 overflow-y-auto pb-1 pr-0.5">
         {readFailed ? (
-          <TasksReadError onRetry={() => setReadRetry((token) => token + 1)} />
+          <CatalogueReadError onRetry={() => setReadRetry((token) => token + 1)} />
         ) : loading || !groups ? (
           <SkeletonCards count={4} />
         ) : !hasOpenLoops ? (
@@ -46,14 +70,14 @@ export function TaskListScreen() {
             heading="Żadnego otwartego wątku"
             body="Zacznij w workbench: przechwyć temat i rozpisz kroki — pojawią się tutaj."
             actionLabel="Otwórz workbench"
-            onAction={() => openView('workbench')}
+            onAction={goToWorkbench}
           />
         ) : !hasAnyAction ? (
           <EmptyCatalogue
             heading="Wątki bez kroków"
             body="Otwórz wątek w workbench i dopisz pierwsze działania — wtedy wybierzesz je do Teraz."
             actionLabel="Otwórz workbench"
-            onAction={() => openView('workbench')}
+            onAction={goToWorkbench}
           />
         ) : (
           <ul className="space-y-5" aria-label="Grupy zadań według wątków">
@@ -74,7 +98,7 @@ export function TaskListScreen() {
           </ul>
         )}
       </div>
-    </section>
+    </Dialog>
   )
 }
 
@@ -83,7 +107,7 @@ function TaskGroupHeading({ group }: { group: TaskGroup }) {
   const total = group.actions.length
   return (
     <div className="flex items-baseline gap-2 border-b border-border px-0.5 pb-1">
-      <h2 className="text-sm font-semibold tracking-tight">{group.loop.title}</h2>
+      <h3 className="text-sm font-semibold tracking-tight">{group.loop.title}</h3>
       <span className="ml-auto shrink-0 text-[11px] tabular-nums text-muted-foreground">
         {done}/{total}
       </span>
@@ -157,7 +181,7 @@ function EmptyCatalogue({
   onAction(): void
 }) {
   return (
-    <div className="mx-auto mt-6 max-w-sm rounded-xl border border-dashed border-border p-8 text-center">
+    <div className="mx-auto my-4 max-w-sm rounded-xl border border-dashed border-border p-8 text-center">
       <span className="mx-auto flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
         <Inbox className="size-5" />
       </span>
@@ -171,10 +195,10 @@ function EmptyCatalogue({
 }
 
 /** Karta porażki odczytu (konwencja dziennika): komunikat + retry; dane zostają nietknięte. */
-export function TasksReadError({ onRetry }: { onRetry(): void }) {
+function CatalogueReadError({ onRetry }: { onRetry(): void }) {
   return (
     <div role="alert" className="rounded-xl border border-destructive/40 bg-destructive/5 p-6 text-center">
-      <h2 className="text-base font-semibold">Katalog zadań nie może odczytać danych</h2>
+      <h3 className="text-base font-semibold">Katalog zadań nie może odczytać danych</h3>
       <p className="pt-2 text-sm text-muted-foreground">
         Lokalna baza danych (IndexedDB) odrzuciła odczyt — najczęstsze powody to tryb prywatny
         albo zablokowana pamięć strony. Twoje wątki zostały zapisane.

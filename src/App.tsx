@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react'
 import { DevToolbar } from './shared/components/DevToolbar'
 import { NowScreen } from './modules/now/components/now-screen'
-import { TaskListScreen } from './modules/tasks/components/task-list-screen'
 import { WorkbenchScreen } from './modules/workbench/components/workbench-screen'
 import { JournalScreen } from './modules/journal/components/journal-screen'
 import { AppNotices } from './shared/components/app-notices'
 import type { ViewId } from './lib/navigation'
 import { ensureScenarioBootstrapped } from './scenarios/loader'
 
-/* ADR-0020: Teraz = lądowanie i główny ekran pracy; workbench schodzi na pozycję narzędzia. */
+/*
+ * ADR-0020: Teraz = lądowanie i główny ekran pracy; workbench schodzi na pozycję narzędzia.
+ * ADR-0024: Zadania nie są zakładką — modal „Wybierz zadania" na ekranie Teraz.
+ */
 const MODULE_TABS: { id: ViewId; label: string }[] = [
   { id: 'now', label: 'Teraz' },
-  { id: 'tasks', label: 'Zadania' },
   { id: 'workbench', label: 'Workbench' },
   { id: 'journal', label: 'Dziennik' },
 ]
@@ -91,8 +92,6 @@ function App() {
           <p className="p-4 text-sm text-muted-foreground">Ładowanie danych lokalnych…</p>
         ) : view === 'now' ? (
           <NowScreen />
-        ) : view === 'tasks' ? (
-          <TaskListScreen />
         ) : view === 'workbench' ? (
           <WorkbenchScreen />
         ) : (

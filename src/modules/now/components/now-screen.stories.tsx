@@ -54,7 +54,7 @@ export const FreshWorld: Story = {
   decorators: [heightDecorator, seededWith(() => applyScenarioWithoutReload('empty'))],
 }
 
-/** Są otwarte wątki, ale nic nie wybrane do Teraz — zachęta do przejścia na Zadania. */
+/** Są otwarte wątki, ale nic nie wybrane do Teraz — zachęta do otwarcia „Wybierz zadania”. */
 export const NothingPickedYet: Story = {
   decorators: [heightDecorator, seededWith(() => applyScenarioWithoutReload('minimal'))],
 }
