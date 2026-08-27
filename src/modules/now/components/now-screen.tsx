@@ -22,7 +22,7 @@ import { plDndAccessibility } from '@/shared/lib/pl-dnd'
 import { TaskPickerModal } from '@/modules/tasks'
 import { formatClockTime, formatQueueMeta, formatTodayTitle } from '../lib/now-date'
 import { useNowClock } from '../hooks/use-now-clock'
-import { useNowQueue, useOpenLoopCount } from '../hooks/use-now'
+import { READ_ERROR, useNowQueue, useOpenLoopCount } from '../hooks/use-now'
 import type { NowRow } from '../hooks/use-now'
 
 /**
@@ -37,9 +37,11 @@ export function NowScreen() {
   const [readRetry, setReadRetry] = useState(0)
   const [pickerOpen, setPickerOpen] = useState(false)
   const { rows, readFailed, loading } = useNowQueue(readRetry)
-  const openLoopCount = useOpenLoopCount()
+  // Ten sam retry-token co kolejka — porażka któregokolwiek odczytu ma wspólną drogę powrotu.
+  const openLoopCount = useOpenLoopCount(readRetry)
 
   const doneCount = (rows ?? []).filter((row) => row.action.done).length
+  const retryRead = () => setReadRetry((token) => token + 1)
 
   return (
     <>
@@ -64,13 +66,19 @@ export function NowScreen() {
 
         <div className="min-h-0 flex-1 overflow-y-auto pb-12">
           {readFailed ? (
-            <NowReadError onRetry={() => setReadRetry((token) => token + 1)} />
+            <NowReadError onRetry={retryRead} />
           ) : loading || !rows ? (
             <SkeletonCards count={4} />
-          ) : rows.length === 0 ? (
-            <EmptyQueue hasOpenLoops={(openLoopCount ?? 0) > 0} onPickTasks={() => setPickerOpen(true)} />
-          ) : (
+          ) : rows.length > 0 ? (
             <NowQueue rows={rows} />
+          ) : openLoopCount === undefined ? (
+            /* Luka #1: wariant stanu pustego dopiero na rozstrzygniętej liczbie wątków —
+             * inaczej mrugałoby „świeży świat" z CTA do workbench dla kogoś, kto wątki ma. */
+            <SkeletonCards count={4} />
+          ) : openLoopCount === READ_ERROR ? (
+            <NowReadError onRetry={retryRead} />
+          ) : (
+            <EmptyQueue hasOpenLoops={openLoopCount > 0} onPickTasks={() => setPickerOpen(true)} />
           )}
         </div>
       </section>
@@ -92,6 +100,8 @@ function NowQueue({ rows }: { rows: NowRow[] }) {
     if (!over || active.id === over.id) return
     const oldIndex = rows.findIndex((row) => row.item.id === active.id)
     const newIndex = rows.findIndex((row) => row.item.id === over.id)
+    // Luka #2: wiersze mogły się zmienić w trakcie przeciągania — zapis z −1 ułożyłby dzień fałszywie.
+    if (oldIndex === -1 || newIndex === -1) return
     void guard(() => nowRepo.reorder(arrayMove(rows, oldIndex, newIndex).map((row) => row.item.id)))
   }
 
@@ -147,7 +157,8 @@ function SortableNowRow({ row, position }: SortableNowRowProps) {
       style={{ ...(transform ? ({ transform: CSS.Transform.toString(transform), zIndex: 20 } satisfies CSSProperties) : {}), transition }}
       className={cn('group flex items-start gap-2 rounded-lg border border-border bg-card px-2 py-1.5 shadow-sm', isDragging && 'opacity-80')}
     >
-      <span aria-hidden="true" className="w-5 shrink-0 pt-1 text-right text-xs tabular-nums text-muted-foreground">
+      {/* Luka #5: min-w zamiast stałej szerokości — numeracja ≥ 100 nie nachodzi na checkbox. */}
+      <span aria-hidden="true" className="min-w-5 shrink-0 pt-1 text-right text-xs tabular-nums text-muted-foreground">
         {position}.
       </span>
 
@@ -160,9 +171,14 @@ function SortableNowRow({ row, position }: SortableNowRowProps) {
       />
 
       <div className="min-w-0 flex-1">
-        <p className={cn('truncate text-sm', action.done ? 'text-muted-foreground line-through' : '')}>{action.label}</p>
+        {/* Luka #4: title przy pełnej treści — truncation bez utraty dostępu do całości (konwencja dziennika). */}
+        <p title={action.label} className={cn('truncate text-sm', action.done ? 'text-muted-foreground line-through' : '')}>
+          {action.label}
+        </p>
         <p className="flex items-center gap-1.5 pt-0.5 text-[11px] text-muted-foreground">
-          <span className="truncate">{loop.title}</span>
+          <span title={loop.title} className="truncate">
+            {loop.title}
+          </span>
           {waiting && (
             <span className={cn('flex shrink-0 items-center gap-0.5', overdue && 'text-destructive')}>
               <Clock3 className="size-3" />

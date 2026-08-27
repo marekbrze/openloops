@@ -16,7 +16,7 @@ export interface NowRow {
 }
 
 /** Sentinel porażki odczytu — rozróżnia ładowanie od błędu bazy (konwencja dziennika). */
-const READ_ERROR = Symbol('now-read-error')
+export const READ_ERROR = Symbol('now-read-error')
 type NowRead = NowRow[] | typeof READ_ERROR
 
 /**
@@ -81,16 +81,39 @@ export function useNowQueue(retryToken = 0): NowQueueState {
   return state
 }
 
-/** Zbiór actionId wybranych do Teraz — jedna kwerenda zasila wszystkie przełączniki naraz. */
-export function usePickedActionIds(): Set<string> | undefined {
+/**
+ * Zbiór actionId wybranych do Teraz — jedna kwerenda zasila wszystkie przełączniki naraz
+ * (modal Zadań i panel workbench). Porażka odczytu = READ_ERROR zamiast wiecznego
+ * `undefined` (luka #3 audytu Teraz): retry-token odgrzewa kwerendę razem z retry ekranu.
+ */
+export function usePickedActionIds(retryToken = 0): Set<string> | typeof READ_ERROR | undefined {
   return useLiveQuery(
-    async () => new Set((await db.nowItems.toArray()).map((item) => item.actionId)),
-    [],
+    async () => {
+      try {
+        return new Set((await db.nowItems.toArray()).map((item) => item.actionId))
+      } catch (error) {
+        console.error('[openloops] odczyt wyboru Teraz nie powiódł się', error)
+        return READ_ERROR
+      }
+    },
+    [retryToken],
   )
 }
 
-/** Liczba otwartych wątków — decyduje o treści stanu pustego ekranu Teraz (świat vs. brak wyboru). */
-export function useOpenLoopCount(): number | undefined {
-  const count = useLiveQuery(() => db.loops.where('status').equals('open').count(), [])
-  return count
+/**
+ * Liczba otwartych wątków — decyduje o wariancie stanu pustego ekranu Teraz (świat vs.
+ * brak wyboru). Porażka odczytu = READ_ERROR (luka #1: bez niej EmptyQueue zgadywałaby).
+ */
+export function useOpenLoopCount(retryToken = 0): number | typeof READ_ERROR | undefined {
+  return useLiveQuery(
+    async () => {
+      try {
+        return await db.loops.where('status').equals('open').count()
+      } catch (error) {
+        console.error('[openloops] odczyt liczby otwartych wątków nie powiódł się', error)
+        return READ_ERROR
+      }
+    },
+    [retryToken],
+  )
 }

@@ -1,40 +1,37 @@
 # Now (Teraz) — Edge Cases
 
-*Audyt stres-testowy z 2026-08-27 (proto-edgecases), przed fazą proto-harden.*
-*Zakres: cały moduł — hero dnia, kolejka, DnD, stany puste, modal „Wybierz zadania" jako integracja (treść modalu audytowana osobno w `tasks-edgecases.md`).*
+*Audyt stres-testowy z 2026-08-27 (proto-edgecases, commit `cd69836`), po fazie **proto-harden** tego samego dnia.*
+*Statusy: ✅ zaimplementowane (+ miejsce), ⏸️ świadomie odroczone (powód), ✔︎ zweryfikowane jako nie-problem.*
 
-## Coverage
+## Coverage (po harden)
 
-- **Spec captured na starcie**: 8 pozycji z `docs/modules/now.md` — **wszystkie 8 obsłużonych w kodzie** (kaskady ADR-0021 + filtr obronny, reopen bez odtwarzania, honest-zero meta, dwa stany puste, resync zegara, karta błędu odczytu, idempotentny klucz `now:${actionId}`, membership-disabled).
-- **Nowe luki z audytu**: 7 → 🔴 0 · 🟡 2 · 🟢 5 (plus 2 odroczone dziedziczone z workbench).
-- **Największe źródło luk**: wyścigi stanów pochodnych (licznik otwartych wątków, członkostwo kolejki) — odczyt główny ma pełną obsługę błędu, aux-reads już nie; brak potwierdzenia indeksów przed zapisem reorderu.
+- **Spec captured na starcie**: 8 pozycji z `docs/modules/now.md` — wszystkie 8 obsłużonych już w lofi.
+- **Nowe luki z audytu**: 7 → **5 zamkniętych**, **2 odroczonych świadomie**.
+- **Severity**: 🔴 0 · 🟡 2 · 🟢 5 → wszystkie 🟡 zamknięte.
 
 ## Inventory
 
-| # | Severity | Category | Edge case | Behavior today | Suggested behavior | Where |
-|---|----------|----------|-----------|----------------|--------------------|-------|
-| 1 | 🟡 | Data states / race | Wyścig stanu pustego: `rows` już czytelne, `openLoopCount` jeszcze `undefined` → `?? 0` daje wariant „świeży świat" z CTA do workbench, po chwili mruga do właściwego „nic nie wybrane" | Fałszywy wariant stanu pustego na ekranie lądowania | Renderuj EmptyQueue dopiero gdy `openLoopCount !== undefined` (do tego czasu szkielet) — decyzja o wariancie na twardej danych | `src/modules/now/components/now-screen.tsx:71` |
-| 2 | 🟡 | Action outcomes | Drag-end po zmianie wierszy w trakcie przeciągania: `findIndex` zwraca −1, `arrayMove(…, −1, …)` przestawia zły element i **zapisuje fałszywy porządek dnia** do `nowRepo.reorder` | Brak guardy na −1 | Early-return gdy `oldIndex === -1 \|\| newIndex === -1` (zapis tylko z poprawnych indeksów) | `src/modules/now/components/now-screen.tsx:93-95` |
-| 3 | 🟢 | Errors | Odczyty pomocnicze bez obsługi porażki: `usePickedActionIds` i `useOpenLoopCount` nie mają sentinelu `READ_ERROR` — przy odmowie odczytu pierwszy wiecznie zwraca `undefined` (przełączniki modalu wiecznie disabled bez wyjaśnienia), drugi kłamie „świeży świat" | Cisza / wieczny disabled | Wrap w try/catch konwencją dziennika; retry głównej kwerendy powinien odgrzewać też te odczyty | `src/modules/now/hooks/use-now.ts:85-96` |
-| 4 | 🟢 | Data states | Truncation bez pełnej treści: `action.label` i `loop.title` ucięte bez `title=` — długi tekst nie do odczytania (konwencja z hardenu dziennika #8) | Ucięcie bez dostępu do całości | `title={label}` / `title={loop.title}` na uciętych `<p>` | `src/modules/now/components/now-screen.tsx:163,165` |
-| 5 | 🟢 | Boundary values | Numeracja pozycji ≥ 100: kolumna `w-5` (20 px) nie mieści „100." — cyfry nachodzą na checkbox | Stała szerokość kolumny numeru | `min-w-5` zamiast `w-5` (albo bez górnej granicy — kolejka dnia rzadko >99; tanie zabezpieczenie) | `src/modules/now/components/now-screen.tsx:150` |
-| 6 | 🟢 | Prototype-specific | LiveQuery modalu i członkostwa żyją też przy zamkniętym dialogu — każda mutacja w kolejce przelicza katalog niewidoczny dla użytkownika | Zbędne kwerendy w tle | Gate'ować subskrypcje flagą `open` (optymalizacja; nie blokuje harden) | `src/modules/now/components/now-screen.tsx:78` |
-| 7 | ⏸️ | Action outcomes | Brak in-flight disable przy toggle/X/reorder (mikro-wyścig podwójnego kliknięcia) | Kontrolki aktywne podczas zapisu | Świadomie odroczone w workbench (#13) — ta sama decyzja; optimistic-disable gdy testy pokażą problem | `src/modules/now/components/now-screen.tsx:157,180` |
-| 8 | ⏸️ | State transitions | Nowy dzień, wczorajsza kolejka: brak rolowania dnia — zrobione i niezdejmowane pozycje witają użytkownika rano | Kolejka trwa ponad datę | Świadome wg ADR-0023 („zrobione zostają", zdjęcie = decyzja użytkownika); wrócić do tematu po testach userów, nie w harden | `src/modules/data-layer/repositories/index.ts:196-236` |
+| # | Severity | Category | Edge case | Status | Gdzie / powód |
+|---|----------|----------|-----------|--------|---------------|
+| 1 | 🟡 | Data states / race | Wyścig stanu pustego: `rows` czytelne, `openLoopCount` jeszcze nie → fałszywy wariant „świeży świat" mrugał użytkownikowi z wątkami | ✅ | EmptyQueue renderowana dopiero na rozstrzygniętym liczniku (szkielet do tego czasu) — `now-screen.tsx:72-81` |
+| 2 | 🟡 | Action outcomes | Drag-end po zmianie wierszy: `findIndex` = −1 → `arrayMove` zapisywał fałszywy porządek dnia | ✅ | Early-return na −1 przed `nowRepo.reorder` — `now-screen.tsx:97-99` |
+| 3 | 🟢 | Errors | Odczyty pomocnicze (`usePickedActionIds`, `useOpenLoopCount`) bez obsługi porażki — wiecznie disabled / zgadywany stan pusty | ✅ | Sentinel `READ_ERROR` + wspólny retry-token w obu hookach (`use-now.ts:100-131`); porażka licznika w stanie pustym pokazuje kartę retry (`now-screen.tsx:76-78`); story `Now/NowReadError` |
+| 4 | 🟢 | Data states | Truncation bez pełnej treści (etykieta, tytuł wątku) | ✅ | `title=` na obu uciętych elementach — `now-screen.tsx:182,186` |
+| 5 | 🟢 | Boundary values | Numeracja ≥ 100 nachodziła na checkbox (`w-5`) | ✅ | `min-w-5` zamiast stałej szerokości — `now-screen.tsx:169` |
+| 6 | 🟢 | Prototype-specific | LiveQuery modalu i członkostwa żywe przy zamkniętym dialogu (zbyteczne kwerendy) | ⏸️ | Gate subskrypcji flagą `open` = skeleton-flash przy każdym otwarciu modalu; koszt znikomy w skali prototypu — wraca w proto-polish, jeśli testy pokażą |
+| 7 | ⏸️ | Action outcomes | Brak in-flight disable przy toggle/X/reorder | ⏸️ | Dziedziczona decyzja workbench #13 — optimistic-disable gdy testy userów pokażą problem |
+| 8 | ⏸️ | State transitions | Nowy dzień, wczorajsza kolejka (brak rolowania dnia) | ⏸️ | Świadome wg ADR-0023 („zrobione zostają", zdjęcie = decyzja użytkownika); wrócić po testach userów |
 
-**Kategorie sprawdzone bez uwag**: Empty states ✔ (dwa warianty + CTA, `now-screen.tsx:228-246`), Loading initial ✔ (szkielet w rytmie karty `now-screen.tsx:69`, leniwy stan między liveQuery `use-now.ts:72-79`), Errors–read ✔ (sentinel + karta retry `use-now.ts:46-58`, `now-screen.tsx:252-269`), Errors–write ✔ (guard → baner, wszystkie mutacje), Forms & input ✔ (moduł bez formularzy), Validation ✔ (n/d), Destructive confirm ✔ (zdjęcie nie niszczy danych — źródło nietknięte, powrót przez modal/workbench), Undo ✔ (n/d przy odwracalności), Success feedback ✔ (masowe zdjęcie ma toast `now-screen.tsx:99-103`; pojedyncze ma wizualny natychmiastowy efekt — spójnie z kulturą aplikacji), State transitions ✔ (kaskady: `repositories/index.ts:80-88,159-165,255-272`; reopen bez odtwarzania), Cross-module deleted-source ✔ (join-filtr `use-now.ts:37-42`), Storage write/quota ✔ (guard), Storage read ✔ (sentinel + bootstrap w `App.tsx:29-42`), Offline ✔ (runtime bez sieci, dziedziczone #15 workbench), Navigation/back/deep-link ✔ (dziedziczone ⏸️ #10 workbench), Unicode/RTL/emoji ✔ (tekst bez transformacji), Północ/uśpienie ✔ (`use-now-clock.ts:27-39`).
+**Kategorie sprawdzone bez uwag**: Empty states ✔, Loading initial ✔, Errors–read ✔, Errors–write ✔ (guard), Forms & input ✔ (moduł bez formularzy), Validation ✔ (n/d), Destructive confirm ✔ (zdjęcie odwracalne — źródło nietknięte), Undo ✔ (n/d), Success feedback ✔, State transitions ✔ (kaskady ADR-0021, reopen bez odtwarzania), Cross-module deleted-source ✔ (join-filtr), Storage write/read ✔, Offline ✔, Navigation/back/deep-link ✔ (dziedziczone ⏸️ #10 workbench), Unicode/RTL/emoji ✔, Północ/uśpienie ✔.
 
-## Priority list
+## Priority list (historia wykonania)
 
-1. **Wyścig stanu pustego (#1)** — fałszywy komunikat na ekranie lądowania; taniaGuarda przed renderem EmptyQueue.
-2. **Guarda −1 w drag-endzie (#2)** — jedyna droga do zapisania fałszywego porządku dnia.
-3. **Obsługa błędu odczytów pomocniczych + re-arm retry (#3)** — spójność z konwencją dziennika; dotyka też modalu tasks.
-4. 🟢 wg tabeli: `title=` (4) · min-w numeracji (5) · gate liveQuery modalu (6).
-5. Odroczone świadomie: #7, #8 — decyzje zapisane, wracamy po testach userów.
+1. ~~Wyścig stanu pustego~~ → gate na rozstrzygniętym liczniku.
+2. ~~Guarda −1 w drag-endzie~~ → early-return.
+3. ~~Odczyty pomocnicze~~ → sentinele + wspólny retry; karta błędu w stanie pustym.
+4. 🟢 `title=` · min-w numeracji → done. Gate liveQuery (6) odroczony z powodem.
+5. Odrocone świadomie: #7 (in-flight), #8 (rolowanie dnia).
 
-## Hand-off to proto-harden
+## Hand-off status
 
-- #1 — render EmptyQueue po rozstrzygnięciu obu kwerend (szkielet do tego czasu).
-- #2 — early-return na −1 w `handleDragEnd`.
-- #3 — try/catch + wspólny retry-token dla `usePickedActionIds`/`useOpenLoopCount` (uwaga: hook dzielony z tasks — zmiana w jednym miejscu).
-- #4–#6 — tanie, wszystkie w jednym pliku ekranu.
+proto-harden zamknął cały obowiązkowy zakres 2026-08-27 (ADR-0027). Kolejny baseline da re-run proto-edgecases; warstwa wizualna: proto-brand → proto-design → proto-polish.

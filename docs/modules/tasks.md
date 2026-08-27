@@ -60,6 +60,13 @@ Zasady kierujące:
 - **Porażka odczytu IndexedDB** → karta alert z „Spróbuj ponownie", konwencja dziennika/Teraz.
 - **Długi katalog / długie etykiety** → scroll wewnątrz panelu modalu (bez rozciągania strony); truncation jednowierszowy etykiet (spójnie z resztą systemu).
 
+*Z hardenu 2026-08-27 (ADR-0028, ewidencja: `tasks-edgecases.md`):*
+
+- **Porażka zapisu w modalu** → baner błędu w top layer (`AppNotices` jako `popover="manual"`) — widoczny NAD modalnym dialogiem; porażka pick/unpick nie milczy.
+- **Licznik „N do zrobienia"** → renderowany dopiero z danymi (nie kłamie „0" przy szkielecie).
+- **Długi tytuł wątku w grupie** → truncation jednowierszowy z `title=`; bilans `done/total` zostaje na miejscu.
+- **Retry karty błędu** → odgrzewa i katalog, i członkostwo (wspólny retry-token); rippling: przełączniki w workbench bezpieczne na sentinelu.
+
 ## Integration Points
 
 - **now (Teraz)**: modal żyje na ekranie Teraz — moduł dostarcza treść, ekran wyzwalacz; dzielą hook `usePickedActionIds`; katalog nie przechowuje własnego stanu wyboru ani stanu otwarcia (stan otwarcia = Teraz).

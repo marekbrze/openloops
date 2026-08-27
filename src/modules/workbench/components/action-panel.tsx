@@ -111,7 +111,8 @@ export function ActionPanel({ loopId, firstRun }: ActionPanelProps) {
                   <SortableActionRow
                     key={action.id}
                     action={action}
-                    picked={pickedIds?.has(action.id)}
+                    // READ_ERROR (porażka odczytu) traktowane jak nieczytelne członkostwo — przełącznik czeka.
+                    picked={pickedIds instanceof Set ? pickedIds.has(action.id) : undefined}
                     onRequestDelete={requestDeleteAction}
                   />
                 ))

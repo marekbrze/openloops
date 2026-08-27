@@ -8,7 +8,7 @@ import { Dialog } from '@/shared/components/dialog'
 import { SkeletonCards } from '@/shared/components/skeleton-cards'
 import { guard } from '@/shared/lib/mutations'
 import { openView } from '@/shared/lib/notify'
-import { usePickedActionIds } from '@/modules/now/hooks/use-now'
+import { READ_ERROR, usePickedActionIds } from '@/modules/now/hooks/use-now'
 import { useTaskCatalog } from '../hooks/use-tasks'
 import type { TaskGroup } from '../hooks/use-tasks'
 
@@ -27,7 +27,9 @@ interface TaskPickerModalProps {
 export function TaskPickerModal({ open, onClose }: TaskPickerModalProps) {
   const [readRetry, setReadRetry] = useState(0)
   const { groups, readFailed, loading } = useTaskCatalog(readRetry)
-  const pickedIds = usePickedActionIds()
+  // Wspólny retry-token — „Spróbuj ponownie" odgrzewa i katalog, i członkostwo (luka #5).
+  const pickedIds = usePickedActionIds(readRetry)
+  const membershipFailed = pickedIds === READ_ERROR
 
   const todoCount = (groups ?? []).reduce((sum, group) => sum + group.actions.filter((a) => !a.done).length, 0)
   const hasOpenLoops = (groups ?? []).length > 0
@@ -45,12 +47,13 @@ export function TaskPickerModal({ open, onClose }: TaskPickerModalProps) {
         <h2 id="task-picker-title" className="text-base font-semibold tracking-tight">
           Wybierz zadania
         </h2>
-        <span className="ml-auto shrink-0 text-xs text-muted-foreground">{todoCount} do zrobienia</span>
+        {/* Luka #2: licznik dopiero z danymi — „0 do zrobienia" przy szkielecie kłamało. */}
+        {groups && <span className="shrink-0 text-xs text-muted-foreground">{todoCount} do zrobienia</span>}
         <button
           type="button"
           onClick={onClose}
           aria-label="Zamknij wybór zadań"
-          className="-mr-1 shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          className="-mr-1 ml-auto shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
         >
           <X className="size-4" />
         </button>
@@ -61,7 +64,7 @@ export function TaskPickerModal({ open, onClose }: TaskPickerModalProps) {
 
       {/* Długi katalog scrolluje się w panelu, nie rozciąga strony pod spodem. */}
       <div className="mt-3 max-h-[60vh] min-h-0 overflow-y-auto pb-1 pr-0.5">
-        {readFailed ? (
+        {readFailed || membershipFailed ? (
           <CatalogueReadError onRetry={() => setReadRetry((token) => token + 1)} />
         ) : loading || !groups ? (
           <SkeletonCards count={4} />
@@ -89,7 +92,7 @@ export function TaskPickerModal({ open, onClose }: TaskPickerModalProps) {
                     <TaskRow
                       key={action.id}
                       action={action}
-                      picked={pickedIds ? pickedIds.has(action.id) : undefined}
+                      picked={pickedIds instanceof Set ? pickedIds.has(action.id) : undefined}
                     />
                   ))}
                 </ul>
@@ -107,7 +110,10 @@ function TaskGroupHeading({ group }: { group: TaskGroup }) {
   const total = group.actions.length
   return (
     <div className="flex items-baseline gap-2 border-b border-border px-0.5 pb-1">
-      <h3 className="text-sm font-semibold tracking-tight">{group.loop.title}</h3>
+      {/* Luka #3: tytuł wątku w jednej linii — długi tytuł nie spycha bilansu done/total. */}
+      <h3 title={group.loop.title} className="min-w-0 truncate text-sm font-semibold tracking-tight">
+        {group.loop.title}
+      </h3>
       <span className="ml-auto shrink-0 text-[11px] tabular-nums text-muted-foreground">
         {done}/{total}
       </span>
@@ -151,7 +157,10 @@ function TaskRow({ action, picked }: TaskRowProps) {
         {picked ? <ListX className="size-3.5" /> : <ListPlus className="size-3.5" />}
       </button>
 
-      <span className={cn('min-w-0 flex-1 truncate text-sm', action.done && 'text-muted-foreground line-through')}>
+      <span
+        title={action.label}
+        className={cn('min-w-0 flex-1 truncate text-sm', action.done && 'text-muted-foreground line-through')}
+      >
         {action.label}
       </span>
 
@@ -195,7 +204,7 @@ function EmptyCatalogue({
 }
 
 /** Karta porażki odczytu (konwencja dziennika): komunikat + retry; dane zostają nietknięte. */
-function CatalogueReadError({ onRetry }: { onRetry(): void }) {
+export function CatalogueReadError({ onRetry }: { onRetry(): void }) {
   return (
     <div role="alert" className="rounded-xl border border-destructive/40 bg-destructive/5 p-6 text-center">
       <h3 className="text-base font-semibold">Katalog zadań nie może odczytać danych</h3>

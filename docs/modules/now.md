@@ -67,6 +67,13 @@ Zasady kierujące:
 - **Double-toggle tej samej akcji** → deterministyczny klucz `now:${actionId}` czyni operację idempotentną.
 - **Membership w trakcie ładowania** (przełączniki po stronie Zadania/workbench) → kontrolki czekają (disabled), zamiast kłamać stanem.
 
+*Z hardenu 2026-08-27 (ADR-0027, ewidencja: `now-edgecases.md`):*
+
+- **Wyścig stanu pustego** → wariant (świeży świat / brak wyboru) wybierany dopiero na rozstrzygniętej liczbie otwartych wątków; do tego czasu szkielet.
+- **Zmiana kolejki w trakcie przeciągania** → reorder zapisuje tylko z poprawnych indeksów (guarda na −1) — fałszywy porządek dnia jest niemożliwy.
+- **Porażka odczytów pomocniczych** (członkostwo, licznik wątków) → sentinel + wspólna karta retry z kolejki; brak wiecznie-wiecznego disabled.
+- **Długie teksty** → truncation z `title=` (pełna treść osiągalna); numeracja ≥ 100 nie nachodzi na checkbox.
+
 ## Integration Points
 
 - **data-layer**: `nowRepo` (jedyne API mutacji), liveQuery join `nowItems × actions × loops`; kaskady w `actionsRepo.remove`, `loopsRepo.remove/abandon`, `closeLoopWithWin`.
