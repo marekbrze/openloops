@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react'
 import { DevToolbar } from './shared/components/DevToolbar'
+import { NowScreen } from './modules/now/components/now-screen'
+import { TaskListScreen } from './modules/tasks/components/task-list-screen'
 import { WorkbenchScreen } from './modules/workbench/components/workbench-screen'
 import { JournalScreen } from './modules/journal/components/journal-screen'
 import { AppNotices } from './shared/components/app-notices'
 import type { ViewId } from './lib/navigation'
 import { ensureScenarioBootstrapped } from './scenarios/loader'
 
+/* ADR-0020: Teraz = lądowanie i główny ekran pracy; workbench schodzi na pozycję narzędzia. */
 const MODULE_TABS: { id: ViewId; label: string }[] = [
+  { id: 'now', label: 'Teraz' },
+  { id: 'tasks', label: 'Zadania' },
   { id: 'workbench', label: 'Workbench' },
   { id: 'journal', label: 'Dziennik' },
 ]
@@ -17,7 +22,7 @@ const BOOT_ERROR_MESSAGE =
 function App() {
   const [ready, setReady] = useState(false)
   const [bootError, setBootError] = useState<string | null>(null)
-  const [view, setView] = useState<ViewId>('workbench')
+  const [view, setView] = useState<ViewId>('now')
 
   // Seed scenariusza przed pierwszym renderem; porażka otwarcia IndexedDB = widoczny ekran błędu (luka #2).
   useEffect(() => {
@@ -84,6 +89,10 @@ function App() {
           </div>
         ) : !ready ? (
           <p className="p-4 text-sm text-muted-foreground">Ładowanie danych lokalnych…</p>
+        ) : view === 'now' ? (
+          <NowScreen />
+        ) : view === 'tasks' ? (
+          <TaskListScreen />
         ) : view === 'workbench' ? (
           <WorkbenchScreen />
         ) : (

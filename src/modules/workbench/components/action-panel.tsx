@@ -19,6 +19,7 @@ import { EditableText } from '@/shared/components/editable-text'
 import { guard } from '@/shared/lib/mutations'
 import { notify, openView } from '@/shared/lib/notify'
 import { plDndAccessibility } from '@/shared/lib/pl-dnd'
+import { usePickedActionIds } from '@/modules/now/hooks/use-now'
 import { useLoop, useLoopActions } from '../hooks/use-workbench'
 import { ActionAddForm } from './action-add-form'
 import { CloseLoopModal } from './close-loop-modal'
@@ -39,6 +40,8 @@ interface ActionPanelProps {
 export function ActionPanel({ loopId, firstRun }: ActionPanelProps) {
   const loop = useLoop(loopId)
   const actions = useLoopActions(loopId)
+  // Jedna kwerenda członkostwa Teraz na cały panel — wiersze nie utrzymują własnych liveQuery.
+  const pickedIds = usePickedActionIds()
   const [closeOpen, setCloseOpen] = useState(false)
   const [pendingDeleteAction, setPendingDeleteAction] = useState<LoopAction | undefined>(undefined)
   const [confirmLoopDelete, setConfirmLoopDelete] = useState(false)
@@ -105,7 +108,12 @@ export function ActionPanel({ loopId, firstRun }: ActionPanelProps) {
                 <EmptyActionsHint />
               ) : (
                 actions.map((action) => (
-                  <SortableActionRow key={action.id} action={action} onRequestDelete={requestDeleteAction} />
+                  <SortableActionRow
+                    key={action.id}
+                    action={action}
+                    picked={pickedIds?.has(action.id)}
+                    onRequestDelete={requestDeleteAction}
+                  />
                 ))
               )}
             </ul>

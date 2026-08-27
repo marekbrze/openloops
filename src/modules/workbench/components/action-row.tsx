@@ -1,7 +1,7 @@
-import { Trash2 } from 'lucide-react'
+import { ListPlus, ListX, Trash2 } from 'lucide-react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { actionsRepo, dayKey } from '@/modules/data-layer'
+import { actionsRepo, dayKey, nowRepo } from '@/modules/data-layer'
 import type { LoopAction } from '@/modules/data-layer'
 import { cn } from '@/lib/utils'
 import { EditableText } from '@/shared/components/editable-text'
@@ -10,12 +10,14 @@ import { draggingStyle, LoopGripHandle } from './loop-card'
 
 interface ActionRowProps {
   action: LoopAction
+  /** Czy akcja leży w kolejce Teraz; `undefined` = członkostwo jeszcze nieczytelne (przełącznik czeka). */
+  picked?: boolean | undefined
   /** Panel decyduje: done wymaga potwierdzenia, undone znika od razu. */
   onRequestDelete: (action: LoopAction) => void
 }
 
-/** Jednoliniowy wiersz akcji (decyzja layoutu lofi): checkbox · etykieta · typ · dopytanie · uchwyt. */
-export function SortableActionRow({ action, onRequestDelete }: ActionRowProps) {
+/** Jednoliniowy wiersz akcji (decyzja layoutu lofi): checkbox · etykieta · typ · dopytanie · Teraz · uchwyt. */
+export function SortableActionRow({ action, picked, onRequestDelete }: ActionRowProps) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
     id: action.id,
   })
@@ -62,6 +64,9 @@ export function SortableActionRow({ action, onRequestDelete }: ActionRowProps) {
         />
       )}
 
+      {/* ADR-0022: dołączanie do Teraz to druga kontrolka obok checkboxa, nigdy jego zamiana. */}
+      <PickForNowToggle action={action} picked={picked} />
+
       <button
         type="button"
         onClick={() => onRequestDelete(action)}
@@ -79,6 +84,36 @@ export function SortableActionRow({ action, onRequestDelete }: ActionRowProps) {
         className="shrink-0 text-muted-foreground"
       />
     </li>
+  )
+}
+
+/**
+ * Przełącznik dołączenia do kolejki Teraz (ADR-0022): osobna kontrolka obok checkboxa,
+ * wyłączona dla done — skończone zadanie nie wraca do planowania dnia.
+ */
+function PickForNowToggle({ action, picked }: { action: LoopAction; picked?: boolean | undefined }) {
+  const toggle = () =>
+    void guard(() => (picked ? nowRepo.removeByActionId(action.id) : nowRepo.add(action.id)))
+  const disabled = Boolean(action.done) || picked === undefined
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={disabled}
+      aria-pressed={picked ?? false}
+      aria-label={picked ? `Zdejmij z kolejki Teraz: ${action.label}` : `Dodaj do kolejki Teraz: ${action.label}`}
+      title="Kolejka Teraz"
+      data-no-select
+      className={cn(
+        'shrink-0 rounded-md p-1 transition-colors focus-visible:ring-2 focus-visible:ring-ring',
+        // Zawsze widoczny — to podstawowa droga dołączania do dnia, nie operacja destrukcyjna.
+        picked ? 'bg-secondary text-secondary-foreground' : 'text-muted-foreground hover:bg-muted',
+        disabled && 'cursor-not-allowed opacity-40 hover:bg-transparent',
+      )}
+    >
+      {picked ? <ListX className="size-3.5" /> : <ListPlus className="size-3.5" />}
+    </button>
   )
 }
 
