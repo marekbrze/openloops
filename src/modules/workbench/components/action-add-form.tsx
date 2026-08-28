@@ -29,14 +29,14 @@ export function ActionAddForm({ onAdd }: ActionAddFormProps) {
   }
 
   return (
-    <form onSubmit={submit} className="flex items-center gap-1.5 rounded-lg border border-dashed border-border p-1.5">
+    <form onSubmit={submit} className="flex items-center gap-1.5 rounded-lg border border-dashed border-border bg-muted p-1.5 focus-within:border-ring/50">
       <input
         ref={inputRef}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         aria-label="Etykieta nowej akcji"
         placeholder="Dopisz krok do wątku…"
-        className="h-7 min-w-0 flex-1 rounded-md bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:bg-muted/50"
+        className="h-7 min-w-0 flex-1 rounded-md bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground"
       />
       <Button type="submit" size="sm" variant="outline" disabled={busy || !value.trim()}>
         {busy ? 'Dodaję…' : 'Dodaj'}

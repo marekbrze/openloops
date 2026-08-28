@@ -88,7 +88,7 @@ export function AddLoopForm({ onAdded, focusOnMount }: AddLoopFormProps) {
           onChange={(e) => setGoalText(e.target.value)}
           aria-label="Cel nowego wątku (opcjonalny)"
           placeholder="Po czym wiem, że gotowe? (opcjonalne)"
-          className="mt-1 h-8 w-full rounded-md border border-dashed border-border bg-muted/30 px-2 text-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="mt-1 h-8 w-full rounded-md border border-dashed border-border bg-muted px-2 text-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         />
       )}
       {error && (
