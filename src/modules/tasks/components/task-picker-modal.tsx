@@ -114,7 +114,7 @@ function TaskGroupHeading({ group }: { group: TaskGroup }) {
       <h3 title={group.loop.title} className="min-w-0 truncate text-sm font-semibold tracking-tight">
         {group.loop.title}
       </h3>
-      <span className="ml-auto shrink-0 text-[11px] tabular-nums text-muted-foreground">
+      <span className="ml-auto shrink-0 text-xs tabular-nums text-muted-foreground">
         {done}/{total}
       </span>
     </div>
@@ -138,7 +138,7 @@ function TaskRow({ action, picked }: TaskRowProps) {
   return (
     <li
       className={cn(
-        'flex items-center gap-1.5 rounded-lg border border-border bg-card py-1 pl-6 pr-2 shadow-sm',
+        'flex items-center gap-1.5 rounded-lg border border-border bg-card py-1 pl-6 pr-2 transition-colors duration-150 hover:bg-muted/60',
         action.done && 'opacity-70',
       )}
     >
@@ -164,12 +164,12 @@ function TaskRow({ action, picked }: TaskRowProps) {
         {action.label}
       </span>
 
-      <span className="shrink-0 text-[11px] whitespace-nowrap text-muted-foreground">
+      <span className="shrink-0 text-xs whitespace-nowrap text-muted-foreground">
         {waiting ? 'czekam' : 'mój ruch'}
       </span>
 
       {waiting && overdue && (
-        <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[11px] font-medium text-destructive">
+        <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-warning/15 px-1.5 py-0.5 text-xs font-medium text-warning-ink">
           <Clock3 className="size-3" />
           po terminie
         </span>
