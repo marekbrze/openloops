@@ -2,7 +2,6 @@ import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react'
 import { Clock3, GripVertical } from 'lucide-react'
 import type { Loop, LoopAction } from '@/modules/data-layer'
 import { cn } from '@/lib/utils'
-import { EditableText } from '@/shared/components/editable-text'
 import { getProgressView, hasWaitingOn, overdueCount } from '../lib/workbench-ui'
 
 /** Propsy uchwytu podłączone przez useSortable (typy luźne, bo API listenerów jest generyczne). */
@@ -19,17 +18,18 @@ interface LoopCardProps extends DragHandleProps {
   selected: boolean
   todayKey: string
   onSelect: () => void
-  onRename: (title: string) => void
 }
 
-/** Karta wątku na liście po lewej: tytuł, progres/pochodne, uchwyt DnD (ADR: grip). */
+/**
+ * Karta wątku na liście po lewej: tytuł, progres/pochodne, uchwyt DnD (ADR: grip).
+ * ADR-0029: klik na kartę wyłącznie zaznacza — zmiana nazwy dzieje się w panelu akcji.
+ */
 export function LoopCard({
   loop,
   actions,
   selected,
   todayKey,
   onSelect,
-  onRename,
   handleRef,
   attributes,
   listeners,
@@ -64,8 +64,8 @@ export function LoopCard({
           listeners={listeners}
           className="mt-1 shrink-0 text-muted-foreground"
         />
-        <div className="min-w-0 flex-1" data-no-select>
-          <EditableText value={loop.title} onChange={onRename} ariaLabel="Tytuł wątku" className="text-sm font-medium" />
+        <div className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium">{loop.title}</span>
         </div>
       </div>
 

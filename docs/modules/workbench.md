@@ -10,7 +10,7 @@ Zasady kierujące (z wywiadu 2026-08-27):
 
 - **Szybkość przechwytywania ponad formalność** — nowy wątek to pole inline nad listą, nie modal; świeży temat ląduje **na górze**, od razu zaznaczony do rozpisania.
 - **Układ dwukolumnowy jest stały** — pusty prawy panel pokazuje zachętę „Wybierz wątek…", nigdy skoku layoutu.
-- **Edycja wszędzie klik-to-edit** — drobne poprawki tekstów nie przechodzą przez dialogi; dedykowane przełączniki tylko dla danych strukturalnych (typ akcji, data dopytania).
+- **Edycja wszędzie klik-to-edit** — drobne poprawki tekstów nie przechodzą przez dialogi; dedykowane przełączniki tylko dla danych strukturalnych (typ akcji, data dopytania). Wyjątek (ADR-0029): karta wątku tylko zaznacza — nazwa edytuje się w panelu.
 - **Moment domknięcia jest celebracją** — modal „Cel osiągnięty" nazywa zwycięstwo i mówi, że wpis trafia do dziennika.
 - **Zero fałszywego progresu** — brak akcji „mój ruch" = brak bara, tylko etykieta stanu.
 
@@ -34,6 +34,7 @@ Zasady kierujące (z wywiadu 2026-08-27):
 1. Skończony „mój ruch" → checkbox → pasek progresu wątku rośnie **od razu i tylko o ten typ**; powstaje małe zwycięstwo w dzienniku.
 2. Odhaczenie z powrotem usuwa swój wpis dziennika — bilans dnia wraca do stanu realnego.
 3. Akcje „czekam na kogoś" mają swój checkbox (done ⇄ todo), ale na progres nie wpływają.
+4. Auto-sort (ADR-0030): zrobione natychmiast **zjeżdżają na dół listy**; odhaczenie wraca na dawne miejsce wśród otwartych.
 
 ### Czekam na kogoś / data dopytania
 
@@ -57,7 +58,7 @@ Zasady kierujące (z wywiadu 2026-08-27):
 ## Screens (rough)
 
 - **Lewa kolumna — lista wątków**: nagłówek z licznikiem otwartych, inline formularz dodawania (tytuł [+ cel]), lista kart, na dole zwijana sekcja „Domknięte i porzucone (N)". Przewaga: jedna kolumna przewijalna, zero modali przy codziennej pracy.
-- **Karta wątku**: tytuł, pasek progresu **lub** etykieta zastępcza (brak akcji „mój ruch"), wskaźnik „czeka na innych N", plakietka „X po terminie" gdy dotyczy.
+- **Karta wątku**: tytuł (statyczny — klik zaznacza, ADR-0029), pasek progresu **lub** etykieta zastępcza (brak akcji „mój ruch"), wskaźnik „czeka na innych N", plakietka „X po terminie" gdy dotyczy.
 - **Prawa kolumna — panel akcji**: nagłówek (tytuł klik-to-edit, przycisk „Domknij", menu ⋯: Porzuć / Usuń…), lista akcji (checkbox, etykieta klik-to-edit, przełącznik typu, data dopytania, handle DnD), **przypięty cel** jako ostatni element (wyróżniony wizualnie, klik-to-edit, nieruchomy w DnD).
 - **Panel bez zaznaczenia**: placeholder — ikona/krótka zachęta „Wybierz wątek…" + wskazówka o dodaniu pierwszego, gdy lista też pusta.
 - **Modal domknięcia**: nagłówek „Cel osiągnięty”, nazwa wątku, notka o wpisie do dziennika, Confirm/Anuluj; po potwierdzeniu toast z przejściem do Dziennika.
@@ -70,13 +71,13 @@ Zasady kierujące (z wywiadu 2026-08-27):
 | Action | Description | Entity | Notes |
 |--------|------------|--------|-------|
 | Add Loop | Inline form nad listą; nowy wątek **na górę** i auto-zaznaczony | Loop | quick capture |
-| Edit Loop | Tytuł klik-to-edit (karta i panel) | Loop | |
+| Edit Loop | Tytuł klik-to-edit — tylko w panelu (ADR-0029) | Loop | karta nie edytuje |
 | Reorder Loops | Drag & drop; ręczny priorytet; kolejność nigdy się nie resetuje | Loop | |
 | Select Loop | Klik na kartę → prawa kolumna | Loop | nawigacja, bez zmiany danych |
-| Add Action | Na koniec listy, nad przypiętym celem | Action | |
+| Add Action | Na koniec grupy otwartych, nad zrobionymi i celem | Action | |
 | Edit Action | Etykieta klik-to-edit; przełącznik typu; data dopytania tylko WaitingOn | Action | |
-| Toggle Done | Checkbox; mój-ruch napędza progres + wpis dziennika; uncheck usuwa wpis | Action | jedyny pisarz DayEntry |
-| Reorder Actions | Drag & drop — plan wykonania | Action | cel przypięty ostatni |
+| Toggle Done | Checkbox; mój-ruch napędza progres + wpis dziennika; uncheck usuwa wpis | Action | jedyny pisarz DayEntry; done zjeżdża na dół (ADR-0030) |
+| Reorder Actions | Drag & drop — plan wykonania wewnątrz grup (otwarte / zrobione) | Action | cel przypięty ostatni |
 | Delete Action | Potwierdzenie gdy done; bilans dnia aktualizuje się wstecz | Action | |
 | Edit Goal | Cel klik-to-edit, także po domknięciu | Goal | |
 | Close Loop | CTA w nagłówku panelu → modal „Cel osiągnięty" | Loop | większe zwycięstwo → DayEntry |

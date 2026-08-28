@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Inbox } from 'lucide-react'
 import {
   DndContext,
@@ -51,14 +51,23 @@ export function ActionPanel({ loopId, firstRun }: ActionPanelProps) {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
+  /**
+   * Auto-sort (ADR-0030): zrobione zawsze zjeżdżają na dół listy, każda grupa wewnątrz
+   * siebie zachowuje ręczną kolejność (sortOrder). Odhaczenie wraca na swoje dawne miejsce.
+   */
+  const orderedActions = useMemo(
+    () => [...actions.filter((a) => !a.done), ...actions.filter((a) => a.done)],
+    [actions],
+  )
+
   if (!loop || loop.status !== 'open') return <PanelPlaceholder firstRun={firstRun} />
 
   /** Reordering nie ma dostępu do celu — SortableContext obejmuje wyłącznie akcje (ADR priority area). */
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return
-    const oldIndex = actions.findIndex((a) => a.id === active.id)
-    const newIndex = actions.findIndex((a) => a.id === over.id)
-    void guard(() => actionsRepo.reorder(arrayMove(actions, oldIndex, newIndex).map((a) => a.id)))
+    const oldIndex = orderedActions.findIndex((a) => a.id === active.id)
+    const newIndex = orderedActions.findIndex((a) => a.id === over.id)
+    void guard(() => actionsRepo.reorder(arrayMove(orderedActions, oldIndex, newIndex).map((a) => a.id)))
   }
 
   /** ACTIONS.md: done-akcja znika za potwierdzeniem (traci bieżące zwycięstwo); undone natychmiast. */
@@ -102,12 +111,12 @@ export function ActionPanel({ loopId, firstRun }: ActionPanelProps) {
 
       <div className="min-h-0 flex-1 overflow-y-auto pb-12 pt-3">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} accessibility={plDndAccessibility}>
-          <SortableContext items={actions.map((a) => a.id)} strategy={verticalListSortingStrategy}>
-            <ul className="space-y-1" aria-label="Działania wątku — ręczna kolejność wykonania">
+          <SortableContext items={orderedActions.map((a) => a.id)} strategy={verticalListSortingStrategy}>
+            <ul className="space-y-1" aria-label="Działania wątku — otwarte wg ręcznej kolejności, wykonane na końcu">
               {actions.length === 0 ? (
                 <EmptyActionsHint />
               ) : (
-                actions.map((action) => (
+                orderedActions.map((action) => (
                   <SortableActionRow
                     key={action.id}
                     action={action}
@@ -121,7 +130,7 @@ export function ActionPanel({ loopId, firstRun }: ActionPanelProps) {
           </SortableContext>
         </DndContext>
 
-        {/* Nowe kroki trafiają na koniec listy (repo sortOrder = length) — zawsze tuż nad celem. */}
+        {/* Nowe kroki (zawsze niezrobione) lądują na końcu grupy otwartych — nad zrobionymi i celem. */}
         <div className="mt-2">
           <ActionAddForm onAdd={(label) => guard(() => actionsRepo.add(loop.id, label, 'MyMove'))} />
         </div>

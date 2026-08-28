@@ -51,7 +51,6 @@ export const WithProgress: Story = {
         { id: 'a3', loopId: 'loop-demo', label: 'Przegląd z devem', ownerType: 'WaitingOn', followUpDate: dkey(3), done: false, sortOrder: 2, createdAt: ts, updatedAt: ts },
       ] as LoopAction[]}
       todayKey={dkey(0)}
-      onRename={() => {}}
     />
   ),
 }
@@ -64,7 +63,6 @@ export const WaitingOnly: Story = {
         { id: 'b1', loopId: 'loop-demo', label: 'Czekać na kontrpropozycję stawki', ownerType: 'WaitingOn', done: false, sortOrder: 0, createdAt: ts, updatedAt: ts },
       ] as LoopAction[]}
       todayKey={dkey(0)}
-      onRename={() => {}}
     />
   ),
 }
@@ -75,7 +73,6 @@ export const EmptySteps: Story = {
       loop={mkLoop({ title: 'Case study openloops w portfolio' })}
       actions={[]}
       todayKey={dkey(0)}
-      onRename={() => {}}
     />
   ),
 }
@@ -88,7 +85,6 @@ export const OverdueFollowUp: Story = {
         { id: 'c1', loopId: 'loop-demo', label: 'Potwierdzić budżet u finansów', ownerType: 'WaitingOn', followUpDate: dkey(-1), done: false, sortOrder: 0, createdAt: ts, updatedAt: ts },
       ] as LoopAction[]}
       todayKey={dkey(0)}
-      onRename={() => {}}
     />
   ),
 }
@@ -102,7 +98,6 @@ export const MyMoveComplete: Story = {
         { id: 'e2', loopId: 'loop-demo', label: 'Umówić sesję retro', ownerType: 'WaitingOn', done: false, sortOrder: 1, createdAt: ts, updatedAt: ts },
       ] as LoopAction[]}
       todayKey={dkey(0)}
-      onRename={() => {}}
     />
   ),
 }

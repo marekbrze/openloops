@@ -147,7 +147,6 @@ function SortableLoopItem({
         selected={selected}
         todayKey={dayKey()}
         onSelect={onSelect}
-        onRename={(title) => void guard(() => loopsRepo.update(loop.id, { title }))}
         handleRef={setActivatorNodeRef}
         attributes={attributes as unknown as Record<string, unknown>}
         listeners={listeners as unknown as Record<string, unknown> | undefined}

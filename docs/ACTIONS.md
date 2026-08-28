@@ -13,7 +13,7 @@ Complete list of actions users can perform, organized by entity.
 | Action | Description | Role | Notes |
 |--------|------------|------|-------|
 | Add Loop | Przechwycenie nowego otwartego tematu: tytuł + (opcjonalnie od razu) cel | Owner | inline form nad listą (bez modala); **nowy trafia na górę** i zostaje auto-zaznaczony |
-| Edit Loop | Zmiana tytułu klik-to-edit (karta i panel); zmiana treści celu przez edycję Goal | Owner | konwencja: teksty bez dialogów |
+| Edit Loop | Zmiana tytułu klik-to-edit — tylko w prawym panelu (karta wątku tylko zaznacza, ADR-0029); zmiana treści celu przez edycję Goal | Owner | konwencja: teksty bez dialogów |
 | Reorder Loops | Ręczne ustawienie priorytetów drag & drop na liście po lewej | Owner | `sort_order`; kolejność nie resetuje się sama |
 | Select Loop | Zaznaczenie wątku otwiera jego akcje w prawym panelu | Owner | akcja nawigacyjna — nie zmienia danych; przy braku zaznaczenia panel pokazuje zachętę |
 | Close Loop | Ręczne domknięcie: „cel osiągnięty". open → closed | Owner | CTA w nagłówku panelu → **modal celebracyjny** z notką o wpisie do dziennika; nie wymaga odhaczonych wszystkich akcji; **większe zwycięstwo** |
