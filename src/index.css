@@ -71,6 +71,8 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
+    /* Zasłona modala — stała ciemna w obu motywach (foreground/50 w dark dawało jasną mgłę). */
+    --color-scrim: oklch(0 0 0 / 45%);
     /* Motion: sprężyste wyhamowanie, tylko stany (DESIGN.md). */
     --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -97,7 +99,7 @@
     --card-foreground: oklch(0.24 0.015 240);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.24 0.015 240);
-    --primary: oklch(0.588 0.158 242);
+    --primary: var(--brand-700); /* brand-700: biały tekst 5.75:1, text-primary 5.84:1 (brand-600 miewał 3.96) */
     --primary-foreground: oklch(0.995 0.005 235);
     --secondary: oklch(0.965 0.007 235);
     --secondary-foreground: oklch(0.3 0.015 240);
@@ -112,7 +114,7 @@
     --warning-ink: oklch(0.47 0.11 70);
     --border: oklch(0.918 0.008 235);
     --input: oklch(0.9 0.01 235);
-    --ring: oklch(0.588 0.158 242);
+    --ring: var(--brand-700);
     --chart-1: var(--brand-600);
     --chart-2: var(--brand-400);
     --chart-3: var(--brand-300);
@@ -121,12 +123,12 @@
     --radius: 0.5rem;
     --sidebar: oklch(1 0 0);
     --sidebar-foreground: oklch(0.24 0.015 240);
-    --sidebar-primary: oklch(0.588 0.158 242);
+    --sidebar-primary: var(--brand-700);
     --sidebar-primary-foreground: oklch(0.995 0.005 235);
     --sidebar-accent: oklch(0.955 0.012 235);
     --sidebar-accent-foreground: oklch(0.3 0.02 240);
     --sidebar-border: oklch(0.918 0.008 235);
-    --sidebar-ring: oklch(0.588 0.158 242);
+    --sidebar-ring: var(--brand-700);
 }
 
 /*

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { DevToolbar } from './shared/components/DevToolbar'
+import { Button } from '@/components/ui/button'
 import { NowScreen } from './modules/now/components/now-screen'
 import { WorkbenchScreen } from './modules/workbench/components/workbench-screen'
 import { JournalScreen } from './modules/journal/components/journal-screen'
@@ -80,13 +81,9 @@ function App() {
           <div role="alert" className="mx-auto mt-10 max-w-lg rounded-xl border border-destructive/40 bg-destructive/5 p-6 text-center">
             <h1 className="text-base font-semibold">Aplikacja nie może wystartować</h1>
             <p className="pt-2 text-sm text-muted-foreground">{bootError}</p>
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="mt-4 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
-            >
+            <Button className="mt-4" onClick={() => window.location.reload()}>
               Spróbuj ponownie
-            </button>
+            </Button>
           </div>
         ) : !ready ? (
           <p className="p-4 text-sm text-muted-foreground">Ładowanie danych lokalnych…</p>

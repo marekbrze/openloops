@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+
 interface JournalReadErrorProps {
   onRetry(): void
 }
@@ -14,13 +16,9 @@ export function JournalReadError({ onRetry }: JournalReadErrorProps) {
         Lokalna baza danych (IndexedDB) odrzuciła odczyt — najczęstsze powody to tryb prywatny
         albo zablokowana pamięć strony. Twoje zapisy nie zginęły.
       </p>
-      <button
-        type="button"
-        onClick={onRetry}
-        className="mt-4 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
-      >
+      <Button className="mt-4" onClick={onRetry}>
         Spróbuj ponownie
-      </button>
+      </Button>
     </div>
   )
 }

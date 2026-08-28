@@ -52,7 +52,7 @@ export function Dialog({ open, onClose, labelId, describeId, children, className
       onClick={handleBackdropClick}
       className={cn(
         'm-auto max-w-md rounded-xl border border-border bg-background p-6 text-foreground shadow-xl outline-none',
-        'backdrop:bg-foreground/50 backdrop:backdrop-blur-[1px]',
+        'backdrop:bg-scrim',
         className,
       )}
     >

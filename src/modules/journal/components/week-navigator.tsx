@@ -10,7 +10,7 @@ interface WeekNavigatorProps {
 }
 
 const navButton =
-  'rounded-md p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40'
+  'rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40'
 
 /** Nagłówek widoku: zakres dat z nawigacją ← / → / „Dziś". Zmiana zakresu ogłaszana przez aria-live. */
 export function WeekNavigator({ title, isCurrentWeek, onPreviousWeek, onNextWeek, onToday }: WeekNavigatorProps) {
@@ -37,7 +37,7 @@ export function WeekNavigator({ title, isCurrentWeek, onPreviousWeek, onNextWeek
         type="button"
         onClick={onToday}
         disabled={isCurrentWeek}
-        className="rounded-lg border border-border px-2.5 py-1 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40"
+        className="rounded-lg border border-border px-2.5 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40"
       >
         Dziś
       </button>

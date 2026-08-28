@@ -25,13 +25,18 @@ export function WorkbenchScreen() {
   const firstRun = Boolean(openLoops && closedLoops && openLoops.length === 0 && closedLoops.length === 0)
 
   return (
-    <div className="grid h-full min-h-0 grid-cols-1 gap-4 lg:grid-cols-2">
-      <div className="min-h-0 overflow-hidden lg:h-full">
-        <LoopListColumn selectedId={selectedId} onSelectLoop={setSelectedId} />
+    <>
+      {/* Ekran bez własnego h1 (tytuł wątku jest edytowalnym panelem, nie nagłówkiem strony) —
+          hierarchia nagłówków dla czytników: h1 widoku → h2 kolumn. */}
+      <h1 className="sr-only">Workbench</h1>
+      <div className="grid h-full min-h-0 grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="min-h-0 overflow-hidden lg:h-full">
+          <LoopListColumn selectedId={selectedId} onSelectLoop={setSelectedId} />
+        </div>
+        <div className="min-h-0 overflow-hidden lg:h-full">
+          <ActionPanel loopId={selectedId} firstRun={firstRun} />
+        </div>
       </div>
-      <div className="min-h-0 overflow-hidden lg:h-full">
-        <ActionPanel loopId={selectedId} firstRun={firstRun} />
-      </div>
-    </div>
+    </>
   )
 }

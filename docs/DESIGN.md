@@ -36,8 +36,8 @@ UX-owka pracuje z tym cały dzień — rano planuje kolejkę przy jasnym oknie, 
 | --brand-300 | oklch(0.828 0.111 230) | |
 | --brand-400 | oklch(0.746 0.16 233) | primary w ciemnym |
 | --brand-500 | oklch(0.685 0.169 237) | ziarno (Tailwind sky-500) |
-| --brand-600 | oklch(0.588 0.158 242) | **primary w jasnym** (buttons, ring) |
-| --brand-700 | oklch(0.5 0.134 242) | hover primary |
+| --brand-600 | oklch(0.588 0.158 242) | |
+| --brand-700 | oklch(0.5 0.134 242) | **primary w jasnym** (buttons, ring) — biały tekst 5.75:1, text-primary 5.84:1; brand-600 miewał 3.96 na labelach przycisków |
 | --brand-800 | oklch(0.443 0.11 241) | |
 | --brand-900 | oklch(0.391 0.09 241) | |
 
@@ -64,7 +64,7 @@ Chroma neutralnych: 0.006–0.018, ku **hue 235–240** (chłodno, „oddychają
 | destructive | oklch(0.577 0.2 27) / tint oklch(0.955 0.02 27) | oklch(0.68 0.17 25) | błędy, porzucenie wątku, usuwanie |
 | warning | oklch(0.68 0.14 75) / tint oklch(0.96 0.035 80) | oklch(0.78 0.13 75) | „czekam na kogoś" po terminie (data dopytania), stany wstrzymania |
 
-**Dark mode**: głębia z jasności powierzchni (canvas 16% → card 20.5% → popover 25%), ten sam hue/chroma co brand; akcent jaśnieje do --brand-400, body weight bez zmian (Geist trzyma czytelność). Tylko warstwa semantyczna (`:root` ↔ `.dark`) się zmienia — prymitywy stałe.
+**Dark mode**: głębia z jasności powierzchni (canvas 16% → card 20.5% → popover 25%), ten sam hue/chroma co brand; akcent jaśnieje do --brand-400, body weight bez zmian (Geist trzyma czytelność). Tylko warstwa semantyczna (`:root` ↔ `.dark`) się zmienia — prymitywy stałe. **Scrim modala**: stały `oklch(0 0 0 / 45%)` w obu motywach (jasna mgła z `foreground/50` w dark była błędem).
 **Radius**: jedyna wartość **--radius: 0.5rem** (8px — ciszej i precyzyjniej niż obecne 10px); warianty jak w Tailwind v4 `@theme` (sm ×0.6, md ×0.8, lg ×1, xl ×1.4…). **Focus ring**: brand sky, 2px, offset 2px.
 
 ## Typography
