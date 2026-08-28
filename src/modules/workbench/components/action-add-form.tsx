@@ -29,7 +29,7 @@ export function ActionAddForm({ onAdd }: ActionAddFormProps) {
   }
 
   return (
-    <form onSubmit={submit} className="flex items-center gap-1.5 rounded-lg border border-dashed border-border bg-muted p-1.5 focus-within:border-ring/50">
+    <form onSubmit={submit} className="flex items-center gap-1.5 rounded-lg border border-dashed border-border bg-card p-1.5 focus-within:border-ring/50">
       <input
         ref={inputRef}
         value={value}

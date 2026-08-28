@@ -64,7 +64,7 @@ Chroma neutralnych: 0.008–0.019, ku **hue 235–240** (chłodno, „oddychają
 | destructive | oklch(0.577 0.2 27) / tint oklch(0.955 0.02 27) | oklch(0.68 0.17 25) | błędy, porzucenie wątku, usuwanie |
 | warning | oklch(0.68 0.14 75) / tint oklch(0.96 0.035 80) | oklch(0.78 0.13 75) | „czekam na kogoś" po terminie (data dopytania), stany wstrzymania |
 
-**Dark mode**: głębia z jasności powierzchni (canvas 14.5% → card 21.5% → popover 26.5%), ten sam hue/chroma co brand; akcent jaśnieje do --brand-400; **kroki surfaces dobrane pod zauważalność** (canvas↔card ΔL≥0.035, hover na karcie = pełna tinta muted, nie rozcieńczona), body weight bez zmian (Geist trzyma czytelność). Tylko warstwa semantyczna (`:root` ↔ `.dark`) się zmienia — prymitywy stałe. **Scrim modala**: stały `oklch(0 0 0 / 45%)` w obu motywach (jasna mgła z `foreground/50` w dark była błędem).
+**Dark mode**: głębia z jasności powierzchni (canvas 14.5% → card 21.5% → popover 26.5%), ten sam hue/chroma co brand; akcent jaśnieje do --brand-400; **kroki surfaces dobrane pod zauważalność** (canvas↔card ΔL≥0.035, hover na karcie = pełna tinta muted, nie rozcieńczona). **Pola inline**: stojące na kanwie = `bg-card` (jaśniejsze od otoczenia — pole aktywne, nie wyłączone; dashed border = slot na wpisanie); „studzienka" `bg-muted` tylko zagnieżdżona w białej karcie. Tylko warstwa semantyczna (`:root` ↔ `.dark`) się zmienia — prymitywy stałe. **Scrim modala**: stały `oklch(0 0 0 / 45%)` w obu motywach (jasna mgła z `foreground/50` w dark była błędem).
 **Radius**: jedyna wartość **--radius: 0.5rem** (8px — ciszej i precyzyjniej niż obecne 10px); warianty jak w Tailwind v4 `@theme` (sm ×0.6, md ×0.8, lg ×1, xl ×1.4…). **Focus ring**: brand sky, 2px, offset 2px.
 
 ## Typography
