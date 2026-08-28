@@ -48,12 +48,13 @@ export function NowScreen() {
       <section aria-label="Teraz — dzisiejsza kolejka pracy" className="mx-auto flex h-full min-h-0 max-w-2xl flex-col">
         <header className="flex shrink-0 items-end justify-between gap-4 pb-4">
           <div className="min-w-0">
-            <h1 className="text-xl font-bold tracking-tight">{formatTodayTitle(today)}</h1>
+            <h1 className="text-xl font-semibold tracking-tight">{formatTodayTitle(today)}</h1>
             {/* Meta kolejki dopiero z danymi — liczenie na undefined zawyżałoby stan pusty. */}
             {rows && <p className="pt-1 text-xs text-muted-foreground">{formatQueueMeta(rows.length - doneCount, doneCount)}</p>}
           </div>
           <div className="flex shrink-0 flex-col items-end gap-2">
-            <time dateTime={formatClockTime(today)} className="text-3xl font-semibold tabular-nums tracking-tight">
+            {/* Zegar w Geist Mono (DESIGN.md: mono tylko zegar/liczby, tabular-nums). */}
+            <time dateTime={formatClockTime(today)} className="font-mono text-2xl font-semibold tabular-nums tracking-tight">
               {formatClockTime(today)}
             </time>
             {/* ADR-0024: dobieranie zadań bez opuszczania głównego ekranu pracy. */}
@@ -155,7 +156,11 @@ function SortableNowRow({ row, position }: SortableNowRowProps) {
     <li
       ref={setNodeRef}
       style={{ ...(transform ? ({ transform: CSS.Transform.toString(transform), zIndex: 20 } satisfies CSSProperties) : {}), transition }}
-      className={cn('group flex items-start gap-2 rounded-lg border border-border bg-card px-2 py-1.5 shadow-sm', isDragging && 'opacity-80')}
+      /* Matte: hairline zamiast cienia (DESIGN.md „cienkie"); subtelny hover jako feedback. */
+      className={cn(
+        'group flex items-start gap-2 rounded-lg border border-border bg-card px-2 py-1.5 transition-colors duration-150 hover:bg-muted/60',
+        isDragging && 'opacity-80',
+      )}
     >
       {/* Luka #5: min-w zamiast stałej szerokości — numeracja ≥ 100 nie nachodzi na checkbox. */}
       <span aria-hidden="true" className="min-w-5 shrink-0 pt-1 text-right text-xs tabular-nums text-muted-foreground">
@@ -175,18 +180,19 @@ function SortableNowRow({ row, position }: SortableNowRowProps) {
         <p title={action.label} className={cn('truncate text-sm', action.done ? 'text-muted-foreground line-through' : '')}>
           {action.label}
         </p>
-        <p className="flex items-center gap-1.5 pt-0.5 text-[11px] text-muted-foreground">
+        <p className="flex items-center gap-1.5 pt-0.5 text-xs text-muted-foreground">
           <span title={loop.title} className="truncate">
             {loop.title}
           </span>
+          {/* Przeterminowane dopytanie = warning (DESIGN.md); destructive zostaje dla błędów i usuwania. */}
           {waiting && (
-            <span className={cn('flex shrink-0 items-center gap-0.5', overdue && 'text-destructive')}>
+            <span className={cn('flex shrink-0 items-center gap-0.5', overdue && 'text-warning-ink')}>
               <Clock3 className="size-3" />
               czeka
             </span>
           )}
           {overdue && (
-            <span className="shrink-0 rounded-full bg-destructive/10 px-1.5 font-medium text-destructive">po terminie</span>
+            <span className="shrink-0 rounded-full bg-warning/15 px-1.5 font-medium text-warning-ink">po terminie</span>
           )}
         </p>
       </div>
