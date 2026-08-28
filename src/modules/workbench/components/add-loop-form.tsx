@@ -53,7 +53,7 @@ export function AddLoopForm({ onAdded, focusOnMount }: AddLoopFormProps) {
   }
 
   return (
-    <form onSubmit={submit} className="rounded-lg border border-border bg-card p-2 shadow-sm" noValidate>
+    <form onSubmit={submit} className="rounded-lg border border-border bg-card p-2 transition-colors duration-150 focus-within:bg-muted/40" noValidate>
       <div className="flex items-center gap-1">
         <input
           ref={titleInputRef}

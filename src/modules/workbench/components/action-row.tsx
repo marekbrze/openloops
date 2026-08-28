@@ -29,7 +29,7 @@ export function SortableActionRow({ action, picked, onRequestDelete }: ActionRow
       ref={setNodeRef}
       style={{ ...draggingStyle(transform ? CSS.Transform.toString(transform) : undefined), transition }}
       className={cn(
-        'group flex items-center gap-1 rounded-lg border border-border bg-card px-1.5 py-1 shadow-sm',
+        'group flex items-center gap-1 rounded-lg border border-border bg-card px-1.5 py-1 transition-colors duration-150 hover:bg-muted/60',
         isDragging && 'opacity-80',
       )}
     >
@@ -108,7 +108,7 @@ function PickForNowToggle({ action, picked }: { action: LoopAction; picked?: boo
       className={cn(
         'shrink-0 rounded-md p-1 transition-colors focus-visible:ring-2 focus-visible:ring-ring',
         // Zawsze widoczny — to podstawowa droga dołączania do dnia, nie operacja destrukcyjna.
-        picked ? 'bg-secondary text-secondary-foreground' : 'text-muted-foreground hover:bg-muted',
+        picked ? 'bg-primary/10 font-medium text-primary' : 'text-muted-foreground hover:bg-muted',
         disabled && 'cursor-not-allowed opacity-40 hover:bg-transparent',
       )}
     >
@@ -145,7 +145,7 @@ function ToggleOption({ label, active, onSelect }: { label: string; active: bool
       onClick={onSelect}
       aria-pressed={active}
       className={cn(
-        'rounded-md px-1.5 py-0.5 text-[11px] whitespace-nowrap transition-colors',
+        'rounded-md px-1.5 py-0.5 text-xs whitespace-nowrap transition-colors',
         active
           ? 'bg-secondary font-medium text-secondary-foreground'
           : 'text-muted-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring',
@@ -178,8 +178,8 @@ function FollowUpDateField({
         aria-describedby={describedBy}
         data-no-select
         className={cn(
-          'w-[7.5rem] shrink-0 rounded-md border bg-background px-1 py-0.5 text-[11px] outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
-          overdue && !done ? 'border-destructive text-destructive' : 'border-border text-muted-foreground',
+          'w-[7.5rem] shrink-0 rounded-md border bg-background px-1 py-0.5 text-xs outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+          overdue && !done ? 'border-warning-ink text-warning-ink' : 'border-border text-muted-foreground',
         )}
       />
       {overdue && !done && (

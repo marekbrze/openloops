@@ -150,7 +150,7 @@ function TaskRow({ action, picked }: TaskRowProps) {
         aria-label={picked ? `Zdejmij z kolejki Teraz: ${action.label}` : `Dodaj do kolejki Teraz: ${action.label}`}
         className={cn(
           'shrink-0 rounded-md p-1 transition-colors focus-visible:ring-2 focus-visible:ring-ring',
-          picked ? 'bg-secondary font-medium text-secondary-foreground' : 'text-muted-foreground hover:bg-muted',
+          picked ? 'bg-primary/10 font-medium text-primary' : 'text-muted-foreground hover:bg-muted',
           (action.done || picked === undefined) && 'cursor-not-allowed opacity-40 hover:bg-transparent',
         )}
       >

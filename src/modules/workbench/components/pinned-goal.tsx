@@ -12,9 +12,10 @@ interface PinnedGoalProps {
  */
 export function PinnedGoal({ goalText, onUpdate }: PinnedGoalProps) {
   return (
-    <div className="mt-3 border-t-2 pt-3" data-goal>
+    <div className="mt-3 border-t pt-3" data-goal>
       <div className="rounded-lg border border-dashed border-border bg-muted/40 p-3">
-        <div className="flex items-center gap-1.5 pb-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+        {/* Nagłówek zwykłym case'em z glyphem wiodącym — bez uppercase-eyebrow (ban z DESIGN.md). */}
+        <div className="flex items-center gap-1.5 pb-1 text-xs font-medium text-muted-foreground">
           <Flag className="size-3.5 shrink-0" />
           Cel — po czym wiem, że gotowe
         </div>

@@ -40,13 +40,13 @@ export function ClosedLoopsSection({ loops, onRequestDelete, onReopen }: ClosedL
             {loops.map((loop) => (
               <li key={loop.id} className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-2 py-1.5">
                 {loop.status === 'closed' ? (
-                  <CheckCircle2 aria-label="Domknięty" className="size-3.5 shrink-0 text-primary" />
+                  <CheckCircle2 aria-label="Domknięty" className="size-3.5 shrink-0 text-success" />
                 ) : (
                   <CircleSlash aria-label="Porzucony" className="size-3.5 shrink-0 text-muted-foreground" />
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-medium">{loop.title}</p>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {loop.status === 'closed' ? 'domknięty' : 'porzucony'} · {dateOf(loop)}
                   </p>
                 </div>

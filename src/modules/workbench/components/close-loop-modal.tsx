@@ -30,7 +30,7 @@ export function CloseLoopModal({ loop, onClose, onConfirm }: CloseLoopModalProps
   return (
     <Dialog open={Boolean(loop)} onClose={onClose} labelId="close-loop-title" describeId="close-loop-desc">
       <div className="flex items-center gap-2">
-        <span className="rounded-full bg-primary/10 p-2 text-primary">
+        <span className="rounded-full bg-success/15 p-2 text-success-ink">
           <Trophy className="size-5" />
         </span>
         <h2 id="close-loop-title" className="text-lg font-semibold tracking-tight">

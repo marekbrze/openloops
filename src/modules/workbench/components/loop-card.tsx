@@ -53,8 +53,9 @@ export function LoopCard({
       onClick={selectUnlessInteractive}
       onKeyDown={onKeyDownSelect}
       className={cn(
-        'rounded-lg border bg-card p-2 shadow-sm transition-colors',
-        selected ? 'border-ring ring-2 ring-ring/30' : 'border-border hover:border-ring/50',
+        // Matte: hairline bez cienia (DESIGN.md „cienkie"); jeden sygnał hover (tinta), ring tylko dla zaznaczenia.
+        'rounded-lg border bg-card p-2 transition-colors duration-150 hover:bg-muted/60',
+        selected ? 'border-ring ring-2 ring-ring/30' : 'border-border',
       )}
     >
       <div className="flex items-start gap-1">
@@ -98,29 +99,29 @@ function ProgressArea({ actions, todayKey }: { actions: LoopAction[]; todayKey: 
               style={{ width: `${Math.round((view.done / view.total) * 100)}%` }}
             />
           </div>
-          <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
+          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
             {view.done}/{view.total}
           </span>
         </>
       )}
       {view.kind === 'waiting-only' && (
-        <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+        <span className="flex items-center gap-1 text-xs text-muted-foreground">
           <Clock3 className="size-3" />
           cały czeka na innych · {view.waiting}
         </span>
       )}
       {view.kind === 'empty' && (
-        <span className="text-[11px] italic text-muted-foreground">rozpisz kroki…</span>
+        <span className="text-xs italic text-muted-foreground">rozpisz kroki…</span>
       )}
 
       {view.kind !== 'waiting-only' && waiting && (
-        <span className="ml-auto flex shrink-0 items-center gap-1 text-[11px] text-muted-foreground" title="Wątek czeka częściowo na innych">
+        <span className="ml-auto flex shrink-0 items-center gap-1 text-xs text-muted-foreground" title="Wątek czeka częściowo na innych">
           <Clock3 className="size-3" />
           czeka
         </span>
       )}
       {overdue > 0 && (
-        <span className="ml-auto shrink-0 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[11px] font-medium text-destructive">
+        <span className="ml-auto shrink-0 rounded-full bg-warning/15 px-1.5 py-0.5 text-xs font-medium text-warning-ink">
           {overdue} po terminie
         </span>
       )}
