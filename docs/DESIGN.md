@@ -69,7 +69,7 @@ Chroma neutralnych: 0.006–0.018, ku **hue 235–240** (chłodno, „oddychają
 
 ## Typography
 **Direction**: jeden dobrze nastrojony sans — **Geist Variable** (już w projekcie; dosłownie font referencji Vercel/Geist) + **Geist Mono** wyłącznie na zegar i liczby.
-**Scale**: stały rem, kroki (Tailwind xs–2xl): 0.75 / 0.875 (baza UI) / 1 / 1.125 / 1.25 / 1.5 rem. Stosunek kroków ≤1.2 na sąsiednich krokach używanych. *(Implementacja: domyślne kroki Tailwind zamiast listy 13px/21px — mniej wartości arbitralnych, ten sam rytm.)*
+**Scale**: stały rem, kroki (Tailwind xs–2xl): 0.75 / 0.875 (baza UI) / 1 / 1.125 / 1.25 / 1.5 rem + **jeden krok display 2.25rem, zarezerwowany wyłącznie dla liczb bilansu tygodnia** (najcięższy element ekranu dziennika). Stosunek kroków ≤1.2 na sąsiednich krokach używanych. *(Implementacja: domyślne kroki Tailwind zamiast listy 13px/21px — mniej wartości arbitralnych, ten sam rytm.)*
 **Weights**: 400 (body) / 500 (UI emphasis, buttons, tabs) / 600 (headings) / 700 (tylko wordmark „openloops"). Cztery, nie więcej.
 **Loading**: fontsource (self-hosted, bundlowane), `font-display: swap`; dokładać tylko `@fontsource-variable/geist-mono`.
 **Details**: Geist Mono + `tabular-nums` na żywym zegarze Teraz, licznikach bilansu i datach; tracking −0.01em na nagłówkach; line-height 1.5 body / 1.2 headings; measure 65ch dla dłuższych tekstów dziennika. Bez fontów display w labelach i danych.

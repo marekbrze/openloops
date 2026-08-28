@@ -44,18 +44,19 @@ export function DayCard({ date, group, isToday }: DayCardProps) {
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-medium">{formatDayTitle(date)}</h3>
           {isToday && (
-            <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-secondary-foreground">
+            <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
               dziś
             </span>
           )}
         </div>
         {group.entries.length > 0 && (
           <div className="flex items-center gap-2 text-xs tabular-nums text-muted-foreground">
-            <span className="flex items-center gap-1" aria-label={`${smallWins}`}>
+            {/* Ikona zielona tylko przy niezerowej liczbie — spójnie z bilansem tygodnia (bilans zawsze realny). */}
+            <span className={`flex items-center gap-1 ${smallWins > 0 ? 'text-success' : ''}`} aria-label={`${smallWins}`}>
               <CheckCircle2 className="size-3.5" aria-hidden="true" />
               {smallWins}
             </span>
-            <span className="flex items-center gap-1" aria-label={`${bigWins}`}>
+            <span className={`flex items-center gap-1 ${bigWins > 0 ? 'text-success' : ''}`} aria-label={`${bigWins}`}>
               <Trophy className="size-3.5" aria-hidden="true" />
               {bigWins}
             </span>
@@ -64,7 +65,7 @@ export function DayCard({ date, group, isToday }: DayCardProps) {
       </header>
 
       {group.entries.length === 0 ? (
-        <p className="pt-2 text-xs text-muted-foreground/70">Brak zwycięstw</p>
+        <p className="pt-2 text-xs text-muted-foreground">Brak zwycięstw</p>
       ) : (
         <ul className="divide-y divide-border/60">
           {group.entries.map((entry) => (
@@ -87,7 +88,7 @@ function EntryRow({ entry }: { entry: DayEntry }) {
         {formatEntryTime(entry.createdAt)}
       </time>
       <meta.Icon
-        className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+        className="mt-0.5 size-4 shrink-0 text-success"
         aria-hidden="true"
       />
       <p

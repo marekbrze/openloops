@@ -15,7 +15,8 @@ export function WeekBalanceCard({ smallWins, bigWins }: WeekBalanceCardProps) {
       <p role="status" className="sr-only">
         {`Małe zwycięstwa: ${smallWins}. Większe zwycięstwa: ${bigWins}.`}
       </p>
-      <div className="grid grid-cols-2 gap-3">
+      {/* Jeden blok z pionowym hairline'em zamiast pary identycznych kafli (ban identycznych siatek, DESIGN.md). */}
+      <div className="grid grid-cols-2 divide-x divide-border rounded-xl border border-border bg-card p-4">
         <BalanceTile
           icon={<CheckCircle2 className="size-4" aria-hidden="true" />}
           label="Małe zwycięstwa"
@@ -48,10 +49,12 @@ function BalanceTile({
   value: number
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <div className="flex items-center gap-2 text-muted-foreground">
+    <div className="px-1 first:pl-0 last:pr-0">
+      {/* Ikona zielona tylko przy niezerowym stanie — pusty tydzień niczego nie celebruje (bilans zawsze realny). */}
+      <div className={`flex items-center gap-2 ${value > 0 ? 'text-success' : 'text-muted-foreground'}`}>
         {icon}
-        <span className="text-xs font-medium uppercase tracking-wide">{label}</span>
+        {/* Zwykły case — uppercase-eyebrow jest pod banem (DESIGN.md). */}
+        <span className="text-xs font-medium text-muted-foreground">{label}</span>
       </div>
       <p className="pt-1 text-4xl font-semibold tabular-nums tracking-tight">{value}</p>
       <p className="text-xs text-muted-foreground">{hint}</p>
