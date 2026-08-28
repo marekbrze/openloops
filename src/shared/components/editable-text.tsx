@@ -59,7 +59,7 @@ export function EditableText({ value, onChange, ariaLabel, placeholder, classNam
 
   if (editing) {
     const fieldClass = cn(
-      'w-full rounded-md border border-ring bg-background px-1.5 py-0.5 text-inherit font-inherit outline-none',
+      'w-full rounded-md border border-ring bg-card px-1.5 py-0.5 text-inherit font-inherit outline-none',
       'focus-visible:ring-3 focus-visible:ring-ring/50',
       className,
     )
