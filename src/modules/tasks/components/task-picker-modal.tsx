@@ -138,7 +138,7 @@ function TaskRow({ action, picked }: TaskRowProps) {
   return (
     <li
       className={cn(
-        'flex items-center gap-1.5 rounded-lg border border-border bg-card py-1 pl-6 pr-2 transition-colors duration-150 hover:bg-muted/60',
+        'flex items-center gap-1.5 rounded-lg border border-border bg-card py-1 pl-6 pr-2 transition-colors duration-150 hover:bg-muted',
         action.done && 'opacity-70',
       )}
     >

@@ -54,7 +54,7 @@ export function LoopCard({
       onKeyDown={onKeyDownSelect}
       className={cn(
         // Matte: hairline bez cienia (DESIGN.md „cienkie"); jeden sygnał hover (tinta), ring tylko dla zaznaczenia.
-        'rounded-lg border bg-card p-2 transition-colors duration-150 hover:bg-muted/60',
+        'rounded-lg border bg-card p-2 transition-colors duration-150 hover:bg-muted',
         selected ? 'border-ring ring-2 ring-ring/30' : 'border-border',
       )}
     >

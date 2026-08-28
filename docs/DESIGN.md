@@ -44,18 +44,18 @@ UX-owka pracuje z tym cały dzień — rano planuje kolejkę przy jasnym oknie, 
 ### Neutralne (tint ku hue 235, NIE kremowe)
 | Role | Token | Light | Dark |
 |---|---|---|---|
-| canvas (body bg) | --background | oklch(0.977 0.006 235) | oklch(0.16 0.014 240) |
-| surface (card) | --card | oklch(1 0 0) | oklch(0.205 0.016 240) |
-| raised (popover) | --popover | oklch(1 0 0) | oklch(0.25 0.018 240) |
-| muted surface | --muted | oklch(0.965 0.007 235) | oklch(0.24 0.014 240) |
-| hover accent bg | --accent | oklch(0.955 0.012 235) | oklch(0.27 0.016 240) |
+| canvas (body bg) | --background | oklch(0.964 0.008 235) | oklch(0.145 0.015 240) |
+| surface (card) | --card | oklch(1 0 0) | oklch(0.215 0.017 240) |
+| raised (popover) | --popover | oklch(1 0 0) | oklch(0.265 0.019 240) |
+| muted surface | --muted | oklch(0.948 0.01 235) | oklch(0.265 0.015 240) |
+| hover accent bg | --accent | oklch(0.934 0.014 235) | oklch(0.295 0.017 240) |
 | ink (body) | --foreground | oklch(0.24 0.015 240) | oklch(0.955 0.006 235) |
 | ink secondary | --muted-foreground | oklch(0.5 0.018 240) | oklch(0.72 0.014 235) |
 | hairline | --border | oklch(0.918 0.008 235) | oklch(0.985 0 0 / 12%) |
 | input border | --input | oklch(0.9 0.01 235) | oklch(0.985 0 0 / 15%) |
-| ring (focus) | --ring | --brand-600 | --brand-400 |
+| ring (focus) | --ring | --brand-700 | --brand-400 |
 
-Chroma neutralnych: 0.006–0.018, ku **hue 235–240** (chłodno, „oddychająco"). Zero czystej szarości (chroma 0 = martwe), zero default-warm kremów (~hue 60).
+Chroma neutralnych: 0.008–0.019, ku **hue 235–240** (chłodno, „oddychająco"). Zero czystej szarości (chroma 0 = martwe), zero default-warm kremów (~hue 60).
 
 ### Semantyczne (2–3 odcienie każdy; **info = brand sky**, brak czwartego huesu)
 | Rola | Light | Dark | Użycie w openloops |
@@ -64,7 +64,7 @@ Chroma neutralnych: 0.006–0.018, ku **hue 235–240** (chłodno, „oddychają
 | destructive | oklch(0.577 0.2 27) / tint oklch(0.955 0.02 27) | oklch(0.68 0.17 25) | błędy, porzucenie wątku, usuwanie |
 | warning | oklch(0.68 0.14 75) / tint oklch(0.96 0.035 80) | oklch(0.78 0.13 75) | „czekam na kogoś" po terminie (data dopytania), stany wstrzymania |
 
-**Dark mode**: głębia z jasności powierzchni (canvas 16% → card 20.5% → popover 25%), ten sam hue/chroma co brand; akcent jaśnieje do --brand-400, body weight bez zmian (Geist trzyma czytelność). Tylko warstwa semantyczna (`:root` ↔ `.dark`) się zmienia — prymitywy stałe. **Scrim modala**: stały `oklch(0 0 0 / 45%)` w obu motywach (jasna mgła z `foreground/50` w dark była błędem).
+**Dark mode**: głębia z jasności powierzchni (canvas 14.5% → card 21.5% → popover 26.5%), ten sam hue/chroma co brand; akcent jaśnieje do --brand-400; **kroki surfaces dobrane pod zauważalność** (canvas↔card ΔL≥0.035, hover na karcie = pełna tinta muted, nie rozcieńczona), body weight bez zmian (Geist trzyma czytelność). Tylko warstwa semantyczna (`:root` ↔ `.dark`) się zmienia — prymitywy stałe. **Scrim modala**: stały `oklch(0 0 0 / 45%)` w obu motywach (jasna mgła z `foreground/50` w dark była błędem).
 **Radius**: jedyna wartość **--radius: 0.5rem** (8px — ciszej i precyzyjniej niż obecne 10px); warianty jak w Tailwind v4 `@theme` (sm ×0.6, md ×0.8, lg ×1, xl ×1.4…). **Focus ring**: brand sky, 2px, offset 2px.
 
 ## Typography

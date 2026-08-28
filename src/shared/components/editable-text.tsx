@@ -95,7 +95,7 @@ export function EditableText({ value, onChange, ariaLabel, placeholder, classNam
       title={`Kliknij, aby edytować (${ariaLabel.toLowerCase()})`}
       className={cn(
         'block w-full cursor-text rounded-md border border-transparent px-1.5 py-0.5 text-left whitespace-pre-wrap break-words',
-        'hover:border-border hover:bg-muted/60 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50',
+        'hover:border-border hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50',
         (!value || value.trim() === '') && 'text-muted-foreground italic',
         className,
       )}

@@ -158,7 +158,7 @@ function SortableNowRow({ row, position }: SortableNowRowProps) {
       style={{ ...(transform ? ({ transform: CSS.Transform.toString(transform), zIndex: 20 } satisfies CSSProperties) : {}), transition }}
       /* Matte: hairline zamiast cienia (DESIGN.md „cienkie"); subtelny hover jako feedback. */
       className={cn(
-        'group flex items-start gap-2 rounded-lg border border-border bg-card px-2 py-1.5 transition-colors duration-150 hover:bg-muted/60',
+        'group flex items-start gap-2 rounded-lg border border-border bg-card px-2 py-1.5 transition-colors duration-150 hover:bg-muted',
         isDragging && 'opacity-80',
       )}
     >
