@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://marekbrze.github.io/openloops/sitemap.xml

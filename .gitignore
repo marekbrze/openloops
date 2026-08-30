@@ -31,3 +31,4 @@ bun.lockb
 
 *storybook.log
 storybook-static
+.seo-tmp/
