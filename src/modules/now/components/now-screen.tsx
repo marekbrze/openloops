@@ -205,6 +205,26 @@ function SortableNowRow({ row, position }: SortableNowRowProps) {
         </p>
       </div>
 
+      {/* Żaba (ADR-0037): oznaczenie prosto z kolejki — akcja już w Teraz, więc od razu skacze na szczyt. */}
+      <button
+        type="button"
+        onClick={() => void guard(() => actionsRepo.setFrog(action.id, !action.isFrog))}
+        disabled={Boolean(action.done)}
+        aria-pressed={Boolean(action.isFrog)}
+        aria-label={action.isFrog ? `Zdejmij żabę: ${action.label}` : `Oznacz jako żabę: ${action.label}`}
+        title="Żaba — odkładam, więc zjem ją pierwsza"
+        data-no-select
+        className={cn(
+          'shrink-0 rounded-md p-1 transition duration-150 focus-visible:ring-2 focus-visible:ring-ring',
+          action.isFrog
+            ? 'bg-success/15 text-success-ink'
+            : 'text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-muted focus-visible:opacity-100',
+          action.done && 'cursor-not-allowed opacity-40 hover:bg-transparent',
+        )}
+      >
+        <FrogIcon className="size-3.5" />
+      </button>
+
       <button
         type="button"
         onClick={() => void guard(() => nowRepo.removeByActionId(action.id))}
