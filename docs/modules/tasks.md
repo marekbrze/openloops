@@ -35,8 +35,8 @@ Zasady kierujące:
 ## Screens (rough)
 
 - **Modal „Wybierz zadania"**: nagłówek (tytuł + licznik do zrobienia + X); panel ~`max-w-2xl`, wewnętrzny scroll.
-- **Grupa wątku**: nagłówek (glif żaby gdy wątek odkładany, ADR-0037) z bilansem `done/total` nad listą wierszy.
-- **Wiersz zadania**: [przełącznik Teraz] · etykieta (+glif żaby gdy odkładana) · typ · plakietka „po terminie" (gdy dotyczy).
+- **Grupa wątku**: nagłówek (glif żaby + zielony hairline pod nagłówkiem, ADR-0037) z bilansem `done/total` nad listą wierszy.
+- **Wiersz zadania**: [przełącznik Teraz] · etykieta (+glif żaby i tinta tła wiersza gdy odkładana) · typ · plakietka „po terminie" (gdy dotyczy).
 - **Stany specjalne**: szkielet ładowania; karta błędu odczytu z retry; pusty świat; wątki bez kroków.
 
 ## Actions

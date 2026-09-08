@@ -58,7 +58,7 @@ Zasady kierujące (z wywiadu 2026-08-27):
 ## Screens (rough)
 
 - **Lewa kolumna — lista wątków**: nagłówek z licznikiem otwartych, inline formularz dodawania (tytuł [+ cel]), lista kart, na dole zwijana sekcja „Domknięte i porzucone (N)". Przewaga: jedna kolumna przewijalna, zero modali przy codziennej pracy.
-- **Karta wątku**: tytuł (statyczny — klik zaznacza, ADR-0029), zielony glif żaby gdy wątek odkładany (ADR-0037), pasek progresu **lub** etykieta zastępcza (brak akcji „mój ruch"), wskaźnik „czeka na innych N", plakietka „X po terminie" gdy dotyczy.
+- **Karta wątku**: tytuł (statyczny — klik zaznacza, ADR-0029), żaba wyróżniona całą kartą — zielony glif + tinta tła `bg-success/10` i hairline `border-success/40` (ADR-0037), pasek progresu **lub** etykieta zastępcza (brak akcji „mój ruch"), wskaźnik „czeka na innych N", plakietka „X po terminie" gdy dotyczy.
 - **Prawa kolumna — panel akcji**: nagłówek (tytuł klik-to-edit, przycisk „Domknij", menu ⋯: Żaba / Porzuć / Usuń…), lista akcji (checkbox, etykieta klik-to-edit, przełącznik żaby, przełącznik typu, data dopytania, przełącznik „Teraz", handle DnD), **przypięty cel** jako ostatni element (wyróżniony wizualnie, klik-to-edit, nieruchomy w DnD).
 - **Panel bez zaznaczenia**: placeholder — ikona/krótka zachęta „Wybierz wątek…" + wskazówka o dodaniu pierwszego, gdy lista też pusta.
 - **Modal domknięcia**: nagłówek „Cel osiągnięty”, nazwa wątku, notka o wpisie do dziennika, Confirm/Anuluj; po potwierdzeniu toast z przejściem do Dziennika.

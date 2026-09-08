@@ -60,7 +60,7 @@ Chroma neutralnych: 0.008–0.019, ku **hue 235–240** (chłodno, „oddychają
 ### Semantyczne (2–3 odcienie każdy; **info = brand sky**, brak czwartego huesu)
 | Rola | Light | Dark | Użycie w openloops |
 |---|---|---|---|
-| success | oklch(0.63 0.15 150) / tint oklch(0.955 0.03 150) / tekst na tincie oklch(0.42 0.11 150) | oklch(0.72 0.14 150) | **wyłącznie zwycięstwa**: wpisy dziennika, „domknięty wątek", success-toast. Sky = interakcja, zielony = zwycięstwo — nie mieszamy. |
+| success | oklch(0.63 0.15 150) / tint oklch(0.955 0.03 150) / tekst na tincie oklch(0.42 0.11 150) | oklch(0.72 0.14 150) | **zwycięstwa i żaby** (ADR-0037): wpisy dziennika, „domknięty wątek", success-toast; żaba = odkładane zadanie/wątek — zielony glif + tinta całego wiersza/karty (`bg-success/10`, hairline `border-success/40`; żaba to zwycięstwo w przygotowaniu). Sky = interakcja, zielony = zwycięstwo — nie mieszamy. |
 | destructive | oklch(0.577 0.2 27) / tint oklch(0.955 0.02 27) | oklch(0.68 0.17 25) | błędy, porzucenie wątku, usuwanie |
 | warning | oklch(0.68 0.14 75) / tint oklch(0.96 0.035 80) | oklch(0.78 0.13 75) | „czekam na kogoś" po terminie (data dopytania), stany wstrzymania |
 

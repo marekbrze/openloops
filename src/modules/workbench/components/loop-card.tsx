@@ -57,6 +57,8 @@ export function LoopCard({
         // Matte: hairline bez cienia (DESIGN.md „cienkie"); jeden sygnał hover (tinta), ring tylko dla zaznaczenia.
         'rounded-lg border bg-card p-2 transition-colors duration-150 hover:bg-muted',
         selected ? 'border-ring ring-2 ring-ring/30' : 'border-border',
+        // Żaba (ADR-0037): cała karta w zieleni — odkładany wątek widoczny z lotu ptaka.
+        loop.isFrog && 'border-success/40 bg-success/10 hover:bg-success/15',
       )}
     >
       <div className="flex items-start gap-1">

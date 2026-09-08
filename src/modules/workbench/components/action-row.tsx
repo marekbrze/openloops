@@ -31,6 +31,8 @@ export function SortableActionRow({ action, picked, onRequestDelete }: ActionRow
       style={{ ...draggingStyle(transform ? CSS.Transform.toString(transform) : undefined), transition }}
       className={cn(
         'group flex items-center gap-1 rounded-lg border border-border bg-card px-1.5 py-1 transition-colors duration-150 hover:bg-muted',
+        // Żaba (ADR-0037): tinta tła zamiast samego glifu — wiersz odkładanego kroku rzuca się w oczy.
+        action.isFrog && 'border-success/40 bg-success/10 hover:bg-success/15',
         isDragging && 'opacity-80',
       )}
     >

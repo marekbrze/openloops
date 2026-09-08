@@ -160,6 +160,8 @@ function SortableNowRow({ row, position }: SortableNowRowProps) {
       /* Matte: hairline zamiast cienia (DESIGN.md „cienkie"); subtelny hover jako feedback. */
       className={cn(
         'group flex items-start gap-2 rounded-lg border border-border bg-card px-2 py-1.5 transition-colors duration-150 hover:bg-muted',
+        // Żaba (ADR-0037): zielona tinta całego wiersza — na głównym ekranie widać, od czego zaczynasz.
+        action.isFrog && 'border-success/40 bg-success/10 hover:bg-success/15',
         isDragging && 'opacity-80',
       )}
     >

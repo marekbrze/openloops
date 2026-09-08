@@ -20,7 +20,7 @@ Zasady kierujące:
 
 ### Układanie dnia
 
-1. Kolejka pokazuje wszystkie wybrane akcje ponumerowane (1., 2., …) w ręcznym porządku; każdy wiersz ma kontekst: zielony glif żaby dla akcji odkładanych (ADR-0037), tytuł wątku-source, znacznik „czeka” dla WaitingOn i „po terminie” gdy minęła data dopytania.
+1. Kolejka pokazuje wszystkie wybrane akcje ponumerowane (1., 2., …) w ręcznym porządku; każdy wiersz ma kontekst: akcje-żaby wyróżnione całym wierszem — zielony glif + tinta tła (ADR-0037), tytuł wątku-source, znacznik „czeka” dla WaitingOn i „po terminie” gdy minęła data dopytania.
 2. Drag & drop (uchwyt lub klawiatura) przestawia pozycje; zapis idzie do `nowRepo.reorder` — numeracja to także plan wykonania.
 3. Checkbox odhacza akcję → małe zwycięstwo w dzienniku; pozycja skreślona zostaje w kolejce aż do zdjęcia.
 

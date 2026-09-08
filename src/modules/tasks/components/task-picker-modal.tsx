@@ -110,7 +110,13 @@ function TaskGroupHeading({ group }: { group: TaskGroup }) {
   const done = group.actions.filter((action) => action.done).length
   const total = group.actions.length
   return (
-    <div className="flex items-baseline gap-2 border-b border-border px-0.5 pb-1">
+    <div
+      className={cn(
+        'flex items-baseline gap-2 border-b px-0.5 pb-1',
+        // Żaba wątku (ADR-0037): zielony hairline pod nagłówkiem grupy.
+        group.loop.isFrog ? 'border-success/40' : 'border-border',
+      )}
+    >
       {/* Luka #3: tytuł wątku w jednej linii — długi tytuł nie spycha bilansu done/total. */}
       <h3 title={group.loop.title} className="flex min-w-0 items-center gap-1 text-sm font-semibold tracking-tight">
         {/* Żaba wątku (ADR-0037): grupa odkładanego wątku — i tak pierwsza (dziedziczy sortOrder). */}
@@ -143,6 +149,8 @@ function TaskRow({ action, picked }: TaskRowProps) {
     <li
       className={cn(
         'flex items-center gap-1.5 rounded-lg border border-border bg-card py-1 pl-6 pr-2 transition-colors duration-150 hover:bg-muted',
+        // Żaba (ADR-0037): tinta wiersza — katalog pokazuje odkładane rzeczy na pierwszy rzut oka.
+        action.isFrog && 'border-success/40 bg-success/10 hover:bg-success/15',
         action.done && 'opacity-70',
       )}
     >
