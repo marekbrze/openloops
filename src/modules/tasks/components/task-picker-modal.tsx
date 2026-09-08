@@ -5,6 +5,7 @@ import { dayKey, nowRepo } from '@/modules/data-layer'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Dialog } from '@/shared/components/dialog'
+import { FrogIcon } from '@/shared/components/frog-icon'
 import { SkeletonCards } from '@/shared/components/skeleton-cards'
 import { guard } from '@/shared/lib/mutations'
 import { openView } from '@/shared/lib/notify'
@@ -111,8 +112,11 @@ function TaskGroupHeading({ group }: { group: TaskGroup }) {
   return (
     <div className="flex items-baseline gap-2 border-b border-border px-0.5 pb-1">
       {/* Luka #3: tytuł wątku w jednej linii — długi tytuł nie spycha bilansu done/total. */}
-      <h3 title={group.loop.title} className="min-w-0 truncate text-sm font-semibold tracking-tight">
-        {group.loop.title}
+      <h3 title={group.loop.title} className="flex min-w-0 items-center gap-1 text-sm font-semibold tracking-tight">
+        {/* Żaba wątku (ADR-0037): grupa odkładanego wątku — i tak pierwsza (dziedziczy sortOrder). */}
+        {group.loop.isFrog && <FrogIcon className="size-3.5 shrink-0 text-success-ink" />}
+        <span className="min-w-0 truncate">{group.loop.title}</span>
+        {group.loop.isFrog && <span className="sr-only">(żaba)</span>}
       </h3>
       <span className="ml-auto shrink-0 text-xs tabular-nums text-muted-foreground">
         {done}/{total}
@@ -157,11 +161,15 @@ function TaskRow({ action, picked }: TaskRowProps) {
         {picked ? <ListX className="size-3.5" /> : <ListPlus className="size-3.5" />}
       </button>
 
+      {/* Żaba akcji (ADR-0037): tylko informuje — katalog niczego nie oznacza (ADR-0022). */}
+      {action.isFrog && <FrogIcon className="size-3.5 shrink-0 text-success-ink" />}
+
       <span
         title={action.label}
         className={cn('min-w-0 flex-1 truncate text-sm', action.done && 'text-muted-foreground line-through')}
       >
         {action.label}
+        {action.isFrog && <span className="sr-only"> (żaba)</span>}
       </span>
 
       <span className="shrink-0 text-xs whitespace-nowrap text-muted-foreground">

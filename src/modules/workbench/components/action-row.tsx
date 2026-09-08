@@ -5,6 +5,7 @@ import { actionsRepo, dayKey, nowRepo } from '@/modules/data-layer'
 import type { LoopAction } from '@/modules/data-layer'
 import { cn } from '@/lib/utils'
 import { EditableText } from '@/shared/components/editable-text'
+import { FrogIcon } from '@/shared/components/frog-icon'
 import { guard } from '@/shared/lib/mutations'
 import { draggingStyle, LoopGripHandle } from './loop-card'
 
@@ -50,6 +51,9 @@ export function SortableActionRow({ action, picked, onRequestDelete }: ActionRow
         />
       </div>
 
+      {/* Żaba (ADR-0037): odkładany krok — dokładany do Teraz ląduje na górze kolejki. */}
+      <FrogToggle action={action} />
+
       {/* Przełącznik typu — dedykowana kontrolka danych strukturalnych (ADR-0009). */}
       <OwnerTypeToggle action={action} />
 
@@ -84,6 +88,37 @@ export function SortableActionRow({ action, picked, onRequestDelete }: ActionRow
         className="shrink-0 text-muted-foreground"
       />
     </li>
+  )
+}
+
+/**
+ * Przełącznik żaby (ADR-0037): aktywna żaba zawsze widoczna w zieleni zwycięstw
+ * (hue 150 — „zjedz ją pierwsza"), nieaktywna odkrywa się na hover jak kosz.
+ * Disabled dla done — żaba żyje tylko na rzeczach do zrobienia.
+ */
+function FrogToggle({ action }: { action: LoopAction }) {
+  const toggle = () => void guard(() => actionsRepo.setFrog(action.id, !action.isFrog))
+  const disabled = Boolean(action.done)
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={disabled}
+      aria-pressed={Boolean(action.isFrog)}
+      aria-label={action.isFrog ? `Zdejmij żabę: ${action.label}` : `Oznacz jako żabę: ${action.label}`}
+      title="Żaba — odkładam, więc zjem ją pierwsza"
+      data-no-select
+      className={cn(
+        'shrink-0 rounded-md p-1 transition duration-150 focus-visible:ring-2 focus-visible:ring-ring',
+        action.isFrog
+          ? 'bg-success/15 text-success-ink'
+          : 'text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:bg-muted focus-visible:opacity-100',
+        disabled && 'cursor-not-allowed opacity-40 hover:bg-transparent',
+      )}
+    >
+      <FrogIcon className="size-3.5" />
+    </button>
   )
 }
 

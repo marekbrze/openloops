@@ -36,6 +36,17 @@ const loops: Loop[] = [
     updatedAt: iso(0),
   },
   {
+    /* Żaba-wątek (ADR-0037): najstarszy otwarty temat — klasyczne odkładanie; oznaczenie wciągnęło go na górę listy. */
+    id: 'loop-abonamenty',
+    title: 'Porządek w abonamentach narzędziowych',
+    status: 'open',
+    isFrog: true,
+    sortOrder: -6,
+    goalText: 'Lista subskrypcji skrócona do używanych; roczna oszczędność policzona.',
+    createdAt: iso(-15),
+    updatedAt: iso(0),
+  },
+  {
     id: 'loop-contract',
     title: 'Umowa z podwykonawcą graficznym',
     status: 'open',
@@ -61,15 +72,6 @@ const loops: Loop[] = [
     goalText: 'Retro spisane z trzema ustaleniami na kwartał.',
     createdAt: iso(-12),
     updatedAt: iso(-1),
-  },
-  {
-    id: 'loop-abonamenty',
-    title: 'Porządek w abonamentach narzędziowych',
-    status: 'open',
-    sortOrder: 0,
-    goalText: 'Lista subskrypcji skrócona do używanych; roczna oszczędność policzona.',
-    createdAt: iso(-15),
-    updatedAt: iso(-3),
   },
   /* Sekcja „Domknięte i porzucone” */
   {
@@ -124,8 +126,10 @@ const actions: LoopAction[] = [
   }),
   mkAction('loop-onboarding', '3-poprawki', 'Wdrożyć poprawki po przeglądzie', 'MyMove'),
 
-  // Brief Q4 — plakietka „po terminie” na karcie (data wczorajsza)
-  mkAction('loop-brief-q4', '0-kpi', 'Uzupełnić sekcję KPI liczbami z analytics', 'MyMove'),
+  // Brief Q4 — plakietka „po terminie” na karcie (data wczorajsza) + żaba-akcja (ADR-0037)
+  mkAction('loop-brief-q4', '0-kpi', 'Uzupełnić sekcję KPI liczbami z analytics', 'MyMove', {
+    isFrog: true,
+  }),
   mkAction('loop-brief-q4', '1-budget', 'Potwierdzić budżet u finansów', 'WaitingOn', {
     followUpDate: dkey(-1),
   }),
@@ -181,10 +185,10 @@ const dayEntries: DayEntry[] = [
   },
 ]
 
-/* Kolejka „Teraz" na start dnia: mój ruch najpierw, czekanie jako ostatnie przypomnienie (ADR-0023). */
+/* Kolejka „Teraz" na start dnia: żaba-akcja na samej górze (ADR-0037), czekanie jako ostatnie przypomnienie (ADR-0023). */
 const nowItems: NowItem[] = [
-  'act-loop-onboarding-1-makieta',
   'act-loop-brief-q4-0-kpi',
+  'act-loop-onboarding-1-makieta',
   'act-loop-abonamenty-0-roczne',
   'act-loop-brief-q4-1-budget',
 ].map((actionId, index) => ({

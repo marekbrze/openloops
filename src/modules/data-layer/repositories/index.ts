@@ -63,7 +63,8 @@ export const loopsRepo = {
     await db.transaction('rw', db.loops, db.actions, db.nowItems, async () => {
       const actionIds = (await db.actions.where('loopId').equals(id).toArray()).map((a) => a.id)
       await clearNowItems(actionIds)
-      await db.loops.update(id, { status: 'abandoned', abandonedAt: now(), updatedAt: now() })
+      // Flaga żaby nie przeżywa porzucenia (ADR-0037) — reopen nie przywraca odkładania.
+      await db.loops.update(id, { status: 'abandoned', isFrog: false, abandonedAt: now(), updatedAt: now() })
     })
   },
   /** Reopen wraca na koniec listy otwartej (ADR-0003: przechwycenie ≠ przywrócenie); wpisów dziennika nie rusza. */
@@ -76,6 +77,18 @@ export const loopsRepo = {
       abandonedAt: undefined,
       updatedAt: now(),
     })
+  },
+  /**
+   * Żaba wątku (ADR-0037): oznaczenie odkładanego tematu = jednorazowy skok NA GÓRĘ listy
+   * (wzór ADR-0003); zdjęcie żaby niczego nie przestawia — porządek układa dalej drag & drop.
+   */
+  async setFrog(id: string, isFrog: boolean): Promise<void> {
+    if (!isFrog) {
+      await db.loops.update(id, { isFrog: false, updatedAt: now() })
+      return
+    }
+    const minOrder = await db.loops.orderBy('sortOrder').first()
+    await db.loops.update(id, { isFrog: true, sortOrder: (minOrder?.sortOrder ?? 1) - 1, updatedAt: now() })
   },
   async remove(id: string): Promise<void> {
     // Twarde usunięcie wątku z akcjami i pozycjami Teraz; wpisy dziennika zostają ze snapshotem tekstu.
@@ -135,7 +148,8 @@ export const actionsRepo = {
           createdAt: now(),
           updatedAt: now(),
         }
-        await db.actions.update(action.id, { done: true, doneAt: now(), updatedAt: now() })
+        // Zjedzenie żaby: odhaczenie czyści flagę (ADR-0037); cofnięcie jej nie przywraca.
+        await db.actions.update(action.id, { done: true, doneAt: now(), isFrog: false, updatedAt: now() })
         await db.dayEntries.put(entry)
       } else {
         await db.actions.update(action.id, { done: false, doneAt: undefined, updatedAt: now() })
@@ -166,6 +180,17 @@ export const actionsRepo = {
   listForLoop(loopId: string): Promise<LoopAction[]> {
     return bySortOrder(loopId)
   },
+  /**
+   * Żaba akcji (ADR-0037): oznaczenie odkładanego kroku; jeśli akcja już leży w kolejce
+   * Teraz, jednorazowo wskakuje na jej szczyt („zjem ją pierwsza”). Zdjęcie żaby
+   * nie przestawia niczego.
+   */
+  async setFrog(id: string, isFrog: boolean): Promise<void> {
+    await db.transaction('rw', db.actions, db.nowItems, async () => {
+      await db.actions.update(id, { isFrog, updatedAt: now() })
+      if (isFrog) await moveNowItemToFront(id)
+    })
+  },
 }
 
 /**
@@ -193,13 +218,26 @@ function clearNowItems(actionIds: string[]): Promise<void> {
   return db.nowItems.where('actionId').anyOf(actionIds).delete().then(() => undefined)
 }
 
+/**
+ * Jednorazowy skok pozycji kolejki na szczyt (ADR-0037) — no-op gdy pozycji brak.
+ * Wspólny trzon `nowRepo.moveToFront` i `actionsRepo.setFrog`.
+ */
+async function moveNowItemToFront(actionId: string): Promise<void> {
+  const item = await db.nowItems.get(nowItemId(actionId))
+  if (!item) return
+  const first = await db.nowItems.orderBy('sortOrder').first()
+  await db.nowItems.update(item.id, { sortOrder: (first?.sortOrder ?? 0) - 1, updatedAt: now() })
+}
+
 export const nowRepo = {
   list(): Promise<NowItem[]> {
     return db.nowItems.orderBy('sortOrder').toArray()
   },
   /**
    * Dołączenie akcji do kolejki — idempotentne (deterministyczny klucz), doklejane na KONIEC
-   * (ADR-0023): ułożony plan pracy nie traci głowy.
+   * (ADR-0023): ułożony plan pracy nie traci głowy. Wyjątek: żaba (ADR-0037) — odkładana
+   * rzecz sama prosi o pierwszeństwo, więc ląduje na samej górze. Decyzja czytana ze źródła
+   * wewnątrz transakcji — żaden call-site nie może jej zapomnieć.
    */
   async add(actionId: string): Promise<void> {
     const item: NowItem = {
@@ -210,15 +248,25 @@ export const nowRepo = {
       createdAt: now(),
       updatedAt: now(),
     }
-    await db.transaction('rw', db.nowItems, async () => {
+    await db.transaction('rw', db.nowItems, db.actions, async () => {
       if (await db.nowItems.get(item.id)) return
-      const last = await db.nowItems.orderBy('sortOrder').last()
-      item.sortOrder = (last?.sortOrder ?? -1) + 1
+      const action = await db.actions.get(actionId)
+      if (action?.isFrog) {
+        const first = await db.nowItems.orderBy('sortOrder').first()
+        item.sortOrder = (first?.sortOrder ?? 0) - 1
+      } else {
+        const last = await db.nowItems.orderBy('sortOrder').last()
+        item.sortOrder = (last?.sortOrder ?? -1) + 1
+      }
       await db.nowItems.put(item)
     })
   },
   removeByActionId(actionId: string): Promise<void> {
     return db.nowItems.delete(nowItemId(actionId)).then(() => undefined)
+  },
+  /** Skok istniejącej pozycji na szczyt kolejki (żaba oznaczona po fakcie, ADR-0037). */
+  moveToFront(actionId: string): Promise<void> {
+    return moveNowItemToFront(actionId)
   },
   /** Masowe zdejmowanie („Zdejmij zrobione") — pojedyncza transakcja zamiast serii kliknięć. */
   removeByActionIds(actionIds: string[]): Promise<void> {
@@ -266,7 +314,8 @@ export async function closeLoopWithWin(loop: Loop): Promise<void> {
     }
     const actionIds = (await db.actions.where('loopId').equals(loop.id).toArray()).map((a) => a.id)
     await clearNowItems(actionIds)
-    await db.loops.update(loop.id, { status: 'closed', closedAt: now(), updatedAt: now() })
+    // Żaba wątku nie przeżywa domknięcia (ADR-0037) — cel osiągnięty, odkładanie bezprzedmiotowe.
+    await db.loops.update(loop.id, { status: 'closed', isFrog: false, closedAt: now(), updatedAt: now() })
     await db.dayEntries.put(entry)
   })
 }

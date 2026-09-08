@@ -15,6 +15,7 @@ erDiagram
         string title
         int sort_order "reczny priorytet drag-and-drop; nowy wpis trafia na gore"
         enum status "open | closed | abandoned"
+        bool is_frog "zaba: odkladana; oznaczenie = skok na gore listy (ADR-0037)"
         datetime created_at
         datetime closed_at
         datetime abandoned_at
@@ -33,6 +34,7 @@ erDiagram
         date follow_up_date "opcjonalna tylko dla WaitingOn"
         bool done
         datetime done_at
+        bool is_frog "zaba: dokladana do Teraz trafia na gore kolejki (ADR-0037); czyszczona przy done"
         int sort_order "reczny drag-and-drop"
     }
     DAY_ENTRY {
@@ -53,12 +55,12 @@ erDiagram
     }
 ```
 
-Uwaga modelowa: „wątek zablokowany na innych" nie jest polem — jest **pochodną** (`derived`): Loop jest blocked, gdy ma co najmniej jedną akcję `WaitingOn` niezakończoną. Dziennik (`DayLog`) też nie jest tabelą — to **agregacja** `DAY_ENTRY` po `day_key` do widoku dnia i tygodnia. Kolejka „Teraz" (`NowItem`, ADR-0021) to wskaźnik, nie kopia: treść czyta się na żywo z `ACTION`; rekord nie przeżywa usunięcia/domknięcia/porzucenia źródła (kaskady w repozytoriach).
+Uwaga modelowa: „wątek zablokowany na innych" nie jest polem — jest **pochodną** (`derived`): Loop jest blocked, gdy ma co najmniej jedną akcję `WaitingOn` niezakończoną. Dziennik (`DayLog`) też nie jest tabelą — to **agregacja** `DAY_ENTRY` po `day_key` do widoku dnia i tygodnia. Kolejka „Teraz" (`NowItem`, ADR-0021) to wskaźnik, nie kopia: treść czyta się na żywo z `ACTION`; rekord nie przeżywa usunięcia/domknięcia/porzucenia źródła (kaskady w repozytoriach). Flagi żaby (`is_frog`, ADR-0037) są **bez indeksu** — żaden kwerend nie filtruje po nich, odczyty ładują rekordy do pamięci, więc schemat Dexie (v3) zostaje bez bumpu.
 
 ## Entities
 
 ### Loop
-**Description**: Otwarty wątek roboczy — podstawowa jednostka pracy. Zbiera akcje prowadzące do celu i ręczny priorytet na głównej liście.
+**Description**: Otwarty wątek roboczy — podstawowa jednostka pracy. Zbiera akcje prowadzące do celu i ręczny priorytet na głównej liście. Odkładany wątek może dostać żabę (`isFrog`): oznaczenie wpisuje go na szczyt ręcznej kolejności; domknięcie/porzucenie czyszczą flagę.
 **Instances per user**: Many (kilkanaście–dziesiątki jednocześnie otwartych).
 **Ownership**: User (aplikacja single-user, brak encji User w danych).
 **Lifecycle**: Powstaje w momencie dodania tematu; żyje jako `open`, aż użytkownik ręcznie go domknie (`closed`) albo porzuci (`abandoned`). Domknięte/porzucone można otworzyć ponownie; każdy wątek może być trwale usunięty wraz z zawartością.
@@ -76,7 +78,7 @@ Uwaga modelowa: „wątek zablokowany na innych" nie jest polem — jest **pocho
 **Belongs to**: Loop (1:1). **Wymóg UX**: renderowany jako ostatni element listy działań, przypięty — nie podlega przeciąganiu poza koniec.
 
 ### Action
-**Description**: Konkretny krok do podjęcia w ramach wątku. Ma właściciela-zdarzenia: `MyMove` (mój ruch — liczy się do progresu) lub `WaitingOn` (czekam na kogoś — nie liczy się do progresu, może mieć datę dopytania).
+**Description**: Konkretny krok do podjęcia w ramach wątku. Ma właściciela-zdarzenia: `MyMove` (mój ruch — liczy się do progresu) lub `WaitingOn` (czekam na kogoś — nie liczy się do progresu, może mieć datę dopytania). Odkładany krok może dostać żabę (`isFrog`): dokładana do Teraz ląduje na szczycie kolejki, oznaczona w kolejce wskakuje na szczyt; odhaczenie czyści flagę (cofnięcie nie przywraca).
 **Instances per user**: Wiele na wątek (0–N).
 **Ownership**: User (przez wątek).
 **Lifecycle**: Dodana do wątku; przełącza `done`; usuwalna pojedynczo; znika z wątkiem przy twardym usunięciu.

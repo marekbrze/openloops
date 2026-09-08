@@ -7,7 +7,7 @@ Teraz to główny ekran pracy aplikacji i jej widok startowy (ADR-0020): wchodzi
 Zasady kierujące:
 
 - **Kolejka żyje na źródle** — pozycja trzyma tylko wskaźnik (`NowItem.actionId`); treść, typ i status zawsze czytane z `LoopAction`/`Loop` (ADR-0021). Zero duplikatów danych, zero ghost-pozycji.
-- **Doklejanie na koniec** — góra listy znaczy „następne w kolejce”; nowe zadanie nie może przewrócić ułożonego planu (ADR-0023).
+- **Doklejanie na koniec** — góra listy znaczy „następne w kolejce”; nowe zadanie nie może przewrócić ułożonego planu (ADR-0023). **Wyjątek: żaba** (ADR-0037) — odkładana rzecz sama prosi o pierwszeństwo, więc akcja-żaba dokładana do kolejki ląduje na samej górze; drag & drop dalej wygrywa po fakcie.
 - **Zrobione zostają** — odhaczenie zostawia skreśloną pozycję na miejscu; zdjęcie (pojedyncze albo masowe) to świadoma decyzja użytkownika.
 - **Jedna semantyka zwycięstw** — checkbox na Teraz działa identycznie jak w workbench: pisze `DayEntry` przez `toggleDone`; ekran nie ma własnej księgowości.
 
@@ -20,7 +20,7 @@ Zasady kierujące:
 
 ### Układanie dnia
 
-1. Kolejka pokazuje wszystkie wybrane akcje ponumerowane (1., 2., …) w ręcznym porządku; każdy wiersz ma kontekst: tytuł wątku-source, znacznik „czeka” dla WaitingOn i „po terminie” gdy minęła data dopytania.
+1. Kolejka pokazuje wszystkie wybrane akcje ponumerowane (1., 2., …) w ręcznym porządku; każdy wiersz ma kontekst: zielony glif żaby dla akcji odkładanych (ADR-0037), tytuł wątku-source, znacznik „czeka” dla WaitingOn i „po terminie” gdy minęła data dopytania.
 2. Drag & drop (uchwyt lub klawiatura) przestawia pozycje; zapis idzie do `nowRepo.reorder` — numeracja to także plan wykonania.
 3. Checkbox odhacza akcję → małe zwycięstwo w dzienniku; pozycja skreślona zostaje w kolejce aż do zdjęcia.
 
@@ -32,7 +32,7 @@ Zasady kierujące:
 ### Dobieranie zadań
 
 1. Przycisk **„Wybierz zadania”** w nagłówku (zawsze dostępny) otwiera modal z katalogiem zadań (ADR-0024) — bez opuszczania ekranu; to samo robi CTA stanu pustego „nic nie wybrane”.
-2. Przełącznik „Teraz” w modalu dokłada akcję na koniec kolejki natychmiast — liveQuery odświeża kolejkę widoczną pod spodem; zamknięcie modalu (X / Esc / klik w tło) wraca do nietkniętego ekranu.
+2. Przełącznik „Teraz” w modalu dokłada akcję na koniec kolejki natychmiast (żaba — na górę, ADR-0037) — liveQuery odświeża kolejkę widoczną pod spodem; zamknięcie modalu (X / Esc / klik w tło) wraca do nietkniętego ekranu.
 3. Ze stanu pustego „świeży świat” przycisk prowadzi do Workbench (modal się zamyka przed nawigacją).
 4. Akcja dołączona gdziekolwiek (modal Zadania / workbench) wskakuje na koniec kolejki natychmiast — liveQuery.
 
@@ -66,6 +66,7 @@ Zasady kierujące:
 - **Porażka odczytu IndexedDB** → karta alert z retry, nigdy wieczny szkielet (konwencja dziennika).
 - **Double-toggle tej samej akcji** → deterministyczny klucz `now:${actionId}` czyni operację idempotentną.
 - **Membership w trakcie ładowania** (przełączniki po stronie Zadania/workbench) → kontrolki czekają (disabled), zamiast kłamać stanem.
+- **Żaba oznaczona, gdy akcja już leży w kolejce** → skok na szczyt (`actionsRepo.setFrog` → `nowRepo.moveToFront`, ADR-0037); ręczne przeciągnięcie żaby w dół po fakcie jest trwałe. Skreślona pozycja nigdy nie pokazuje glifu — odhaczenie czyści flagę.
 
 *Z hardenu 2026-08-27 (ADR-0027, ewidencja: `now-edgecases.md`):*
 

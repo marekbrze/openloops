@@ -49,6 +49,16 @@ export const MyMoveTodo: Story = {
   render: () => <SortableActionRow action={mkAction({ label: 'Uzupełnić sekcję KPI liczbami z analytics' })} onRequestDelete={() => {}} />,
 }
 
+/** Żaba (ADR-0037): aktywny glif zielony; nieaktywny przełącznik odkrywa się na hover jak kosz. */
+export const FrogMarked: Story = {
+  render: () => (
+    <SortableActionRow
+      action={mkAction({ label: 'Skleić wersję 0.9 i wysłać do komentarzy', isFrog: true })}
+      onRequestDelete={() => {}}
+    />
+  ),
+}
+
 export const DoneStruckThrough: Story = {
   render: () => (
     <SortableActionRow

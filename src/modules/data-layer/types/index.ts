@@ -21,6 +21,8 @@ export interface Loop extends BaseEntity {
   sortOrder: number
   /** Cel-definition-of-done: „po czym wiem, że gotowe". */
   goalText: string
+  /** Żaba (ADR-0037): wątek odkładany świadomie — oznaczenie = skok na górę listy; czyszczona przy domknięciu/porzuceniu. */
+  isFrog?: boolean
   closedAt?: string
   abandonedAt?: string
 }
@@ -34,6 +36,8 @@ export interface LoopAction extends BaseEntity {
   followUpDate?: string
   done: boolean
   doneAt?: string
+  /** Żaba (ADR-0037): krok odkładany — dokładany do Teraz trafia na górę kolejki; odhaczenie czyści flagę. */
+  isFrog?: boolean
   /** Ręczna kolejność wykonania — cel zawsze zostaje ostatnim elementem (decyzja UI). */
   sortOrder: number
 }

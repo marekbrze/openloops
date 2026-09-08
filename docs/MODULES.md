@@ -4,13 +4,13 @@
 
 openloops to aplikacja o jednym ekranie roboczym (startowym), dwóch powierzchniach zarządzania i jednej refleksyjnej plus warstwa infrastruktury. Podział na 5 modułów projektowych odzwierciedla podział na powierzchnie UI plus infrastrukturę: **now / Teraz** (widok startowy i główny ekran pracy: dziś + ręczna kolejka wybranych akcji — dodany 2026-08-27, ADR-0020/0021), **tasks / Zadania** (katalog wszystkich zadań pogrupowanych po wątku, tylko wybór — modal na Teraz od ADR-0024, pierwotnie zakładka), **workbench** (ekran autorski wątków: lista wątków po lewej + panel akcji z celem po prawej), **journal** (widok bilansu zwycięstw) i **data-layer** (Dexie/persistence pod wszystkim). Moduł **tags** wycofany decyzją użytkownika z 2026-08-27 — kod, encja `Tag` i tabela `tags` usunięte.
 
-Zasada przepływu danych: workbench i Teraz *piszą* wpisy zwycięstw (`Toggle Done`, `Close Loop` → DayEntry); journal jest wyłącznie czytelnikiem; tasks niczego nie zmienia poza kolejką Teraz przez `nowRepo`. Wszystko stoi na data-layer.
+Zasada przepływu danych: workbench i Teraz *piszą* wpisy zwycięstw (`Toggle Done`, `Close Loop` → DayEntry); journal jest wyłącznie czytelnikiem; tasks niczego nie zmienia poza kolejką Teraz przez `nowRepo`. Wszystko stoi na data-layer. Flagi „żaby" (ADR-0037) żyją na `Loop`/`Action`: odkładane rzeczy oznaczane są zielonym glifem, a oznaczenie = skok na górę (kolejki Teraz / listy wątków).
 
 ## Modules
 
 ### now (Teraz)
 **Type**: Core
-**Description**: Widok startowy aplikacji i główny ekran pracy (ADR-0020). Dzisiejsza data z dniem tygodnia i żywym zegarem HH:MM nad ręcznie układaną kolejką akcji wybranych przełącznikiem „Teraz" — z listy Zadania albo prosto z panelu wątku. Drag & drop ustala porządek dnia; odhaczanie pisze dziennik identycznie jak w workbench; zrobione zostają w kolejce aż do świadomego zdjęcia (pojedynczo/masowo).
+**Description**: Widok startowy aplikacji i główny ekran pracy (ADR-0020). Dzisiejsza data z dniem tygodnia i żywym zegarem HH:MM nad ręcznie układaną kolejką akcji wybranych przełącznikiem „Teraz" — z listy Zadania albo prosto z panelu wątku. Akcje-żaby (ADR-0037) dokładane do kolejki lądują na samej górze. Drag & drop ustala porządek dnia; odhaczanie pisze dziennik identycznie jak w workbench; zrobione zostają w kolejce aż do świadomego zdjęcia (pojedynczo/masowo).
 **Entities**: NowItem (wskaźnik na Action)
 **Key Actions**: Read Day (data/zegar), Reorder Queue, Toggle Done in Queue, Remove From Queue (pojedynczo/masowo)
 **Connects to**: data-layer (nowRepo + liveQuery join nowItems×actions×loops), tasks/workbench (wspólny stan wyboru `usePickedActionIds`)
@@ -18,7 +18,7 @@ Zasada przepływu danych: workbench i Teraz *piszą* wpisy zwycięstw (`Toggle D
 
 ### tasks (Zadania)
 **Type**: Core (modal-osadzenie, bez własnej zakładki — ADR-0024)
-**Description**: Katalog wszystkich zadań — akcje otwartych wątków pogrupowane per wątek (kolejność grup = priorytet wątków). Łatwy wybór „co robię dalej": przełącznik „Teraz" przy każdym wierszu dokłada/zdejmuje z kolejki. Renderowany jako **modal „Wybierz zadania" na ekranie Teraz** (przycisk w nagłówku + CTA stanu pustego); dobieranie pracy bez opuszczania głównego ekranu. Powierzchnia celowo tylko-do-czytania-i-wyboru (ADR-0022): edycja treści/typów/usuwanie zostaje w workbench.
+**Description**: Katalog wszystkich zadań — akcje otwartych wątków pogrupowane per wątek (kolejność grup = priorytet wątków, więc grupy wątków-żab są pierwsze). Łatwy wybór „co robię dalej": przełącznik „Teraz" przy każdym wierszu dokłada/zdejmuje z kolejki. Renderowany jako **modal „Wybierz zadania" na ekranie Teraz** (przycisk w nagłówku + CTA stanu pustego); dobieranie pracy bez opuszczania głównego ekranu. Powierzchnia celowo tylko-do-czytania-i-wyboru (ADR-0022): edycja treści/typów/usuwanie zostaje w workbench; glify żab (ADR-0037) tylko informują.
 **Entities**: brak własnych (czyta Loop × Action, pisze NowItem przez nowRepo)
 **Key Actions**: Browse Catalog, Pick For Now/Unpick, Open Task Picker (po stronie Teraz), Open Workbench (stany puste)
 **Connects to**: now (modal żyje na tym ekranie; dzielą hook członkostwa i semantykę przełącznika), data-layer (odczyt)
@@ -26,7 +26,7 @@ Zasada przepływu danych: workbench i Teraz *piszą* wpisy zwycięstw (`Toggle D
 
 ### workbench
 **Type**: Core
-**Description**: Ekran autorski aplikacji — podzielony na dwie kolumny. Lewa: ręcznie priorytetyzowana lista otwartych wątków (drag & drop) z progresem liczącym tylko akcje „mój ruch" i wskaźnikiem „czeka na innych"; zaznaczenie otwiera prawą stronę. Prawa: akcje zaznaczonego wątku z typami, ręczną kolejnością działań, opcjonalną datą dopytania oraz przypiętym na końcu celem-definition-of-done; tu zapada decyzja o domknięciu/porzuceniu. Wiersz akcji ma też przełącznik „Teraz" (ADR-0022) — dokłada krok do kolejki dnia.
+**Description**: Ekran autorski aplikacji — podzielony na dwie kolumny. Lewa: ręcznie priorytetyzowana lista otwartych wątków (drag & drop; wątek-żaba oznaczony zielonym glifem wskakuje na górę — ADR-0037) z progresem liczącym tylko akcje „mój ruch" i wskaźnikiem „czeka na innych"; zaznaczenie otwiera prawą stronę. Prawa: akcje zaznaczonego wątku z typami, ręczną kolejnością działań, opcjonalną datą dopytania oraz przypiętym na końcu celem-definition-of-done; tu zapada decyzja o domknięciu/porzuceniu. Wiersz akcji ma też przełącznik „Teraz" (ADR-0022) i przełącznik żaby (ADR-0037) — dokłada krok do kolejki dnia, żabę oznacza/zdejmuje.
 **Entities**: Loop, Action, Goal
 **Key Actions**: Add/Edit/Reorder Loops, Select Loop, Add/Edit/Toggle Done/Pick For Now/Reorder/Delete Action, Edit Goal, Close/Abandon/Reopen/Delete Loop
 **Connects to**: data-layer (wszystkie zapisy przez repozytoria), journal (generuje DayEntry przy Toggle Done i Close Loop), now (pick toggle)

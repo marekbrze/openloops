@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useEffect } from 'react'
 import { applyScenarioWithoutReload } from '@/scenarios/loader'
-import { db } from '@/modules/data-layer'
+import { actionsRepo, db } from '@/modules/data-layer'
 import { NowScreen } from './now-screen'
 
 /**
  * Integracyjne stany głównego ekranu seedują realną bazę Dexie bez reloadu scenariusza.
- * Kolejka fixture'ów (makieta → KPI → abonamenty → dopytanie po terminie) żyje na
- * źródłowych akcjach scenariusza `full` — daty liczą się względem DZIŚ.
+ * Kolejka fixture'ów (żaba KPI → makieta → abonamenty → dopytanie po terminie; ADR-0037)
+ * żyje na źródłowych akcjach scenariusza `full` — daty liczą się względem DZIŚ.
  */
 
 const heightDecorator = (Story: () => React.ReactNode) => (
@@ -33,9 +33,20 @@ export default meta
 
 type Story = StoryObj<typeof NowScreen>
 
-/** Dzień w toku: trzy pozycje do zrobienia + czekanie po terminie na końcu. */
+/** Dzień w toku: żaba-akcja na szczycie (ADR-0037), potem mój ruch, czekanie po terminie na końcu. */
 export const OrderedDayShowcase: Story = {
   decorators: [heightDecorator, seededWith(() => applyScenarioWithoutReload('full'))],
+}
+
+/** Oznaczenie żaby w locie przez `actionsRepo.setFrog` — pozycja wskakuje na szczyt kolejki (ADR-0037). */
+export const FrogMarkedAtTop: Story = {
+  decorators: [
+    heightDecorator,
+    seededWith(async () => {
+      await applyScenarioWithoutReload('full')
+      await actionsRepo.setFrog('act-loop-onboarding-1-makieta', true)
+    }),
+  ],
 }
 
 /** Pierwsza pozycja odhaczona — zostaje w kolejce (ADR-0023) z CTA masowego zdejmowania. */

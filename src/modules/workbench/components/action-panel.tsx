@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { SimpleMenu } from '@/shared/components/simple-menu'
 import { ConfirmDialog } from '@/shared/components/confirm-dialog'
 import { EditableText } from '@/shared/components/editable-text'
+import { FrogIcon } from '@/shared/components/frog-icon'
 import { guard } from '@/shared/lib/mutations'
 import { notify, openView } from '@/shared/lib/notify'
 import { plDndAccessibility } from '@/shared/lib/pl-dnd'
@@ -80,7 +81,9 @@ export function ActionPanel({ loopId, firstRun }: ActionPanelProps) {
     <section aria-label={`Panel akcji wątku ${loop.title}`} className="flex h-full min-h-0 flex-col">
       <header className="shrink-0 border-b border-border pb-3">
         <div className="flex items-start gap-2">
-          <div className="min-w-0 flex-1" data-no-select>
+          <div className="flex min-w-0 flex-1 items-center gap-1.5" data-no-select>
+            {/* Żaba wątku (ADR-0037): zielony glyph obok tytułu w nagłówku panelu. */}
+            {loop.isFrog && <FrogIcon className="size-4 shrink-0 text-success-ink" />}
             <EditableText
               value={loop.title}
               onChange={(title) => void guard(() => loopsRepo.update(loop.id, { title }))}
@@ -95,6 +98,12 @@ export function ActionPanel({ loopId, firstRun }: ActionPanelProps) {
           <SimpleMenu
             ariaLabel="Więcej akcji wątku"
             items={[
+              {
+                // Żaba (ADR-0037): oznaczenie = skok na górę listy; zdjęcie niczego nie przestawia.
+                label: loop.isFrog ? 'Zdejmij żabę' : 'Oznacz jako żabę',
+                onSelect: () => void guard(() => loopsRepo.setFrog(loop.id, !loop.isFrog)),
+                destructive: false,
+              },
               {
                 label: 'Porzuć wątek',
                 onSelect: () =>

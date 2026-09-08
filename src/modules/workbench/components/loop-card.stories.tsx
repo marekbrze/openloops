@@ -101,3 +101,16 @@ export const MyMoveComplete: Story = {
     />
   ),
 }
+
+/** Żaba wątku (ADR-0037): zielony glyph przy tytule — karta odkładanego wątku. */
+export const FrogLoop: Story = {
+  render: () => (
+    <Interactive
+      loop={mkLoop({ title: 'Porządek w abonamentach narzędziowych', isFrog: true })}
+      actions={[
+        { id: 'f1', loopId: 'loop-demo', label: 'Przeliczyć koszt roczny poszczególnych planów', ownerType: 'MyMove', done: false, sortOrder: 0, createdAt: ts, updatedAt: ts },
+      ] as LoopAction[]}
+      todayKey={dkey(0)}
+    />
+  ),
+}

@@ -2,6 +2,7 @@ import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react'
 import { Clock3, GripVertical } from 'lucide-react'
 import type { Loop, LoopAction } from '@/modules/data-layer'
 import { cn } from '@/lib/utils'
+import { FrogIcon } from '@/shared/components/frog-icon'
 import { getProgressView, hasWaitingOn, overdueCount } from '../lib/workbench-ui'
 
 /** Propsy uchwytu podłączone przez useSortable (typy luźne, bo API listenerów jest generyczne). */
@@ -66,7 +67,12 @@ export function LoopCard({
           className="mt-1 shrink-0 text-muted-foreground"
         />
         <div className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-medium">{loop.title}</span>
+          {/* Żaba wątku (ADR-0037): zielony glyph przy tytule — widać bez otwierania wątku. */}
+          <span className="flex min-w-0 items-center gap-1 text-sm font-medium">
+            {loop.isFrog && <FrogIcon className="size-3.5 shrink-0 text-success-ink" />}
+            <span className="truncate">{loop.title}</span>
+            {loop.isFrog && <span className="sr-only">(żaba)</span>}
+          </span>
         </div>
       </div>
 

@@ -58,8 +58,8 @@ Zasady kierujące (z wywiadu 2026-08-27):
 ## Screens (rough)
 
 - **Lewa kolumna — lista wątków**: nagłówek z licznikiem otwartych, inline formularz dodawania (tytuł [+ cel]), lista kart, na dole zwijana sekcja „Domknięte i porzucone (N)". Przewaga: jedna kolumna przewijalna, zero modali przy codziennej pracy.
-- **Karta wątku**: tytuł (statyczny — klik zaznacza, ADR-0029), pasek progresu **lub** etykieta zastępcza (brak akcji „mój ruch"), wskaźnik „czeka na innych N", plakietka „X po terminie" gdy dotyczy.
-- **Prawa kolumna — panel akcji**: nagłówek (tytuł klik-to-edit, przycisk „Domknij", menu ⋯: Porzuć / Usuń…), lista akcji (checkbox, etykieta klik-to-edit, przełącznik typu, data dopytania, handle DnD), **przypięty cel** jako ostatni element (wyróżniony wizualnie, klik-to-edit, nieruchomy w DnD).
+- **Karta wątku**: tytuł (statyczny — klik zaznacza, ADR-0029), zielony glif żaby gdy wątek odkładany (ADR-0037), pasek progresu **lub** etykieta zastępcza (brak akcji „mój ruch"), wskaźnik „czeka na innych N", plakietka „X po terminie" gdy dotyczy.
+- **Prawa kolumna — panel akcji**: nagłówek (tytuł klik-to-edit, przycisk „Domknij", menu ⋯: Żaba / Porzuć / Usuń…), lista akcji (checkbox, etykieta klik-to-edit, przełącznik żaby, przełącznik typu, data dopytania, przełącznik „Teraz", handle DnD), **przypięty cel** jako ostatni element (wyróżniony wizualnie, klik-to-edit, nieruchomy w DnD).
 - **Panel bez zaznaczenia**: placeholder — ikona/krótka zachęta „Wybierz wątek…" + wskazówka o dodaniu pierwszego, gdy lista też pusta.
 - **Modal domknięcia**: nagłówek „Cel osiągnięty”, nazwa wątku, notka o wpisie do dziennika, Confirm/Anuluj; po potwierdzeniu toast z przejściem do Dziennika.
 - **Dialog usuwania** (wątek/akcja): ostrzeżenie o destrukcyjności + co zostaje (wpisy dziennika ze snapshotem).
@@ -74,8 +74,10 @@ Zasady kierujące (z wywiadu 2026-08-27):
 | Edit Loop | Tytuł klik-to-edit — tylko w panelu (ADR-0029) | Loop | karta nie edytuje |
 | Reorder Loops | Drag & drop; ręczny priorytet; kolejność nigdy się nie resetuje | Loop | |
 | Select Loop | Klik na kartę → prawa kolumna | Loop | nawigacja, bez zmiany danych |
+| Mark/Unmark Frog (Loop) | Menu ⋯ nagłówka panelu; oznaczenie = **skok na górę** listy otwartych, zdjęcie niczego nie przestawia | Loop | zielony glif żaby na karcie; flagę czyszczą domknięcie/porzucenie (ADR-0037) |
 | Add Action | Na koniec grupy otwartych, nad zrobionymi i celem | Action | |
 | Edit Action | Etykieta klik-to-edit; przełącznik typu; data dopytania tylko WaitingOn | Action | |
+| Mark/Unmark Frog (Action) | Przycisk-ikona w wierszu akcji; disabled dla done | Action | akcja-żaba dokładana do Teraz ląduje na szczycie kolejki; oznaczona w kolejce wskakuje na szczyt; odhaczenie czyści flagę (ADR-0037) |
 | Toggle Done | Checkbox; mój-ruch napędza progres + wpis dziennika; uncheck usuwa wpis | Action | jedyny pisarz DayEntry; done zjeżdża na dół (ADR-0030) |
 | Reorder Actions | Drag & drop — plan wykonania wewnątrz grup (otwarte / zrobione) | Action | cel przypięty ostatni |
 | Delete Action | Potwierdzenie gdy done; bilans dnia aktualizuje się wstecz | Action | |
@@ -101,6 +103,7 @@ Zasady kierujące (z wywiadu 2026-08-27):
 - **Data dopytania w przeszłości przy done**: znacznik tylko dla undone.
 - **Pusty tytuł**: inline walidacja blokuje Enter; klik-to-edit nie wypala treści do pustki.
 - **Screen reader**: drag & drop ogłaszany po polsku (dnd-kit accessibility override).
+- **Żaba** (ADR-0037): oznaczenie to jednorazowy skok na górę — drag & drop dalej wygrywa po fakcie; zdjęcie żaby nie przestawia niczego; toggle disabled dla done; domknięcie/porzucenie czyszczą flagę (reopen nie przywraca żaby).
 
 ## Integration Points
 

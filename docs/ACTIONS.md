@@ -15,6 +15,7 @@ Complete list of actions users can perform, organized by entity.
 | Add Loop | Przechwycenie nowego otwartego tematu: tytuł + (opcjonalnie od razu) cel | Owner | inline form nad listą (bez modala); **nowy trafia na górę** i zostaje auto-zaznaczony |
 | Edit Loop | Zmiana tytułu klik-to-edit — tylko w prawym panelu (karta wątku tylko zaznacza, ADR-0029); zmiana treści celu przez edycję Goal | Owner | konwencja: teksty bez dialogów |
 | Reorder Loops | Ręczne ustawienie priorytetów drag & drop na liście po lewej | Owner | `sort_order`; kolejność nie resetuje się sama |
+| Mark/Unmark Frog (Loop) | Oznaczenie odkładanego wątku żabą / zdjęcie żaby | Owner | pozycja w menu ⋯ nagłówka panelu (ADR-0010); oznaczenie = **skok na górę** listy otwartych (wzór ADR-0003); zdjęcie nie przestawia niczego; flagę czyszczą domknięcie i porzucenie (ADR-0037) |
 | Select Loop | Zaznaczenie wątku otwiera jego akcje w prawym panelu | Owner | akcja nawigacyjna — nie zmienia danych; przy braku zaznaczenia panel pokazuje zachętę |
 | Close Loop | Ręczne domknięcie: „cel osiągnięty". open → closed | Owner | CTA w nagłówku panelu → **modal celebracyjny** z notką o wpisie do dziennika; nie wymaga odhaczonych wszystkich akcji; **większe zwycięstwo** |
 | Abandon Loop | Świadome porzucenie tematu. open → abandoned | Owner | pozycja w menu ⋯ nagłówka panelu; nie jest zwycięstwem |
@@ -28,7 +29,8 @@ Complete list of actions users can perform, organized by entity.
 | Add Action | Dopisanie kroku do zaznaczonego wątku | Owner | nowa trafia na koniec listy (nad przypiętym celem) |
 | Edit Action | Zmiana etykiety klik-to-edit; przełączenie typu mój ruch ⇄ czekam na kogoś; ustawienie/usunięcie daty dopytania | Owner | data dopytania tylko dla WaitingOn; po terminie znacznik przy akcji + plakietka na karcie wątku |
 | Toggle Done | Odhaczenie skończonej akcji / odhaczenie z powrotem | Owner | check = małe zwycięstwo → wpis dziennika; uncheck = wpis znika, bilans dnia wraca do stanu realnego; dostępne w workbench **i** na ekranie Teraz — ta sama semantyka |
-| Pick For Now / Unpick | Dołączenie akcji do kolejki Teraz / zdjęcie z niej | Owner | drugi przełącznik obok checkboxa (ADR-0022) — w modalu Zadania na Teraz i w panelu workbench; disabled dla done; dokleja na koniec kolejki (ADR-0023); `nowRepo` jest jedynym pisarzem |
+| Pick For Now / Unpick | Dołączenie akcji do kolejki Teraz / zdjęcie z niej | Owner | drugi przełącznik obok checkboxa (ADR-0022) — w modalu Zadania na Teraz i w panelu workbench; disabled dla done; dokleja na koniec kolejki (ADR-0023), **chyba że akcja jest żabą — wtedy na górę** (ADR-0037); `nowRepo` jest jedynym pisarzem |
+| Mark/Unmark Frog (Action) | Oznaczenie odkładanego kroku żabą / zdjęcie żaby | Owner | przycisk-ikona w wierszu akcji (workbench); disabled dla done; oznaczenie = skok na górę listy wątków nie dotyczy akcji — akcja-żaba przestawia się na szczyt **kolejki Teraz**, jeśli już w niej leży; odhaczenie czyści flagę, cofnięcie nie przywraca (ADR-0037) |
 | Reorder Actions | Ręczna kolejność działań drag & drop — plan wykonania | Owner | cel (`Goal`) przypięty jako ostatni element; nie da się go przeciągnąć powyżej końca listy |
 | Delete Action | Usunięcie pojedynczego kroku z wątku | Owner | destrukcyjne, wymaga potwierdzenia gdy done; bilans dnia traci jej bieżące zwycięstwo (akcji nie ma ⇒ nie była wykonana); snapy z poprzednich dni zostają; kaskadowo czyści pozycję Teraz |
 
@@ -47,7 +49,7 @@ Kolejka żyje na wskaźnikach (`now:${actionId}`); treść czytana na żywo ze �
 |--------|------------|------|-------|
 | Open Now | Zakładka „Teraz" — widok startowy aplikacji (ADR-0020) | Owner | nawigacja tobaru |
 | Read Day | Dzisiejsza data z dniem tygodnia + żywy zegar HH:MM + meta liczności kolejki | Owner | czas lokalny pl-PL; dogania północ/uśpienie karty |
-| Reorder Queue | Drag & drop pozycji — plan wykonania dnia; numeracja widoczna | Owner | dotyczy tylko kolejki; źródła nietknięte |
+| Reorder Queue | Drag & drop pozycji — plan wykonania dnia; numeracja widoczna | Owner | dotyczy tylko kolejki; źródła nietknięte; ręczny porządek wygrywa ze skokiem żaby po fakcie (ADR-0037) |
 | Toggle Done in Queue | Odhaczenie akcji prosto z Teraz | Owner | identyczna ścieżka jak Toggle Done w workbench → wpis dziennika |
 | Remove From Queue | Zdjęcie pojedynczej pozycji (X) — źródło zostaje nietknięte | Owner | done-akcje zostają skreślone aż do świadomego zdjęcia (ADR-0023) |
 | Remove Done In Bulk | „Zdejmij zrobione (n)" — masowe oczyszczenie kolejki | Owner | CTA pojawia się gdy ≥1 pozycja done |

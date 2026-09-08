@@ -16,6 +16,7 @@ import { actionsRepo, dayKey, nowRepo } from '@/modules/data-layer'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { SkeletonCards } from '@/shared/components/skeleton-cards'
+import { FrogIcon } from '@/shared/components/frog-icon'
 import { guard } from '@/shared/lib/mutations'
 import { notify, openView } from '@/shared/lib/notify'
 import { plDndAccessibility } from '@/shared/lib/pl-dnd'
@@ -177,8 +178,13 @@ function SortableNowRow({ row, position }: SortableNowRowProps) {
 
       <div className="min-w-0 flex-1">
         {/* Luka #4: title przy pełnej treści — truncation bez utraty dostępu do całości (konwencja dziennika). */}
-        <p title={action.label} className={cn('truncate text-sm', action.done ? 'text-muted-foreground line-through' : '')}>
-          {action.label}
+        <p title={action.label} className="flex min-w-0 items-center gap-1 text-sm">
+          {/* Żaba (ADR-0037): glif tylko przy akcji odkładanej — done nigdy go nie pokaże (repo czyści flagę). */}
+          {action.isFrog && <FrogIcon className="size-3.5 shrink-0 text-success-ink" />}
+          <span className={cn('truncate', action.done ? 'text-muted-foreground line-through' : '')}>
+            {action.label}
+            {action.isFrog && <span className="sr-only"> (żaba)</span>}
+          </span>
         </p>
         <p className="flex items-center gap-1.5 pt-0.5 text-xs text-muted-foreground">
           <span title={loop.title} className="truncate">
