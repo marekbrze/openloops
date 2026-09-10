@@ -26,20 +26,21 @@ import { useAllActions, useClosedLoops, useOpenLoops } from '../hooks/use-workbe
 import { AddLoopForm } from './add-loop-form'
 import { ClosedLoopsSection } from './closed-loops-section'
 import { LoopCard, draggingStyle } from './loop-card'
+import { WinsSection, type WinEntry } from './wins-section'
 
 interface LoopListColumnProps {
   selectedId?: string
   onSelectLoop: (id: string | undefined) => void
 }
 
-/** Lewa kolumna workbench: quick capture + priorytetyzowana lista otwartych + sekcja zamkniętych. */
+/** Lewa kolumna workbench: quick capture + priorytetyzowana lista otwartych + sekcje zwycięstw i zamkniętych. */
 export function LoopListColumn({ selectedId, onSelectLoop }: LoopListColumnProps) {
   const openLoops = useOpenLoops()
   const closedLoops = useClosedLoops()
   const allActions = useAllActions()
   const [pendingDelete, setPendingDelete] = useState<Loop | undefined>(undefined)
 
-  /** Pochodne kart (progres/czeka/po terminie) liczone z pełnej puli akcji — jedna kwerenda wystarczy. */
+  /** Pochodne kart (czeka/po terminie) liczone z pełnej puli akcji — jedna kwerenda wystarczy. */
   const actionsByLoop = useMemo(() => {
     const map = new Map<string, LoopAction[]>()
     for (const action of allActions) {
@@ -49,6 +50,22 @@ export function LoopListColumn({ selectedId, onSelectLoop }: LoopListColumnProps
     }
     return map
   }, [allActions])
+
+  /** Zwycięstwa (ADR-0039): wszystkie zrobione akcje, najświeższe pierwsze; tytuły wątków z obu list. */
+  const wins = useMemo<WinEntry[]>(() => {
+    const titleById = new Map(
+      [...(openLoops ?? []), ...(closedLoops ?? [])].map((loop) => [loop.id, loop.title]),
+    )
+    return allActions
+      .filter((action) => action.done)
+      .sort((a, b) => (b.doneAt ?? b.updatedAt).localeCompare(a.doneAt ?? a.updatedAt))
+      .map((action) => ({
+        id: action.id,
+        label: action.label,
+        loopTitle: titleById.get(action.loopId) ?? '',
+        doneDay: (action.doneAt ?? action.updatedAt).slice(0, 10),
+      }))
+  }, [allActions, openLoops, closedLoops])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -98,6 +115,9 @@ export function LoopListColumn({ selectedId, onSelectLoop }: LoopListColumnProps
             </SortableContext>
           </DndContext>
         )}
+
+        {/* Zwycięstwa nad „Domkniętymi”: celebracja przed archiwum (ADR-0039). */}
+        <WinsSection wins={wins} />
 
         <ClosedLoopsSection
           loops={closedLoops ?? []}

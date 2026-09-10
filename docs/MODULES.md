@@ -26,7 +26,7 @@ Zasada przepływu danych: workbench i Teraz *piszą* wpisy zwycięstw (`Toggle D
 
 ### workbench
 **Type**: Core
-**Description**: Ekran autorski aplikacji — podzielony na dwie kolumny. Lewa: ręcznie priorytetyzowana lista otwartych wątków (drag & drop; wątek-żaba oznaczony zielonym glifem wskakuje na górę — ADR-0037) z progresem liczącym tylko akcje „mój ruch" i wskaźnikiem „czeka na innych"; zaznaczenie otwiera prawą stronę. Prawa: akcje zaznaczonego wątku z typami, ręczną kolejnością działań, opcjonalną datą dopytania oraz przypiętym na końcu celem-definition-of-done; tu zapada decyzja o domknięciu/porzuceniu. Wiersz akcji ma też przełącznik „Teraz" (ADR-0022) i przełącznik żaby (ADR-0037) — dokłada krok do kolejki dnia, żabę oznacza/zdejmuje.
+**Description**: Ekran autorski aplikacji — podzielony na dwie kolumny. Lewa: ręcznie priorytetyzowana lista otwartych wątków (drag & drop; wątek-żaba oznaczony zielonym glifem wskakuje na górę — ADR-0037) z licznikiem otwartych w nagłówku, kartami z etykietą stanu i wskaźnikiem „czeka na innych" (bez pasa progresu — ADR-0038) oraz zwijanymi sekcjami „Zwycięstwa" (ADR-0039) i „Domknięte i porzucone"; zaznaczenie otwiera prawą stronę. Prawa: pole dopisywania kroków nad listą, akcje zaznaczonego wątku z typami, ręczną kolejnością działań, opcjonalną datą dopytania, zrobione w zwiniętej sekcji „Wykonane" oraz przypiętym na końcu celem-definition-of-done (ADR-0040); tu zapada decyzja o domknięciu/porzuceniu. Wiersz akcji ma też przełącznik „Teraz" (ADR-0022) i przełącznik żaby (ADR-0037) — dokłada krok do kolejki dnia, żabę oznacza/zdejmuje.
 **Entities**: Loop, Action, Goal
 **Key Actions**: Add/Edit/Reorder Loops, Select Loop, Add/Edit/Toggle Done/Pick For Now/Reorder/Delete Action, Edit Goal, Close/Abandon/Reopen/Delete Loop
 **Connects to**: data-layer (wszystkie zapisy przez repozytoria), journal (generuje DayEntry przy Toggle Done i Close Loop), now (pick toggle)
@@ -66,7 +66,7 @@ graph LR
 ## Prototyping Order
 
 1. **data-layer** — nie jest modułem wizualnym, ale musi istnieć najpierw: scaffold Dexie + repozytoria + seed (proto-devsetup).
-2. **workbench** — rdzeń wartości: dodaj wątek → rozpisz akcje → odhaczaj → domknij. Największa złożoność interakcji (dwa drag & drop, progresem, przypięty cel).
+2. **workbench** — rdzeń wartości: dodaj wątek → rozpisz akcje → odhaczaj → domknij. Największa złożoność interakcji (dwa drag & drop, sekcje listy, przypięty cel).
 3. **journal** — jak workbench już generuje wpisy, bilans tygodnia daje pętlę zwycięstw; czyta wyłącznie dane, więc łatwo dokleić.
 4. **now + tasks** (2026-08-27, ADR-0020..0023) — ekran pracy dnia i katalog wyboru; obie powierzchnie żyją na gotowych encjach i każą dorzucić tylko `NowItem` do schematu.
 
@@ -75,7 +75,7 @@ graph LR
 ## Priority Areas
 
 - **Przypięty cel przy reorderingu akcji (workbench)**: najtrudniejszy detal UX — drag & drop akcji nie może pozwolić przeciągnąć celu poza ostatnią pozycję; wyróżnienie celu musi być spójne z systemem.
-- **Progres bar liczący tylko mój ruch (workbench)**: obietnica produktu; błędna arytmetyka niszczy zaufanie (bar staje, choć zrobiłem swoje). Musi też być zrozumiały, gdy wątek ma tylko akcje „czekam".
+- **Zaufanie liczników listy wątków (workbench)**: po zdjęciu pasa (ADR-0038) prawdę mówią liczby — licznik otwartych w nagłówku i licznik Zwycięstw muszą się zgadzać z danymi co do jednej (ADR-0039); karty dalej czytelnie mówią „czeka" i „po terminie".
 - **Moment domknięcia (workbench)**: przejście open → closed to chwila nagrody („cel osiągnięty") — przepływ informacji do dziennika musi być widoczny/nazwany, żeby zwycięstwo było poczute.
 - **Czytelność bilansu (journal)**: jedna spojrzenie na tydzień ma odpowiadać na pytanie „ile zrobiłem" — hierarchia liczb vs. dni krytyczna.
 - **Kolejka dnia (now)**: góra listy = następne w kolejce; doklejanie na koniec i kaskadowe czyszczenie muszą działać bezwyjątkowo, bo inaczej główny ekran pracy kłamie (ADR-0021/0023).

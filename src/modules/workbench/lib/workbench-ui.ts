@@ -5,20 +5,17 @@ import type { LoopAction } from '@/modules/data-layer'
  * nie przechowujemy — zero redundancji w bazie.
  */
 
-export type ProgressView =
-  | { kind: 'bar'; done: number; total: number }
+export type CardStatusView =
+  | { kind: 'actions' }
   | { kind: 'waiting-only'; waiting: number }
   | { kind: 'empty' }
 
-/** ADR-0006: bar istnieje tylko przy jakichkolwiek akcjach „mój ruch” — liczone done/total tego typu. */
-export function getProgressView(actions: LoopAction[]): ProgressView {
+/** ADR-0038: karta bez pasa progresu — liczy się tylko etykieta stanu (pusta / czeka / rozpisana). */
+export function getCardStatusView(actions: LoopAction[]): CardStatusView {
+  if (actions.length === 0) return { kind: 'empty' }
   const myMoves = actions.filter((a) => a.ownerType === 'MyMove')
-  if (myMoves.length === 0) {
-    return actions.length === 0
-      ? { kind: 'empty' }
-      : { kind: 'waiting-only', waiting: unfinished(actions).length }
-  }
-  return { kind: 'bar', done: myMoves.filter((a) => a.done).length, total: myMoves.length }
+  if (myMoves.length === 0) return { kind: 'waiting-only', waiting: unfinished(actions).length }
+  return { kind: 'actions' }
 }
 
 /** Wątek jest zablokowany na innych, gdy ma ≥1 niezakończoną akcję WaitingOn. */

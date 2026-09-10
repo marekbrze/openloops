@@ -6,7 +6,7 @@ interface ActionAddFormProps {
   onAdd: (label: string) => Promise<boolean>
 }
 
-/** Dopisywanie kroku do zaznaczonego wątku — szybkie pole nad przypiętym celem. */
+/** Dopisywanie kroku do zaznaczonego wątku — szybkie pole nad listą akcji (ADR-0040). */
 export function ActionAddForm({ onAdd }: ActionAddFormProps) {
   const [value, setValue] = useState('')
   const [busy, setBusy] = useState(false)

@@ -24,6 +24,7 @@ import { usePickedActionIds } from '@/modules/now/hooks/use-now'
 import { useLoop, useLoopActions } from '../hooks/use-workbench'
 import { ActionAddForm } from './action-add-form'
 import { CloseLoopModal } from './close-loop-modal'
+import { DoneActionsSection } from './done-actions-section'
 import { PinnedGoal } from './pinned-goal'
 import { SortableActionRow } from './action-row'
 
@@ -34,7 +35,8 @@ interface ActionPanelProps {
 }
 
 /**
- * Prawa kolumna workbench: akcje zaznaczonego wątku z przypiętym celem na końcu.
+ * Prawa kolumna workbench: pole dopisywania kroków nad listą (ADR-0040), akcje zaznaczonego
+ * wątku, wykonane w zwiniętej sekcji na końcu i przypięty cel jako ostatni element.
  * Hardening: panel nie renderuje wątków zamkniętych/porzuconych (luka #1) —
  * domknięcie zaznaczonego wątku zawsze schodzi do placeholda.
  */
@@ -55,11 +57,11 @@ export function ActionPanel({ loopId, firstRun }: ActionPanelProps) {
   /**
    * Auto-sort (ADR-0030): zrobione zawsze zjeżdżają na dół listy, każda grupa wewnątrz
    * siebie zachowuje ręczną kolejność (sortOrder). Odhaczenie wraca na swoje dawne miejsce.
+   * ADR-0040: grupa zrobionych renderuje się w zwijanej sekcji na końcu.
    */
-  const orderedActions = useMemo(
-    () => [...actions.filter((a) => !a.done), ...actions.filter((a) => a.done)],
-    [actions],
-  )
+  const openActions = useMemo(() => actions.filter((a) => !a.done), [actions])
+  const doneActions = useMemo(() => actions.filter((a) => a.done), [actions])
+  const orderedActions = useMemo(() => [...openActions, ...doneActions], [openActions, doneActions])
 
   if (!loop || loop.status !== 'open') return <PanelPlaceholder firstRun={firstRun} />
 
@@ -118,14 +120,19 @@ export function ActionPanel({ loopId, firstRun }: ActionPanelProps) {
         </div>
       </header>
 
+      {/* ADR-0040: pole dopisywania kroku nad listą — przechwycenie zawsze pod ręką, nie pod scrollowaniem. */}
+      <div className="shrink-0 pt-3">
+        <ActionAddForm onAdd={(label) => guard(() => actionsRepo.add(loop.id, label, 'MyMove'))} />
+      </div>
+
       <div className="min-h-0 flex-1 overflow-y-auto pb-12 pt-3">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} accessibility={plDndAccessibility}>
           <SortableContext items={orderedActions.map((a) => a.id)} strategy={verticalListSortingStrategy}>
-            <ul className="space-y-1" aria-label="Działania wątku — otwarte wg ręcznej kolejności, wykonane na końcu">
-              {actions.length === 0 ? (
+            <ul className="space-y-1" aria-label="Działania wątku — otwarte wg ręcznej kolejności">
+              {openActions.length === 0 ? (
                 <EmptyActionsHint />
               ) : (
-                orderedActions.map((action) => (
+                openActions.map((action) => (
                   <SortableActionRow
                     key={action.id}
                     action={action}
@@ -136,13 +143,22 @@ export function ActionPanel({ loopId, firstRun }: ActionPanelProps) {
                 ))
               )}
             </ul>
+
+            {/* Zrobione (ADR-0030 auto-sort) w zwiniętej sekcji na końcu; sekcja tylko gdy coś leży. */}
+            {doneActions.length > 0 && (
+              <DoneActionsSection count={doneActions.length}>
+                {doneActions.map((action) => (
+                  <SortableActionRow
+                    key={action.id}
+                    action={action}
+                    picked={pickedIds instanceof Set ? pickedIds.has(action.id) : undefined}
+                    onRequestDelete={requestDeleteAction}
+                  />
+                ))}
+              </DoneActionsSection>
+            )}
           </SortableContext>
         </DndContext>
-
-        {/* Nowe kroki (zawsze niezrobione) lądują na końcu grupy otwartych — nad zrobionymi i celem. */}
-        <div className="mt-2">
-          <ActionAddForm onAdd={(label) => guard(() => actionsRepo.add(loop.id, label, 'MyMove'))} />
-        </div>
 
         <PinnedGoal goalText={loop.goalText} onUpdate={(goalText) => void guard(() => loopsRepo.update(loop.id, { goalText }))} />
       </div>
@@ -209,7 +225,7 @@ export function PanelPlaceholder({ firstRun }: { firstRun?: boolean }) {
 function EmptyActionsHint() {
   return (
     <li className="list-none rounded-lg border border-dashed border-border px-3 py-4 text-center text-sm text-muted-foreground">
-      Wątek bez kroków — dopisz pierwszy poniżej.
+      Wątek bez kroków — dopisz pierwszy w polu powyżej.
     </li>
   )
 }

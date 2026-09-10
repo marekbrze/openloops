@@ -3,7 +3,7 @@ import { Clock3, GripVertical } from 'lucide-react'
 import type { Loop, LoopAction } from '@/modules/data-layer'
 import { cn } from '@/lib/utils'
 import { FrogIcon } from '@/shared/components/frog-icon'
-import { getProgressView, hasWaitingOn, overdueCount } from '../lib/workbench-ui'
+import { getCardStatusView, hasWaitingOn, overdueCount } from '../lib/workbench-ui'
 
 /** Propsy uchwytu podłączone przez useSortable (typy luźne, bo API listenerów jest generyczne). */
 export interface DragHandleProps {
@@ -22,7 +22,7 @@ interface LoopCardProps extends DragHandleProps {
 }
 
 /**
- * Karta wątku na liście po lewej: tytuł, progres/pochodne, uchwyt DnD (ADR: grip).
+ * Karta wątku na liście po lewej: tytuł, pochodne stanu (ADR-0038: bez pasa progresu), uchwyt DnD (ADR: grip).
  * ADR-0029: klik na kartę wyłącznie zaznacza — zmiana nazwy dzieje się w panelu akcji.
  */
 export function LoopCard({
@@ -78,58 +78,43 @@ export function LoopCard({
         </div>
       </div>
 
-      <ProgressArea actions={actions} todayKey={todayKey} />
+      <CardStatusArea actions={actions} todayKey={todayKey} />
     </div>
   )
 }
 
-/** Pochodne karty: pasek progresu / etykieta zastępcza + wskaźniki „czeka” i „po terminie”. */
-function ProgressArea({ actions, todayKey }: { actions: LoopAction[]; todayKey: string }) {
-  const view = getProgressView(actions)
+/**
+ * Pochodne karty (ADR-0038): etykieta stanu zamiast pasa progresu + wskaźniki „czeka”
+ * i „po terminie”. Wątek rozpisany na „mój ruch” nie pokazuje żadnej pochodnej —
+ * licznik otwartych wątków żyje w nagłówku kolumny.
+ */
+function CardStatusArea({ actions, todayKey }: { actions: LoopAction[]; todayKey: string }) {
+  const view = getCardStatusView(actions)
   const waiting = hasWaitingOn(actions)
   const overdue = overdueCount(actions, todayKey)
+  const status =
+    view.kind === 'waiting-only' ? (
+      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+        <Clock3 className="size-3" />
+        cały czeka na innych · {view.waiting}
+      </span>
+    ) : view.kind === 'empty' ? (
+      <span className="text-xs italic text-muted-foreground">rozpisz kroki…</span>
+    ) : undefined
+
+  if (!status && !waiting && overdue === 0) return null
 
   return (
     <div className="flex items-center gap-2 pl-6 pr-1 pt-1.5">
-      {view.kind === 'bar' && (
-        <>
-          <div
-            className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-muted"
-            role="progressbar"
-            aria-valuenow={view.done}
-            aria-valuemin={0}
-            aria-valuemax={view.total}
-            aria-label={`Progres mój ruch: ${view.done} z ${view.total}`}
-          >
-            <div
-              data-testid="progress-fill"
-              className="h-full rounded-full bg-primary transition-[width]"
-              style={{ width: `${Math.round((view.done / view.total) * 100)}%` }}
-            />
-          </div>
-          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-            {view.done}/{view.total}
-          </span>
-        </>
-      )}
-      {view.kind === 'waiting-only' && (
-        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Clock3 className="size-3" />
-          cały czeka na innych · {view.waiting}
-        </span>
-      )}
-      {view.kind === 'empty' && (
-        <span className="text-xs italic text-muted-foreground">rozpisz kroki…</span>
-      )}
-
+      {status}
       {view.kind !== 'waiting-only' && waiting && (
-        <span className="ml-auto flex shrink-0 items-center gap-1 text-xs text-muted-foreground" title="Wątek czeka częściowo na innych">
+        <span className={cn('flex shrink-0 items-center gap-1 text-xs text-muted-foreground', !status && 'ml-auto')} title="Wątek czeka częściowo na innych">
           <Clock3 className="size-3" />
           czeka
         </span>
       )}
       {overdue > 0 && (
-        <span className="ml-auto shrink-0 rounded-full bg-warning/15 px-1.5 py-0.5 text-xs font-medium text-warning-ink">
+        <span className={cn('shrink-0 rounded-full bg-warning/15 px-1.5 py-0.5 text-xs font-medium text-warning-ink', !status && 'ml-auto')}>
           {overdue} po terminie
         </span>
       )}

@@ -40,7 +40,8 @@ function Interactive(props: Omit<Parameters<typeof LoopCard>[0], 'selected' | 'o
   )
 }
 
-export const WithProgress: Story = {
+/** Wątek rozpisany na „mój ruch” — ADR-0038: karta bez pasa progresu, tylko tytuł + wskaźniki. */
+export const OpenActions: Story = {
   args: undefined,
   render: () => (
     <Interactive
