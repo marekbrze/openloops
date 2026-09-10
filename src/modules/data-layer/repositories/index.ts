@@ -16,7 +16,8 @@ const now = () => new Date().toISOString()
 /* ---------- loops ---------- */
 
 export const loopsRepo = {
-  /** ADR-0003: nowy wątek trafia NA GÓRĘ listy (quick capture — świeży temat widoczny od razu). */
+  /** ADR-0003 + ADR-0041: nowy wątek dostaje minimalny sortOrder — na szczycie grupy nie-żab,
+   * czyli na liście workbench widoczny poniżej przypiętych żab (pinacja robi widok, nie baza). */
   async add(title: string, goalText = ''): Promise<Loop> {
     const minOrder = await db.loops.orderBy('sortOrder').first()
     const loop: Loop = {
@@ -79,8 +80,9 @@ export const loopsRepo = {
     })
   },
   /**
-   * Żaba wątku (ADR-0037): oznaczenie odkładanego tematu = jednorazowy skok NA GÓRĘ listy
-   * (wzór ADR-0003); zdjęcie żaby niczego nie przestawia — porządek układa dalej drag & drop.
+   * Żaba wątku (ADR-0037 → ADR-0041): lista workbench pinuje żaby widokowo, więc skok na
+   * górę sortOrder nie jest już jej potrzebny — zostaje dla surowej kolejności w katalogu
+   * Zadania (grupy żab pierwsze przy oznaczeniu). Zdjęcie żaby niczego nie przestawia.
    */
   async setFrog(id: string, isFrog: boolean): Promise<void> {
     if (!isFrog) {

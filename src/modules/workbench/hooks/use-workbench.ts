@@ -8,7 +8,12 @@ import type { Loop, LoopAction } from '@/modules/data-layer'
  */
 
 export function useOpenLoops(): Loop[] | undefined {
-  return useLiveQuery(() => db.loops.where('status').equals('open').sortBy('sortOrder'), [])
+  return useLiveQuery(async () => {
+    const open = await db.loops.where('status').equals('open').sortBy('sortOrder')
+    // Żaby (ADR-0037 → ADR-0041): zawsze na początku listy — widokowa pinacja nad ręcznym
+    // sortOrder. Sort stabilny, więc wewnątrz obu grup zostaje ręczny priorytet.
+    return [...open].sort((a, b) => Number(b.isFrog ?? false) - Number(a.isFrog ?? false))
+  }, [])
 }
 
 /** Sekcja „Domknięte i porzucone” (ADR-0002) — kolejność wg daty zdarzenia malejąco. */

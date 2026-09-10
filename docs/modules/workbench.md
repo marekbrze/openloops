@@ -2,7 +2,7 @@
 
 ## Vision
 
-Workbench to ekran główny aplikacji — mapa dnia użytkownika. Lewa kolumna to ręcznie priorytetyzowana lista **otwartych** wątków: nagłówek z samym licznikiem otwartych, karty z etykietą stanu i wskaźnikiem „czeka na innych" (bez pasa progresu — ADR-0038), na dole zwijane sekcje **Zwycięstwa** (ADR-0039) i „Domknięte i porzucone". Zaznaczenie wątku otwiera prawą kolumnę: pole dopisywania kroków nad listą, jego akcje z typami, ręczną kolejnością i opcjonalną datą dopytania, z **przypiętym celem zawsze jako ostatnim elementem listy** (ADR-0040). Tu zapada decyzja o domknięciu — chwila nagrody, nie administracji.
+Workbench to ekran główny aplikacji — mapa dnia użytkownika. Lewa kolumna to ręcznie priorytetyzowana lista **otwartych** wątków: nagłówek z samym licznikiem otwartych, żaby zawsze przypięte na szczycie (ADR-0041), karty z licznikiem zwycięstw i otwartych zadań oraz wskaźnikiem „czeka na innych" (bez pasa progresu — ADR-0038), na dole zwijane sekcje **Zwycięstwa** (ADR-0039) i „Domknięte i porzucone". Zaznaczenie wątku otwiera prawą kolumnę: pole dopisywania kroków nad listą, jego akcje z typami, ręczną kolejnością i opcjonalną datą dopytania, z **przypiętym celem zawsze jako ostatnim elementem listy** (ADR-0040). Tu zapada decyzja o domknięciu — chwila nagrody, nie administracji.
 
 *Nota z 2026-08-27: wszelkie wzmianki o tagach wycofane razem z modułem tags (kod usunięty); pierwotne rozstrzygnięcia patrz ADR-0008.*
 
@@ -12,14 +12,14 @@ Zasady kierujące (z wywiadu 2026-08-27):
 - **Układ dwukolumnowy jest stały** — pusty prawy panel pokazuje zachętę „Wybierz wątek…", nigdy skoku layoutu.
 - **Edycja wszędzie klik-to-edit** — drobne poprawki tekstów nie przechodzą przez dialogi; dedykowane przełączniki tylko dla danych strukturalnych (typ akcji, data dopytania). Wyjątek (ADR-0029): karta wątku tylko zaznacza — nazwa edytuje się w panelu.
 - **Moment domknięcia jest celebracją** — modal „Cel osiągnięty" nazywa zwycięstwo i mówi, że wpis trafia do dziennika.
-- **Licznik zamiast pasa** — lista wątków pokazuje wyłącznie licznik otwartych (ADR-0038); karty mówią etykietą stanu, zwycięstwa liczy sekcja pucharu.
+- **Licznik zamiast pasa** — lista wątków pokazuje wyłącznie licznik otwartych w nagłówku; karty mówią licznikiem per wątek (🏆 zwycięstwa · otwarte zadania, ADR-0041), a sekcja pucharu gromadzi zwycięstwa z całego świata.
 
 ## User Flows
 
 ### Przechwycenie nowego wątku
 
 1. User wpisuje tytuł w inline polu nad listą (widocznym zawsze jako pierwszy element lewej kolumny) → opcjonalnie rozwija drugie pole na cel.
-2. Enter → nowy wątek pojawia się **na górze listy**, zostaje automatycznie zaznaczony.
+2. Enter → nowy wątek pojawia się **na szczycie grupy nie-żab** — poniżej przypiętych żab (ADR-0041) — i zostaje automatycznie zaznaczony.
 3. User od razu dopisuje akcje w prawym panelu; cel może zostać dopisany później (edytowalny zawsze).
 
 ### Planowanie akcji zaznaczonego wątku
@@ -31,7 +31,7 @@ Zasady kierujące (z wywiadu 2026-08-27):
 
 ### Dzień pracy: odhaczanie
 
-1. Skończona akcja → checkbox → natychmiast znika z listy otwartych panelu, wpada do sekcji **Wykonane** (ADR-0040) i na listę **Zwycięstw** (ADR-0039); powstaje małe zwycięstwo w dzienniku.
+1. Skończona akcja → checkbox → natychmiast znika z listy otwartych panelu, wpada do sekcji **Wykonane** (ADR-0040) i na listę **Zwycięstw** (ADR-0039); licznik na karcie wątku skacze o jeden (🏆), powstaje małe zwycięstwo w dzienniku.
 2. Odhaczenie z powrotem usuwa swój wpis dziennika — bilans dnia wraca do stanu realnego, a akcja wraca na dawne miejsce wśród otwartych.
 3. Akcje „czekam na kogoś" mają swój checkbox (done ⇄ todo) — zrobione trafiają do tej samej sekcji Wykonane.
 4. Auto-sort (ADR-0030): zrobione natychmiast **zjeżdżają na dół** — od ADR-0040 do zwiniętej sekcji na końcu.
@@ -57,8 +57,8 @@ Zasady kierujące (z wywiadu 2026-08-27):
 
 ## Screens (rough)
 
-- **Lewa kolumna — lista wątków**: nagłówek z licznikiem otwartych, inline formularz dodawania (tytuł [+ cel]), lista kart, na dole zwijane sekcje „Zwycięstwa (N)" (ADR-0039) i „Domknięte i porzucone (N)". Przewaga: jedna kolumna przewijalna, zero modali przy codziennej pracy.
-- **Karta wątku**: tytuł (statyczny — klik zaznacza, ADR-0029), żaba wyróżniona całą kartą — zielony glif + tinta tła `bg-success/10` i hairline `border-success/40` (ADR-0037), etykieta stanu („rozpisz kroki…" / „cały czeka na innych · N") **bez pasa progresu** (ADR-0038), wskaźnik „czeka na innych N", plakietka „X po terminie" gdy dotyczy.
+- **Lewa kolumna — lista wątków**: nagłówek z licznikiem otwartych, inline formularz dodawania (tytuł [+ cel]), lista kart z żabami przypiętymi na szczycie (ADR-0041), na dole zwijane sekcje „Zwycięstwa (N)" (ADR-0039) i „Domknięte i porzucone (N)". Przewaga: jedna kolumna przewijalna, zero modali przy codziennej pracy.
+- **Karta wątku**: tytuł (statyczny — klik zaznacza, ADR-0029), żaba wyróżniona całą kartą — zielony glif + tinta tła `bg-success/10` i hairline `border-success/40` (ADR-0037), licznik per wątek: 🏆 zwycięstwa (tinta success tylko przy > 0) · otwarte zadania (ADR-0041) **bez pasa progresu** (ADR-0038), wskaźnik „czeka", plakietka „X po terminie" gdy dotyczy, „rozpisz kroki…" przy zerze akcji.
 - **Prawa kolumna — panel akcji**: nagłówek (tytuł klik-to-edit, przycisk „Domknij", menu ⋯: Żaba / Porzuć / Usuń…), pole dopisywania kroków **nad listą** (ADR-0040), lista akcji otwartych (checkbox, etykieta klik-to-edit, przełącznik żaby, przełącznik typu, data dopytania, przełącznik „Teraz", handle DnD), zwinięta sekcja „Wykonane (N)", **przypięty cel** jako ostatni element (wyróżniony wizualnie, klik-to-edit, nieruchomy w DnD).
 - **Panel bez zaznaczenia**: placeholder — ikona/krótka zachęta „Wybierz wątek…" + wskazówka o dodaniu pierwszego, gdy lista też pusta.
 - **Modal domknięcia**: nagłówek „Cel osiągnięty”, nazwa wątku, notka o wpisie do dziennika, Confirm/Anuluj; po potwierdzeniu toast z przejściem do Dziennika.
@@ -70,15 +70,15 @@ Zasady kierujące (z wywiadu 2026-08-27):
 
 | Action | Description | Entity | Notes |
 |--------|------------|--------|-------|
-| Add Loop | Inline form nad listą; nowy wątek **na górę** i auto-zaznaczony | Loop | quick capture |
+| Add Loop | Inline form nad listą; nowy wątek **na szczyt grupy nie-żab** (poniżej żab — ADR-0041) i auto-zaznaczony | Loop | quick capture |
 | Edit Loop | Tytuł klik-to-edit — tylko w panelu (ADR-0029) | Loop | karta nie edytuje |
 | Reorder Loops | Drag & drop; ręczny priorytet; kolejność nigdy się nie resetuje | Loop | |
 | Select Loop | Klik na kartę → prawa kolumna | Loop | nawigacja, bez zmiany danych |
-| Mark/Unmark Frog (Loop) | Menu ⋯ nagłówka panelu; oznaczenie = **skok na górę** listy otwartych, zdjęcie niczego nie przestawia | Loop | zielony glif żaby na karcie; flagę czyszczą domknięcie/porzucenie (ADR-0037) |
+| Mark/Unmark Frog (Loop) | Menu ⋯ nagłówka panelu; oznaczenie = **stała pinacja na szczycie** listy otwartych (ADR-0041, amend ADR-0037), zdjęcie wraca do ręcznej kolejności | Loop | zielony glif żaby na karcie; flagę czyszczą domknięcie/porzucenie (ADR-0037) |
 | Add Action | Pole nad listą (ADR-0040); nowy na koniec grupy otwartych | Action | |
 | Edit Action | Etykieta klik-to-edit; przełącznik typu; data dopytania tylko WaitingOn | Action | |
 | Mark/Unmark Frog (Action) | Przycisk-ikona w wierszu akcji; disabled dla done | Action | akcja-żaba dokładana do Teraz ląduje na szczycie kolejki; oznaczona w kolejce wskakuje na szczyt; odhaczenie czyści flagę (ADR-0037) |
-| Toggle Done | Checkbox; wpis dziennika + sekcja Wykonane + lista Zwycięstw; uncheck usuwa wpis i wraca na listę | Action | jedyny pisarz DayEntry; done zjeżdża do zwiniętej sekcji (ADR-0030/0040) |
+| Toggle Done | Checkbox; licznik karty, wpis dziennika, sekcja Wykonane i lista Zwycięstw; uncheck cofa wszystko | Action | jedyny pisarz DayEntry; done zjeżdża do zwiniętej sekcji (ADR-0030/0040) |
 | Reorder Actions | Drag & drop — plan wykonania wewnątrz grup (otwarte / zrobione) | Action | cel przypięty ostatni |
 | Delete Action | Potwierdzenie gdy done; bilans dnia aktualizuje się wstecz | Action | |
 | Edit Goal | Cel klik-to-edit, także po domknięciu | Goal | |
@@ -92,8 +92,9 @@ Zasady kierujące (z wywiadu 2026-08-27):
 *Zachowania rozstrzygnięte i zaimplementowane (harden 2026-08-27 — pełna ewidencja: `workbench-edgecases.md`).*
 
 - **Pierwsze uruchomienie (scenariusz `empty`)**: skupione pole dodawania + podpowiedź lewej kolumny; prawy panel ma wariant first-run „nazwij pierwszy wątek…".
-- **Wątek bez akcji albo tylko „czekam na kogoś"**: etykieta stanu na karcie; **wątek rozpisany na „mój ruch"** — karta bez żadnej pochodnej (ADR-0038), praca mówi sama przez siebie.
-- **Wszystkie akcje „mój ruch" zrobione, wątek nadal otwarty**: legalne — karta milczy, domknięcie należy do celu, nie do checkboxów.
+- **Wątek bez akcji**: „rozpisz kroki…" bez licznika; **wątek z akcjami** — licznik per wątek zawsze widoczny, w tym uczciwe zero (🏆 0 bez zieleni, ADR-0041/0017).
+- **Wszystkie akcje zrobione, wątek nadal otwarty**: legalne — „🏆 N · 0 otwartych zadań"; domknięcie należy do celu, nie do checkboxów.
+- **Żaby na liście** (ADR-0041): przypięte nad zawsze nad nie-żabami; przeciągnięcie żaby w dół zapisuje się, ale widok wraca do pinacji przy renderze; nowy wątek ląduje pod grupą żab; drag wewnątrz grup działa normalnie.
 - **Domknięcie/porzucenie zaznaczonego wątku**: panel natychmiast schodzi do placeholda — nigdy nie edytuje się zamkniętego wątku.
 - **Domknięcie z niezakończonymi akcjami**: dozwolone; po sukcesie toast z linkiem do Dziennika.
 - **Nieudany zapis** (IndexedDB odmowa/quota): baner błędu zamiast ciszy; formularze zachowują treść, modal domknięcia zostaje otwarty.

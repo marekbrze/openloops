@@ -60,7 +60,7 @@ Uwaga modelowa: „wątek zablokowany na innych" nie jest polem — jest **pocho
 ## Entities
 
 ### Loop
-**Description**: Otwarty wątek roboczy — podstawowa jednostka pracy. Zbiera akcje prowadzące do celu i ręczny priorytet na głównej liście. Odkładany wątek może dostać żabę (`isFrog`): oznaczenie wpisuje go na szczyt ręcznej kolejności; domknięcie/porzucenie czyszczą flagę.
+**Description**: Otwarty wątek roboczy — podstawowa jednostka pracy. Zbiera akcje prowadzące do celu i ręczny priorytet na głównej liście. Odkładany wątek może dostać żabę (`isFrog`): lista workbench przypina go stale na szczycie (ADR-0041); domknięcie/porzucenie czyszczą flagę.
 **Instances per user**: Many (kilkanaście–dziesiątki jednocześnie otwartych).
 **Ownership**: User (aplikacja single-user, brak encji User w danych).
 **Lifecycle**: Powstaje w momencie dodania tematu; żyje jako `open`, aż użytkownik ręcznie go domknie (`closed`) albo porzuci (`abandoned`). Domknięte/porzucone można otworzyć ponownie; każdy wątek może być trwale usunięty wraz z zawartością.

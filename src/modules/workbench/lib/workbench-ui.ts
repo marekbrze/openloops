@@ -6,16 +6,17 @@ import type { LoopAction } from '@/modules/data-layer'
  */
 
 export type CardStatusView =
-  | { kind: 'actions' }
-  | { kind: 'waiting-only'; waiting: number }
+  | { kind: 'counts'; wins: number; open: number }
   | { kind: 'empty' }
 
-/** ADR-0038: karta bez pasa progresu — liczy się tylko etykieta stanu (pusta / czeka / rozpisana). */
+/**
+ * ADR-0038 → ADR-0041: karta bez pasa progresu — zamiast niego licznik per wątek:
+ * zwycięstwa (zrobione akcje obu typów, jak w dzienniku) i otwarte zadania.
+ */
 export function getCardStatusView(actions: LoopAction[]): CardStatusView {
   if (actions.length === 0) return { kind: 'empty' }
-  const myMoves = actions.filter((a) => a.ownerType === 'MyMove')
-  if (myMoves.length === 0) return { kind: 'waiting-only', waiting: unfinished(actions).length }
-  return { kind: 'actions' }
+  const wins = actions.filter((a) => a.done).length
+  return { kind: 'counts', wins, open: actions.length - wins }
 }
 
 /** Wątek jest zablokowany na innych, gdy ma ≥1 niezakończoną akcję WaitingOn. */

@@ -40,7 +40,7 @@ function Interactive(props: Omit<Parameters<typeof LoopCard>[0], 'selected' | 'o
   )
 }
 
-/** Wątek rozpisany na „mój ruch” — ADR-0038: karta bez pasa progresu, tylko tytuł + wskaźniki. */
+/** Wątek rozpisany na „mój ruch” — ADR-0041: licznik zwycięstw i otwartych zadań na karcie. */
 export const OpenActions: Story = {
   args: undefined,
   render: () => (
@@ -97,6 +97,20 @@ export const MyMoveComplete: Story = {
       actions={[
         { id: 'e1', loopId: 'loop-demo', label: 'Zebrać oceny od zespołu', ownerType: 'MyMove', done: true, sortOrder: 0, createdAt: ts, updatedAt: ts },
         { id: 'e2', loopId: 'loop-demo', label: 'Umówić sesję retro', ownerType: 'WaitingOn', done: false, sortOrder: 1, createdAt: ts, updatedAt: ts },
+      ] as LoopAction[]}
+      todayKey={dkey(0)}
+    />
+  ),
+}
+
+/** Wszystko zrobione, wątek nadal otwarty — uczciwe „0 otwartych zadań” obok zwycięstw (ADR-0017). */
+export const AllDone: Story = {
+  render: () => (
+    <Interactive
+      loop={mkLoop({ title: 'Porządek w abonamentach narzędziowych' })}
+      actions={[
+        { id: 'g1', loopId: 'loop-demo', label: 'Przeliczyć koszt roczny poszczególnych planów', ownerType: 'MyMove', done: true, sortOrder: 0, createdAt: ts, updatedAt: ts },
+        { id: 'g2', loopId: 'loop-demo', label: 'Anulować zbędne plany', ownerType: 'MyMove', done: true, sortOrder: 1, createdAt: ts, updatedAt: ts },
       ] as LoopAction[]}
       todayKey={dkey(0)}
     />

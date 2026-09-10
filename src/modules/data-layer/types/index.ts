@@ -21,7 +21,7 @@ export interface Loop extends BaseEntity {
   sortOrder: number
   /** Cel-definition-of-done: „po czym wiem, że gotowe". */
   goalText: string
-  /** Żaba (ADR-0037): wątek odkładany świadomie — oznaczenie = skok na górę listy; czyszczona przy domknięciu/porzuceniu. */
+  /** Żaba (ADR-0037 → ADR-0041): wątek odkładany świadomie — zawsze przypięty na szczycie listy workbench; czyszczona przy domknięciu/porzuceniu. */
   isFrog?: boolean
   closedAt?: string
   abandonedAt?: string

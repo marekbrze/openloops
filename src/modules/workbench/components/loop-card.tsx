@@ -1,5 +1,5 @@
 import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react'
-import { Clock3, GripVertical } from 'lucide-react'
+import { Clock3, GripVertical, Trophy } from 'lucide-react'
 import type { Loop, LoopAction } from '@/modules/data-layer'
 import { cn } from '@/lib/utils'
 import { FrogIcon } from '@/shared/components/frog-icon'
@@ -84,42 +84,60 @@ export function LoopCard({
 }
 
 /**
- * Pochodne karty (ADR-0038): etykieta stanu zamiast pasa progresu + wskaźniki „czeka”
- * i „po terminie”. Wątek rozpisany na „mój ruch” nie pokazuje żadnej pochodnej —
- * licznik otwartych wątków żyje w nagłówku kolumny.
+ * Pochodne karty (ADR-0038 → ADR-0041): licznik per wątek — zwycięstwa (zielony puchar,
+ * tinta tylko przy wartości > 0 — DESIGN.md) i otwarte zadania + wskaźniki „czeka”
+ * i „po terminie”. Etykieta „cały czeka na innych” wypadła — licznik i „czeka” mówią to samo.
  */
 function CardStatusArea({ actions, todayKey }: { actions: LoopAction[]; todayKey: string }) {
   const view = getCardStatusView(actions)
+  if (view.kind === 'empty') {
+    return (
+      <div className="flex items-center pl-6 pr-1 pt-1.5">
+        <span className="text-xs italic text-muted-foreground">rozpisz kroki…</span>
+      </div>
+    )
+  }
+
   const waiting = hasWaitingOn(actions)
   const overdue = overdueCount(actions, todayKey)
-  const status =
-    view.kind === 'waiting-only' ? (
-      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-        <Clock3 className="size-3" />
-        cały czeka na innych · {view.waiting}
-      </span>
-    ) : view.kind === 'empty' ? (
-      <span className="text-xs italic text-muted-foreground">rozpisz kroki…</span>
-    ) : undefined
-
-  if (!status && !waiting && overdue === 0) return null
 
   return (
-    <div className="flex items-center gap-2 pl-6 pr-1 pt-1.5">
-      {status}
-      {view.kind !== 'waiting-only' && waiting && (
-        <span className={cn('flex shrink-0 items-center gap-1 text-xs text-muted-foreground', !status && 'ml-auto')} title="Wątek czeka częściowo na innych">
+    <div className="flex items-center gap-1.5 pl-6 pr-1 pt-1.5">
+      {/* Zwycięstwa wątku — liczba przy pucharze, tinta success tylko gdy > 0 (uczciwe zero bez zieleni). */}
+      <span
+        className={cn('flex shrink-0 items-center gap-1 text-xs tabular-nums', view.wins > 0 ? 'font-medium text-success-ink' : 'text-muted-foreground')}
+        title="Zwycięstwa wątku — zrobione akcje"
+      >
+        <Trophy aria-hidden="true" className="size-3" />
+        {view.wins}
+      </span>
+      <span aria-hidden="true" className="text-xs text-muted-foreground">
+        ·
+      </span>
+      <span className="min-w-0 truncate text-xs text-muted-foreground" title="Otwarte zadania wątku">
+        {openTasksLabel(view.open)}
+      </span>
+
+      {waiting && (
+        <span className="ml-auto flex shrink-0 items-center gap-1 text-xs text-muted-foreground" title="Wątek czeka (częściowo) na innych">
           <Clock3 className="size-3" />
           czeka
         </span>
       )}
       {overdue > 0 && (
-        <span className={cn('shrink-0 rounded-full bg-warning/15 px-1.5 py-0.5 text-xs font-medium text-warning-ink', !status && 'ml-auto')}>
+        <span className={cn('shrink-0 rounded-full bg-warning/15 px-1.5 py-0.5 text-xs font-medium text-warning-ink', !waiting && 'ml-auto')}>
           {overdue} po terminie
         </span>
       )}
     </div>
   )
+}
+
+/** Polska liczba mnoga: 1 otwarte zadanie · 2 otwarte zadania · 5 otwartych zadań. */
+function openTasksLabel(open: number): string {
+  if (open === 1) return '1 otwarte zadanie'
+  const plural = open % 10 >= 2 && open % 10 <= 4 && (open % 100 < 12 || open % 100 > 14)
+  return `${open} ${plural ? 'otwarte zadania' : 'otwartych zadań'}`
 }
 
 /** Uchwyt rezerwowany dla useSortable — bez listenerów działa jak statyczna ikona. */
