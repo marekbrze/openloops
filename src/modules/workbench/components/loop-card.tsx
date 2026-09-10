@@ -68,41 +68,38 @@ export function LoopCard({
           listeners={listeners}
           className="mt-1 shrink-0 text-muted-foreground"
         />
-        <div className="min-w-0 flex-1">
+        {/* Tytuł i pochodne w jednej linii (feedback usera, ADR-0041): tytuł trzyma truncate, klaster po prawej jest shrink-0. */}
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           {/* Żaba wątku (ADR-0037): zielony glyph przy tytule — widać bez otwierania wątku. */}
           <span className="flex min-w-0 items-center gap-1 text-sm font-medium">
             {loop.isFrog && <FrogIcon className="size-3.5 shrink-0 text-success-ink" />}
             <span className="truncate">{loop.title}</span>
             {loop.isFrog && <span className="sr-only">(żaba)</span>}
           </span>
+          <CardStatusArea actions={actions} todayKey={todayKey} />
         </div>
       </div>
-
-      <CardStatusArea actions={actions} todayKey={todayKey} />
     </div>
   )
 }
 
 /**
- * Pochodne karty (ADR-0038 → ADR-0041): licznik per wątek — zwycięstwa (zielony puchar,
- * tinta tylko przy wartości > 0 — DESIGN.md) i otwarte zadania + wskaźniki „czeka”
- * i „po terminie”. Etykieta „cały czeka na innych” wypadła — licznik i „czeka” mówią to samo.
+ * Pochodne karty (ADR-0038 → ADR-0041) w linii tytułu, wyrównane do prawej: licznik per
+ * wątek — zwycięstwa (zielony puchar, tinta tylko przy wartości > 0 — DESIGN.md) i otwarte
+ * zadania + wskaźniki „czeka” i „po terminie”. Etykieta „cały czeka na innych” wypadła —
+ * licznik i „czeka” mówią to samo.
  */
 function CardStatusArea({ actions, todayKey }: { actions: LoopAction[]; todayKey: string }) {
   const view = getCardStatusView(actions)
   if (view.kind === 'empty') {
-    return (
-      <div className="flex items-center pl-6 pr-1 pt-1.5">
-        <span className="text-xs italic text-muted-foreground">rozpisz kroki…</span>
-      </div>
-    )
+    return <span className="ml-auto shrink-0 text-xs italic text-muted-foreground">rozpisz kroki…</span>
   }
 
   const waiting = hasWaitingOn(actions)
   const overdue = overdueCount(actions, todayKey)
 
   return (
-    <div className="flex items-center gap-1.5 pl-6 pr-1 pt-1.5">
+    <span className="ml-auto flex shrink-0 items-center gap-1.5">
       {/* Zwycięstwa wątku — liczba przy pucharze, tinta success tylko gdy > 0 (uczciwe zero bez zieleni). */}
       <span
         className={cn('flex shrink-0 items-center gap-1 text-xs tabular-nums', view.wins > 0 ? 'font-medium text-success-ink' : 'text-muted-foreground')}
@@ -114,22 +111,22 @@ function CardStatusArea({ actions, todayKey }: { actions: LoopAction[]; todayKey
       <span aria-hidden="true" className="text-xs text-muted-foreground">
         ·
       </span>
-      <span className="min-w-0 truncate text-xs text-muted-foreground" title="Otwarte zadania wątku">
+      <span className="text-xs text-muted-foreground" title="Otwarte zadania wątku">
         {openTasksLabel(view.open)}
       </span>
 
       {waiting && (
-        <span className="ml-auto flex shrink-0 items-center gap-1 text-xs text-muted-foreground" title="Wątek czeka (częściowo) na innych">
+        <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground" title="Wątek czeka (częściowo) na innych">
           <Clock3 className="size-3" />
           czeka
         </span>
       )}
       {overdue > 0 && (
-        <span className={cn('shrink-0 rounded-full bg-warning/15 px-1.5 py-0.5 text-xs font-medium text-warning-ink', !waiting && 'ml-auto')}>
+        <span className="shrink-0 rounded-full bg-warning/15 px-1.5 py-0.5 text-xs font-medium text-warning-ink">
           {overdue} po terminie
         </span>
       )}
-    </div>
+    </span>
   )
 }
 

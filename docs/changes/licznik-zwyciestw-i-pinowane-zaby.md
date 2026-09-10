@@ -21,7 +21,7 @@ Trzy decyzje z jednej sesji, wszystkie w workbench (data-layer tylko komentarze)
 ## Per-file changes (residual — direct edits)
 - `src/modules/workbench/hooks/use-workbench.ts` — `useOpenLoops`: stabilny sort żab przed resztą.
 - `src/modules/workbench/lib/workbench-ui.ts` — `CardStatusView` = `counts(wins, open)` | `empty`; `getCardStatusView` liczy done/undone.
-- `src/modules/workbench/components/loop-card.tsx` — `CardStatusArea`: Trophy + wins · openTasksLabel(open), wskaźniki czeka/po terminie; helper PL mnogiej.
+- `src/modules/workbench/components/loop-card.tsx` — `CardStatusArea`: Trophy + wins · openTasksLabel(open), wskaźniki czeka/po terminie; helper PL mnogiej; **licznik w tej samej linii co tytuł, wyrównany do prawej** (feedback usera; tytuł truncate, klaster shrink-0).
 - `src/modules/workbench/components/loop-card.stories.tsx` — komentarz + nowy story `AllDone` (zwycięstwa przy zerze otwartych).
 - `src/modules/data-layer/repositories/index.ts`, `types/index.ts` — tylko komentarze (semantyka ADR-0041).
 - Dokumenty: ADR-0041, ten plik, `workbench.md`, `MODULES.md`, `GLOSSARY.md`, `ACTIONS.md`, `ENTITY_MAP.md`.
