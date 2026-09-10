@@ -8,6 +8,8 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core'
+/* ADR-0042: sortable nie ogranicza osi podniesionego wiersza — strategia rozsuwa tylko pozostałe; clampuje modifiers. */
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import {
   SortableContext,
   arrayMove,
@@ -99,7 +101,7 @@ export function LoopListColumn({ selectedId, onSelectLoop }: LoopListColumnProps
             Brak otwartych wątków. Dobry moment na przechwycenie nowego.
           </p>
         ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} accessibility={plDndAccessibility}>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]} onDragEnd={handleDragEnd} accessibility={plDndAccessibility}>
             <SortableContext items={openLoops.map((l) => l.id)} strategy={verticalListSortingStrategy}>
               <ul className="space-y-2" aria-label="Otwarte wątki — ręczny priorytet">
                 {openLoops.map((loop) => (

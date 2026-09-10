@@ -9,6 +9,8 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core'
+/* ADR-0042: sortable nie ogranicza osi podniesionego wiersza — strategia rozsuwa tylko pozostałe; clampuje modifiers. */
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { actionsRepo, closeLoopWithWin, loopsRepo } from '@/modules/data-layer'
 import type { LoopAction } from '@/modules/data-layer'
@@ -126,7 +128,7 @@ export function ActionPanel({ loopId, firstRun }: ActionPanelProps) {
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto pb-12 pt-3">
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} accessibility={plDndAccessibility}>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]} onDragEnd={handleDragEnd} accessibility={plDndAccessibility}>
           <SortableContext items={orderedActions.map((a) => a.id)} strategy={verticalListSortingStrategy}>
             <ul className="space-y-1" aria-label="Działania wątku — otwarte wg ręcznej kolejności">
               {openActions.length === 0 ? (

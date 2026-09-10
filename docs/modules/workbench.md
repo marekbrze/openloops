@@ -72,14 +72,14 @@ Zasady kierujące (z wywiadu 2026-08-27):
 |--------|------------|--------|-------|
 | Add Loop | Inline form nad listą; nowy wątek **na szczyt grupy nie-żab** (poniżej żab — ADR-0041) i auto-zaznaczony | Loop | quick capture |
 | Edit Loop | Tytuł klik-to-edit — tylko w panelu (ADR-0029) | Loop | karta nie edytuje |
-| Reorder Loops | Drag & drop; ręczny priorytet; kolejność nigdy się nie resetuje | Loop | |
+| Reorder Loops | Drag & drop — tylko oś pionowa (ADR-0042); ręczny priorytet; kolejność nigdy się nie resetuje | Loop | |
 | Select Loop | Klik na kartę → prawa kolumna | Loop | nawigacja, bez zmiany danych |
 | Mark/Unmark Frog (Loop) | Menu ⋯ nagłówka panelu; oznaczenie = **stała pinacja na szczycie** listy otwartych (ADR-0041, amend ADR-0037), zdjęcie wraca do ręcznej kolejności | Loop | zielony glif żaby na karcie; flagę czyszczą domknięcie/porzucenie (ADR-0037) |
 | Add Action | Pole nad listą (ADR-0040); nowy na koniec grupy otwartych | Action | |
 | Edit Action | Etykieta klik-to-edit; przełącznik typu; data dopytania tylko WaitingOn | Action | |
 | Mark/Unmark Frog (Action) | Przycisk-ikona w wierszu akcji; disabled dla done | Action | akcja-żaba dokładana do Teraz ląduje na szczycie kolejki; oznaczona w kolejce wskakuje na szczyt; odhaczenie czyści flagę (ADR-0037) |
 | Toggle Done | Checkbox; licznik karty, wpis dziennika, sekcja Wykonane i lista Zwycięstw; uncheck cofa wszystko | Action | jedyny pisarz DayEntry; done zjeżdża do zwiniętej sekcji (ADR-0030/0040) |
-| Reorder Actions | Drag & drop — plan wykonania wewnątrz grup (otwarte / zrobione) | Action | cel przypięty ostatni |
+| Reorder Actions | Drag & drop — tylko oś pionowa (ADR-0042); plan wykonania wewnątrz grup (otwarte / zrobione) | Action | cel przypięty ostatni |
 | Delete Action | Potwierdzenie gdy done; bilans dnia aktualizuje się wstecz | Action | |
 | Edit Goal | Cel klik-to-edit, także po domknięciu | Goal | |
 | Close Loop | CTA w nagłówku panelu → modal „Cel osiągnięty" | Loop | większe zwycięstwo → DayEntry |

@@ -50,7 +50,7 @@ Zasady kierujące:
 |--------|------------|--------|-------|
 | Read Day | Data + dzień tygodnia + żywy zegar | widok | czas lokalny, format pl-PL |
 | Open Task Picker | Otwarcie modalu „Wybierz zadania” | — | przycisk nagłówka + CTA stanu pustego; treść modułu tasks (ADR-0024) |
-| Reorder Queue | Drag & drop pozycji kolejki | NowItem.sortOrder | PL komunikaty screen-readera (konwencja `pl-dnd`) |
+| Reorder Queue | Drag & drop pozycji kolejki — tylko oś pionowa (ADR-0042) | NowItem.sortOrder | PL komunikaty screen-readera (konwencja `pl-dnd`) |
 | Mark/Unmark Frog in Queue | Oznaczenie odkładanej akcji żabą prosto z wiersza kolejki | Action.isFrog | oznaczona **natychmiast skacze na szczyt** kolejki (już w Teraz, ADR-0037); disabled dla done; zdjęcie żaby nie przestawia niczego |
 | Toggle Done in Queue | Odhaczenie akcji prosto z Teraz | Action.done | pisze dziennik jak workbench |
 | Remove From Queue | Pojedynczo (X) albo masowo („Zdejmij zrobione”) | NowItem | źródło (akcja/wątek) nietknięte |

@@ -9,6 +9,8 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core'
+/* ADR-0042: sortable nie ogranicza osi podniesionego wiersza — strategia rozsuwa tylko pozostałe; clampuje modifiers. */
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Clock3, GripVertical, ListPlus, ListX, Sunrise, X } from 'lucide-react'
@@ -116,7 +118,7 @@ function NowQueue({ rows }: { rows: NowRow[] }) {
 
   return (
     <>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} accessibility={plDndAccessibility}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]} onDragEnd={handleDragEnd} accessibility={plDndAccessibility}>
         <SortableContext items={rows.map((row) => row.item.id)} strategy={verticalListSortingStrategy}>
           <ol aria-label="Kolejka Teraz — ręczna kolejność dnia" className="space-y-1">
             {rows.map((row, index) => (
